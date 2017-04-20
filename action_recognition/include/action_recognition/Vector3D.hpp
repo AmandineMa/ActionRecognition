@@ -3,7 +3,7 @@
 
 #include <vector>
 
-//#define VECTOR_SIZE 3
+#define VECTOR3D_SIZE 3
 
 class Vector3D{
 

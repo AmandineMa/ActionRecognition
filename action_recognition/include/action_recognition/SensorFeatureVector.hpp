@@ -6,6 +6,8 @@
 
 #include "action_recognition/Vector3D.hpp"
 
+#define SENSOR_FEATURE_VECTOR_SIZE 7
+
 class SensorFeatureVector{
 
 private:
@@ -15,17 +17,6 @@ private:
 
   void set_new_vector_values(void);
   void set_new_vector_values(double x, double y, double z, double x_q, double y_q, double z_q, double w);
-
-  enum VectorElements
-    {
-      X = 0,
-      Y = 1,
-      Z = 2,
-      X_Q = 3,
-      Y_Q = 4,
-      Z_Q = 5,
-      W = 6
-    };
 
 public:
   SensorFeatureVector();

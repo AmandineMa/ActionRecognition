@@ -1,5 +1,5 @@
-#ifndef VECTOR3D_H
-#define	VECTOR3D_H
+#ifndef VECTOR3D_HPP
+#define	VECTOR3D_HPP
 
 #include <vector>
 

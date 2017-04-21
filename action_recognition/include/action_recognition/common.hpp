@@ -1,7 +1,22 @@
-#ifndef COMMON_H
-#define	COMMON_H
+#ifndef COMMON_HPP
+#define	COMMON_HPP
 
 #include <vector>
+#include <string>
+
+namespace VectorElements{
+ enum VectorElement
+    {
+      X = 0,
+      Y = 1,
+      Z = 2,
+      X_Q = 3,
+      Y_Q = 4,
+      Z_Q = 5,
+      W = 6
+    };
+}
+typedef VectorElements::VectorElement VectorElement;
 
 namespace EmissionTypes
 {

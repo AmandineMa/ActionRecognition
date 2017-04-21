@@ -1,5 +1,5 @@
-#ifndef SENSORFEATUREVECTOR_H
-#define	SENSORFEATUREVECTOR_H
+#ifndef SENSORFEATUREVECTOR_HPP
+#define	SENSORFEATUREVECTOR_HPP
 
 #include <vector>
 #include <tf2/LinearMath/Quaternion.h>

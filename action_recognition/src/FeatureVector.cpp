@@ -1,6 +1,4 @@
 #include <vector>
-#include <string>
-#include <iostream>
 
 #include "action_recognition/SensorFeatureVector.hpp"
 #include "action_recognition/FeatureVector.hpp"

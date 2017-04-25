@@ -1,5 +1,5 @@
 #include <tf2/LinearMath/Quaternion.h>
-
+#include <fstream>
 #include "action_recognition/SensorFeatureVector.hpp"
 #include "action_recognition/common.hpp"
 
@@ -11,12 +11,12 @@ SensorFeatureVector::SensorFeatureVector(Vector3D vector3D, tf2::Quaternion quat
   set_new_vector_values();
 }
 
-SensorFeatureVector::SensorFeatureVector(double x, double y, double z, tf2::Quaternion quaternion):translation_(x,y,z),values_vector_(SENSOR_FEATURE_VECTOR_SIZE){
+SensorFeatureVector::SensorFeatureVector(float x, float y, float z, tf2::Quaternion quaternion):translation_(x,y,z),values_vector_(SENSOR_FEATURE_VECTOR_SIZE){
   quaternion_ = quaternion;
   set_new_vector_values();
 } 
 
-SensorFeatureVector::SensorFeatureVector(double x, double y, double z, double x_q, double y_q, double z_q, double w):translation_(x,y,z),quaternion_(x_q, y_q, z_q, w),values_vector_(SENSOR_FEATURE_VECTOR_SIZE){
+SensorFeatureVector::SensorFeatureVector(float x, float y, float z, float x_q, float y_q, float z_q, float w):translation_(x,y,z),quaternion_(x_q, y_q, z_q, w),values_vector_(SENSOR_FEATURE_VECTOR_SIZE){
   set_new_vector_values();
 }
 
@@ -30,7 +30,7 @@ void SensorFeatureVector::set_new_vector_values(void){
   values_vector_[VectorElements::W]=quaternion_.getW();
 }
 
-void SensorFeatureVector::set_new_vector_values(double x, double y, double z, double x_q, double y_q, double z_q, double w){
+void SensorFeatureVector::set_new_vector_values(float x, float y, float z, float x_q, float y_q, float z_q, float w){
   values_vector_[VectorElements::X]=x;
   values_vector_[VectorElements::Y]=y;
   values_vector_[VectorElements::Z]=z;
@@ -42,14 +42,19 @@ void SensorFeatureVector::set_new_vector_values(double x, double y, double z, do
 
 Vector3D SensorFeatureVector::get_vector3D(void){return translation_;}
 tf2::Quaternion SensorFeatureVector::get_quaternion(void){return quaternion_;}
-std::pair<std::vector<double>::iterator,
-          std::vector<double>::iterator> SensorFeatureVector::get_values_pair_iterator(void){
+std::pair<std::vector<float>::iterator,
+          std::vector<float>::iterator> SensorFeatureVector::get_values_pair_iterator(void){
   return std::make_pair(values_vector_.begin(),values_vector_.end());
 }
+
+int SensorFeatureVector::get_values_vector_size(void){return values_vector_.size();}
 
 SensorFeatureVector SensorFeatureVector::normalize(void){
   SensorFeatureVector sfv(translation_.normalize(), quaternion_.normalize());
   return sfv;
 }
 
-//void set_vector3D(Vector3D vector3D){}
+void SensorFeatureVector::write_to_file(std::ofstream &os){
+  tools::swap_endian(values_vector_.begin(),values_vector_.end());
+  os.write((char *)&values_vector_[0], values_vector_.size()*sizeof(float));
+}

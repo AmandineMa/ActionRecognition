@@ -1,17 +1,49 @@
 #include <ros/ros.h>
 #include <iostream>
-
+#include <fstream>
+#include <stdint.h>
 //#include <sys/stat.h>
 //#include "action_recognition/config.h"
 //#include "action_recognition/load_features.h"
 //#include <boost/filesystem.hpp>
 
 #include "action_recognition/Vector3D.hpp"
-
 //#include <eigen3/Eigen/Geometry>
 #include <tf2/LinearMath/Quaternion.h>
 #include "action_recognition/SensorFeatureVector.hpp"
 #include "action_recognition/FeatureVector.hpp"
+#include "action_recognition/FeatureMatrix.hpp"
+#include "action_recognition/common.hpp"
+#include "action_recognition/HTKHeader.hpp"
+
+// int16_t changeEndianness16(int16_t val)
+// {
+//     return (val << 8) |          // left-shift always fills with zeros
+//           ((val >> 8) & 0x00ff); // right-shift sign-extends, so force to zero
+// }
+
+// int32_t changeEndianness32(int32_t val)
+// {
+//     return (val << 24) |
+//           ((val <<  8) & 0x00ff0000) |
+//           ((val >>  8) & 0x0000ff00) |
+//           ((val >> 24) & 0x000000ff);
+// }
+
+// float ReverseFloat( const float inFloat )
+// {
+//    float retVal;
+//    char *floatToConvert = ( char* ) & inFloat;
+//    char *returnFloat = ( char* ) & retVal;
+
+//    // swap the bytes into a temporary buffer
+//    returnFloat[0] = floatToConvert[3];
+//    returnFloat[1] = floatToConvert[2];
+//    returnFloat[2] = floatToConvert[1];
+//    returnFloat[3] = floatToConvert[0];
+
+//    return retVal;
+// }
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
@@ -32,7 +64,7 @@ int main(int argc, char** argv){
   // vector3D_1.set_z(1.0);
   // std::cout << vector3D_1.get_x() << "  "<<vector3D_1.get_y() << "  "<<vector3D_1.get_z() << "  "<<std::endl;
   
-  // Vector3D vector3D_2(1.2,1.0,1.0);
+  //Vector3D vector3D_2(1.2,1.0,1.0);
   // std::cout <<"vector2 "<< vector3D_2.get_x() << std::endl;
   //  vector3D_2.set_new_values(0,0,0);
   // std::cout <<"vector2 "<< vector3D_2.get_x() << std::endl;
@@ -42,6 +74,7 @@ int main(int argc, char** argv){
 
   // std::vector<double> vec2(2,1);
   // Vector3D vector3D_4(vec2);
+ 
 
   /* ------ Tests of SensorFeatureVector class ------ */
  // double w = 3.1212121211211211111111111111111111111111;
@@ -63,7 +96,7 @@ int main(int argc, char** argv){
 
 
   // SensorFeatureVector sfv2(1,2,3, quat);
-  // SensorFeatureVector sfv3(1,2,3,4,5,6,7);
+  SensorFeatureVector sfv3(1,2,3,4,5,6,7);
   // std::cout<<sfv.get_quaternion().getW()<<std::endl;
   // std::cout<<sfv.get_vector3D().get_x()<<std::endl;
   // std::cout<<sfv2.get_quaternion().getW()<<std::endl;
@@ -80,6 +113,16 @@ int main(int argc, char** argv){
   // for(; it_pair.first != it_pair.second ; it_pair.first++)
   //   std::cout<<*it_pair.first<<std::endl;
 
+  std::ofstream ofile("/home/amayima/test.dat");
+
+  HTKHeader header;
+  header.BytesPerSample =  sfv3.get_values_vector_size()*4; 
+  header.nSamples = 1;
+  header.Period = 100000;
+  header.FeatureType = HTK_USER;
+  header.write_to_file(ofile);
+  sfv3.write_to_file(ofile); 
+  ofile.close(); // verification of correct writing in binary file with HList -h command
 
   /* ------ Tests of FeatureVector class ------ */
   // FeatureVector fv(3);
@@ -123,6 +166,10 @@ int main(int argc, char** argv){
   //   for(; it_pair2.first != it_pair2.second ; it_pair2.first++)
   //      std::cout<<*it_pair2.first<<std::endl;
   // }
+
+ /* ------ Tests of FeatureMatrix class ------ */
+  // FeatureMatrix fm;
+  // fm.copy_to_file("hey",10);
 
   /** for a listener 
 

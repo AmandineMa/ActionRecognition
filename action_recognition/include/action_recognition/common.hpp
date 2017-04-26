@@ -99,6 +99,9 @@ void swap_endian(InputIterator first, InputIterator last){
     swap_endian<sizeof(input_type)>((void*)&(*first));
   }
 }
+
+std::string execute_command(std::string command);
+
 }
 
 #endif

@@ -1,7 +1,5 @@
 #include <stdint.h>
-#include <iterator>
-#include <algorithm>
-#include <boost/type_traits.hpp>
+#include <stdio.h>
 
 #include "action_recognition/common.hpp"
 
@@ -23,20 +21,22 @@ void tools::swap_endian<4>(void* p) {
   std::swap(pb[1], pb[2]);
 }
 
-// template <typename Type>
-// Type tools::swap_endian(Type v) {
-//   Type result = v;
-//   swap_endian<sizeof(v)>((void*)&result);
-//   return result;
-// }
+std::string tools::execute_command(std::string command) {
 
-// template <typename InputIterator>
-// void tools::swap_endian(InputIterator first, InputIterator last) {
-//   typedef typename boost::remove_cv<
-//     typename std::iterator_traits<InputIterator>::value_type>::type
-//     input_type;
+  std::string data;
+  FILE * stream;
+  const int max_buffer = 256;
+  char buffer[max_buffer];
+  command.append(" 2>&1");
 
-//   for (; first != last; ++first) {
-//     swap_endian<sizeof(input_type)>((void*)&(*first));
-//   }
-//}
+  stream = popen(command.c_str(), "r");
+  if (stream) {
+    while (!feof(stream))
+      if (fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
+    int stat = pclose(stream); 
+    if(stat != 0){
+      throw std::string(data);
+    }
+  }
+  return data;
+}

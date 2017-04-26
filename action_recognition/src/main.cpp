@@ -15,35 +15,7 @@
 #include "action_recognition/FeatureMatrix.hpp"
 #include "action_recognition/common.hpp"
 #include "action_recognition/HTKHeader.hpp"
-
-// int16_t changeEndianness16(int16_t val)
-// {
-//     return (val << 8) |          // left-shift always fills with zeros
-//           ((val >> 8) & 0x00ff); // right-shift sign-extends, so force to zero
-// }
-
-// int32_t changeEndianness32(int32_t val)
-// {
-//     return (val << 24) |
-//           ((val <<  8) & 0x00ff0000) |
-//           ((val >>  8) & 0x0000ff00) |
-//           ((val >> 24) & 0x000000ff);
-// }
-
-// float ReverseFloat( const float inFloat )
-// {
-//    float retVal;
-//    char *floatToConvert = ( char* ) & inFloat;
-//    char *returnFloat = ( char* ) & retVal;
-
-//    // swap the bytes into a temporary buffer
-//    returnFloat[0] = floatToConvert[3];
-//    returnFloat[1] = floatToConvert[2];
-//    returnFloat[2] = floatToConvert[1];
-//    returnFloat[3] = floatToConvert[0];
-
-//    return retVal;
-// }
+#include "action_recognition/Labels.hpp"
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
@@ -186,34 +158,59 @@ int main(int argc, char** argv){
   // ofile.close(); // verification of correct writing in binary file with HList -h command
 
   /* ------ Tests of FeatureMatrix class ------ */
-  SensorFeatureVector sfv3(1,2,3,4,5,6,7);
-  SensorFeatureVector sfv(1,2,3,4,5,6,8);
-  std::vector<SensorFeatureVector> feature_vector;
-  feature_vector.push_back(sfv3);
-  feature_vector.push_back(sfv);
-  FeatureVector fv2(feature_vector);
+  // SensorFeatureVector sfv3(1,2,3,4,5,6,7);
+  // SensorFeatureVector sfv(1,2,3,4,5,6,8);
+  // std::vector<SensorFeatureVector> feature_vector;
+  // feature_vector.push_back(sfv3);
+  // feature_vector.push_back(sfv);
+  // FeatureVector fv2(feature_vector);
 
-  FeatureVector fv4;
-  fv4.add_sensor_feature_vector(sfv);
-  fv4.add_sensor_feature_vector(sfv3);
-  std::vector<FeatureVector> feature_matrix;
-  feature_matrix.push_back(fv2);
-  feature_matrix.push_back(fv4);
-  FeatureMatrix fm("take", feature_matrix);
+  // FeatureVector fv4;
+  // fv4.add_sensor_feature_vector(sfv);
+  // fv4.add_sensor_feature_vector(sfv3);
+  // std::vector<FeatureVector> feature_matrix;
+  // feature_matrix.push_back(fv2);
+  // feature_matrix.push_back(fv4);
+  // FeatureMatrix fm("take", feature_matrix);
 
-  FeatureMatrix fm2("take");
-  fm2.add_feature_vector(fv2);
-  fm2.add_feature_vector(fv4);
+  // FeatureMatrix fm2("take");
+  // fm2.add_feature_vector(fv2);
+  // fm2.add_feature_vector(fv4);
 
-  std::ofstream ofile("/home/amayima/test.dat");
-  HTKHeader header;
-  header.BytesPerSample = fm.get_feature_vector_size()*4; 
-  header.nSamples = fm.get_samples_number();
-  header.Period = 100000;
-  header.FeatureType = HTK_USER;
-  header.write_to_file(ofile);
-  fm2.write_to_file(ofile); 
-  ofile.close(); // verification of correct writing in binary file with HList -h command
+  // std::ofstream ofile("/home/amayima/test.dat");
+  // HTKHeader header;
+  // header.BytesPerSample = fm.get_feature_vector_size()*4; 
+  // header.nSamples = fm.get_samples_number();
+  // header.Period = 100000;
+  // header.FeatureType = HTK_USER;
+  // header.write_to_file(ofile);
+  // fm2.write_to_file(ofile); 
+  // ofile.close(); // verification of correct writing in binary file with HList -h command
+
+  /* ----- Test Labels ----- */
+  std::vector<std::string> lab_vec;
+  lab_vec.push_back("stir");
+  lab_vec.push_back("put");
+  Labels labels(lab_vec,"/home/amayima/test.list","/home/amayima/test.net.slf","/home/amayima/test.dict",  "/home/amayima/test.grammar");
+  labels.add_label("take");
+  labels.add_label("pour");
+  // labels.set_labels_list_path("/home/amayima/test.list");
+  // labels.set_grammar_net_path("/home/amayima/test.net.slf");
+  // labels.set_dict_path("/home/amayima/test.dict"); 
+  // labels.set_grammar_path("/home/amayima/test.grammar");
+  labels.write_to_file(LabelFileFormats::txt);
+  labels.write_to_file(LabelFileFormats::grammar);
+  labels.write_to_file(LabelFileFormats::dict);
+  try{
+    std::cout << labels.compile_grammar() << std::endl;
+    std::cout << labels.test_grammar() << std::endl;
+  }catch(std::string const& error){
+    std::cerr << error << std::endl;
+  }
+
+
+
+ 
 
 
 

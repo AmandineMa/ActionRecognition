@@ -11,11 +11,14 @@
 //#include <eigen3/Eigen/Geometry>
 #include <tf2/LinearMath/Quaternion.h>
 #include "action_recognition/SensorFeatureVector.hpp"
+#include "action_recognition/SensorFeatureVectorExtended.hpp"
 #include "action_recognition/FeatureVector.hpp"
 #include "action_recognition/FeatureMatrix.hpp"
 #include "action_recognition/common.hpp"
 #include "action_recognition/HTKHeader.hpp"
 #include "action_recognition/Labels.hpp"
+#include "action_recognition/HMM.hpp"
+#include "action_recognition/DataHandler.hpp"
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
@@ -41,60 +44,48 @@ int main(int argc, char** argv){
   //  vector3D_2.set_new_values(0,0,0);
   // std::cout <<"vector2 "<< vector3D_2.get_x() << std::endl;
 
-  // std::vector<double> vec(3,1);
+  // std::vector<float> vec(3,1);
   // Vector3D vector3D_3(vec);
 
-  // std::vector<double> vec2(2,1);
+  // std::vector<float> vec2(2,1);
   // Vector3D vector3D_4(vec2);
  
 
   /* ------ Tests of SensorFeatureVector class ------ */
- // double w = 3.1212121211211211111111111111111111111111;
- //  Eigen::Quaternion<double> quat(w,1,1,1);
- //  std::cout.precision(17);
- //  std::cout<<std::fixed<<quat.w()<<std::endl;
+  float w = 3.12121212;
+  std::cout.precision(6);
+  tf2::Quaternion quat(4,5,6,7); 
+  Vector3D vector3D(1.2,1.0,1.0);
+  SensorFeatureVectorExtended sfv(vector3D, quat);
+  std::cout << quat.getY() << std::endl;
+  sfv.print_vector();
+  SensorFeatureVectorExtended sfv2(1,2,3, quat);
+  sfv2.print_vector();
+  SensorFeatureVectorExtended sfv3(1,2,3,4,5,6,7);
+  sfv3.print_vector();
+  SensorFeatureVectorExtended sfv4(std::vector<float>(7,100));
+  sfv4.print_vector();
+  SensorFeatureVectorExtended sfv_n = sfv.normalize();
+  sfv_n.print_vector();
 
-  // double w = 3.1212121211211211111111111111111111111111;
-  // std::cout.precision(17);
-  // tf2::Quaternion quat(30,1,1,w); 
-  // Vector3D vector3D(1.2,1.0,1.0);
-  // //std::cout<<quat.getW()<<std::endl;
-  // SensorFeatureVector sfv(vector3D, quat);
+  SensorFeatureVector sfv5(vector3D);
+  sfv5.print_vector();
+  SensorFeatureVector sfv6(1,2,3);
+  sfv6.print_vector();
+  SensorFeatureVector sfv7(std::vector<float>(3,100));
+  sfv7.print_vector();
+  SensorFeatureVector sfv_n2 = sfv5.normalize();
+  sfv_n2.print_vector();
+  std::ofstream ofile("/home/amayima/test.dat");
 
-  // std::pair<std::vector<double>::iterator,
-  //         std::vector<double>::iterator> it_pair = sfv.get_values_pair_iterator();
-  // for(; it_pair.first != it_pair.second ; it_pair.first++)
-  //   std::cout<<*it_pair.first<<std::endl;
-
-
-  // SensorFeatureVector sfv2(1,2,3, quat);
-  // SensorFeatureVector sfv3(1,2,3,4,5,6,7);
-  // std::cout<<sfv.get_quaternion().getW()<<std::endl;
-  // std::cout<<sfv.get_vector3D().get_x()<<std::endl;
-  // std::cout<<sfv2.get_quaternion().getW()<<std::endl;
-  // std::cout<<sfv2.get_vector3D().get_x()<<std::endl;
-  // std::cout<<sfv3.get_quaternion().getW()<<std::endl;
-  // std::cout<<sfv3.get_vector3D().get_x()<<std::endl;
-  // SensorFeatureVector sfv_n = sfv.normalize();
-  // std::cout<<sfv_n.get_quaternion().getW()<<std::endl;
-  // std::cout<<sfv_n.get_vector3D().get_x()<<std::endl;
-  // std::cout<<sfv_n.get_quaternion().getAxis().getX()<<std::endl;
-
-  // it_pair = sfv_n.get_values_pair_iterator();
-  // std::cout<<"normalize"<<std::endl;
-  // for(; it_pair.first != it_pair.second ; it_pair.first++)
-  //   std::cout<<*it_pair.first<<std::endl;
-
-  // std::ofstream ofile("/home/amayima/test.dat");
-
-  // HTKHeader header;
-  // header.BytesPerSample =  sfv3.get_values_vector_size()*4; 
-  // header.nSamples = 1;
-  // header.Period = 100000;
-  // header.FeatureType = HTK_USER;
-  // header.write_to_file(ofile);
-  // sfv3.write_to_file(ofile); 
-  // ofile.close(); // verification of correct writing in binary file with HList -h command
+  HTKHeader header;
+  header.BytesPerSample =  sfv_n2.get_size()*4; 
+  header.nSamples = 1;
+  header.Period = 100000;
+  header.FeatureType = HTK_USER;
+  header.write_to_file(ofile);
+  sfv_n2.write_to_file(ofile); 
+  ofile.close(); // verification of correct writing in binary file with HList -h command
 
   /* ------ Tests of FeatureVector class ------ */
   // FeatureVector fv(3);
@@ -124,8 +115,8 @@ int main(int argc, char** argv){
   // std::pair<std::vector<SensorFeatureVector>::iterator,
   //           std::vector<SensorFeatureVector>::iterator>it_pair = fv2.get_pair_iterator();
 
-  // std::pair<std::vector<double>::iterator,
-  //         std::vector<double>::iterator>it_pair2;
+  // std::pair<std::vector<float>::iterator,
+  //         std::vector<float>::iterator>it_pair2;
   // int i = 0;
   // for(; it_pair.first != it_pair.second ; it_pair.first++){
   //   it_pair2 =it_pair.first->get_values_pair_iterator();
@@ -188,30 +179,34 @@ int main(int argc, char** argv){
   // ofile.close(); // verification of correct writing in binary file with HList -h command
 
   /* ----- Test Labels ----- */
-  std::vector<std::string> lab_vec;
-  lab_vec.push_back("stir");
-  lab_vec.push_back("put");
-  Labels labels(lab_vec,"/home/amayima/test.list","/home/amayima/test.net.slf","/home/amayima/test.dict",  "/home/amayima/test.grammar");
-  labels.add_label("take");
-  labels.add_label("pour");
-  // labels.set_labels_list_path("/home/amayima/test.list");
-  // labels.set_grammar_net_path("/home/amayima/test.net.slf");
-  // labels.set_dict_path("/home/amayima/test.dict"); 
-  // labels.set_grammar_path("/home/amayima/test.grammar");
-  labels.write_to_file(LabelFileFormats::txt);
-  labels.write_to_file(LabelFileFormats::grammar);
-  labels.write_to_file(LabelFileFormats::dict);
-  try{
-    std::cout << labels.compile_grammar() << std::endl;
-    std::cout << labels.test_grammar() << std::endl;
-  }catch(std::string const& error){
-    std::cerr << error << std::endl;
-  }
+  // std::vector<std::string> lab_vec;
+  // lab_vec.push_back("stir");
+  // lab_vec.push_back("put");
+  // Labels labels(lab_vec,"/home/amayima/test.list","/home/amayima/test.net.slf","/home/amayima/test.dict",  "/home/amayima/test.grammar");
+  // labels.add_label("take");
+  // labels.add_label("pour");
+  // // labels.set_labels_list_path("/home/amayima/test.list");
+  // // labels.set_grammar_net_path("/home/amayima/test.net.slf");
+  // // labels.set_dict_path("/home/amayima/test.dict"); 
+  // // labels.set_grammar_path("/home/amayima/test.grammar");
+  // labels.write_to_file(LabelFileFormats::txt);
+  // labels.write_to_file(LabelFileFormats::grammar);
+  // labels.write_to_file(LabelFileFormats::dict);
+  // try{
+  //   std::cout << labels.compile_grammar() << std::endl;
+  //   std::cout << labels.test_grammar() << std::endl;
+  // }catch(std::string const& error){
+  //   std::cerr << error << std::endl;
+  // }
 
 
+ /* ----- Test HMMs ----- */
+  // HMM hmm("take", 18, EmissionTypes::Gaussian);
+  // hmm.write_to_file(std::string("/home/amayima/test.hmm"));
 
- 
-
+  /* ----- Test DataHandler ----- */
+  // DataHandler datah;
+  // datah.raw_data_from_file_to_feature_matrices("/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/segmentation(copy)","/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/breakfast_data(copy)/s1", NormalizationTypes::no);
 
 
   /** for a listener 

@@ -2,43 +2,31 @@
 #define	SENSORFEATUREVECTOR_HPP
 #include <vector>
 #include <fstream>
-#include <tf2/LinearMath/Quaternion.h>
 #include "action_recognition/Vector3D.hpp"
 #include "action_recognition/common.hpp"
 
-#define VEC3D_QUAT_SIZE 7
-#define VEC3D_SIZE      3
+#define SENSOR_FEATURE_VECTOR_SIZE 3
 
 class SensorFeatureVector{
 
-private:
-  Vector3D translation_;
-  tf2::Quaternion quaternion_;
-  std::vector<float> values_vector_;
-
-  void set_new_vector_values(void);
-  void set_new_vector_values(float x, float y, float z, float x_q, float y_q, float z_q, float w);
-  void set_new_vector_values(float x, float y, float z);
+protected:
+  Vector3D vector3D_;
 
 public:
   SensorFeatureVector();
-  SensorFeatureVector(Vector3D vector3D, tf2::Quaternion quaternion);  
   SensorFeatureVector(Vector3D vector3D);
   SensorFeatureVector(std::vector<float> values_vector_);
-  SensorFeatureVector(float x, float y, float z, tf2::Quaternion quaternion); 
   SensorFeatureVector(float x, float y, float z);
-  SensorFeatureVector(float x, float y, float z, float x_q, float y_q, float z_q, float w);
   
   Vector3D get_vector3D(void);
-  tf2::Quaternion get_quaternion(void);
-  std::pair<std::vector<float>::iterator,
-            std::vector<float>::iterator> get_values_pair_iterator(void);
-
-  int get_values_vector_size(void);
 
   SensorFeatureVector normalize(void);
 
   void write_to_file(std::ofstream &os);
+
+  void print_vector(void);
+
+  int get_size(void);
 
 };
 #endif

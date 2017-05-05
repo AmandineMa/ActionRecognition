@@ -17,8 +17,8 @@ SensorFeatureVector::SensorFeatureVector(float x, float y, float z):vector3D_(x,
 
 Vector3D SensorFeatureVector::get_vector3D(void){return vector3D_;}
 
-SensorFeatureVector SensorFeatureVector::normalize(void){
- return SensorFeatureVector(vector3D_.normalize());
+void SensorFeatureVector::normalize(void){
+  vector3D_ = vector3D_.normalize();
 }
 
 void SensorFeatureVector::write_to_file(std::ofstream &os){  
@@ -31,7 +31,7 @@ void SensorFeatureVector::write_to_file(std::ofstream &os){
 }
 
 void SensorFeatureVector::print_vector(void){
-  std::cout << "[ "<< vector3D_.get_x() << ", " << vector3D_.get_y() << ", " << vector3D_.get_z() << " ]" << std::endl; 
+  std::cout << "[ "<< vector3D_.get_x() << ", " << vector3D_.get_y() << ", " << vector3D_.get_z() << " ]"; 
 }
 
 int SensorFeatureVector::get_size(void){return SENSOR_FEATURE_VECTOR_SIZE;}

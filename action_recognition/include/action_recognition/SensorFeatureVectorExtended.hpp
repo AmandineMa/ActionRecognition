@@ -22,13 +22,13 @@ public:
 
   tf2::Quaternion get_quaternion(void);
 
-  SensorFeatureVectorExtended normalize(void);
+  virtual void normalize(void);
 
-  void write_to_file(std::ofstream &os);
+  virtual void write_to_file(std::ofstream &os);
 
-  void print_vector(void);
+  virtual void print_vector(void);
 
-  int get_size(void);
+  virtual int get_size(void);
 
 };
 #endif

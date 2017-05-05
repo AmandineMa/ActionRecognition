@@ -52,101 +52,67 @@ int main(int argc, char** argv){
  
 
   /* ------ Tests of SensorFeatureVector class ------ */
-  float w = 3.12121212;
-  std::cout.precision(6);
-  tf2::Quaternion quat(4,5,6,7); 
-  Vector3D vector3D(1.2,1.0,1.0);
-  SensorFeatureVectorExtended sfv(vector3D, quat);
-  std::cout << quat.getY() << std::endl;
-  sfv.print_vector();
-  SensorFeatureVectorExtended sfv2(1,2,3, quat);
-  sfv2.print_vector();
-  SensorFeatureVectorExtended sfv3(1,2,3,4,5,6,7);
-  sfv3.print_vector();
-  SensorFeatureVectorExtended sfv4(std::vector<float>(7,100));
-  sfv4.print_vector();
-  SensorFeatureVectorExtended sfv_n = sfv.normalize();
-  sfv_n.print_vector();
+  // float w = 3.12121212;
+  // std::cout.precision(6);
+  // tf2::Quaternion quat(4,5,6,7); 
+  // Vector3D vector3D(1.2,1.0,1.0);
+  // SensorFeatureVectorExtended sfv(vector3D, quat);
+  // std::cout << quat.getY() << std::endl;
+  // sfv.print_vector();
+  // SensorFeatureVectorExtended sfv2(1,2,3, quat);
+  // sfv2.print_vector();
+  // SensorFeatureVectorExtended sfv3(1,2,3,4,5,6,7);
+  // sfv3.print_vector();
+  // SensorFeatureVectorExtended sfv4(std::vector<float>(7,100));
+  // sfv4.print_vector();
+  // SensorFeatureVectorExtended sfv_n = sfv.normalize();
+  // sfv_n.print_vector();
 
-  SensorFeatureVector sfv5(vector3D);
-  sfv5.print_vector();
-  SensorFeatureVector sfv6(1,2,3);
-  sfv6.print_vector();
-  SensorFeatureVector sfv7(std::vector<float>(3,100));
-  sfv7.print_vector();
-  SensorFeatureVector sfv_n2 = sfv5.normalize();
-  sfv_n2.print_vector();
-  std::ofstream ofile("/home/amayima/test.dat");
-
-  HTKHeader header;
-  header.BytesPerSample =  sfv_n2.get_size()*4; 
-  header.nSamples = 1;
-  header.Period = 100000;
-  header.FeatureType = HTK_USER;
-  header.write_to_file(ofile);
-  sfv_n2.write_to_file(ofile); 
-  ofile.close(); // verification of correct writing in binary file with HList -h command
-
-  /* ------ Tests of FeatureVector class ------ */
-  // FeatureVector fv(3);
-  // SensorFeatureVector sfv3(1,2,3,4,5,6,7);
-  // std::vector<SensorFeatureVector> feature_vector(2);
-  // feature_vector[0] = sfv3;
-  // std::cout<<feature_vector.size()<<std::endl;
-  // feature_vector.push_back(sfv3);
-  // std::cout<<feature_vector.size()<<std::endl;
-  // FeatureVector fv1(2,feature_vector);
-
-  // FeatureVector fv;
-  // SensorFeatureVector sfv3(1,2,3,4,5,6,7);
-  // //std::cout<<fv.get_element_number()<<std::endl;
-  // fv.add_sensor_feature_vector(sfv3);
-  // //std::cout<<fv.get_element_number()<<std::endl;
-
-  // SensorFeatureVector sfv(1,2,3,4,5,6,8);
-  // std::vector<SensorFeatureVector> feature_vector;
-  // feature_vector.push_back(sfv3);
-  // feature_vector.push_back(sfv);
-  // FeatureVector fv2(feature_vector);
-
-  // FeatureVector fv4;
-  // fv4.add_sensor_feature_vector(sfv);
-  // fv4.add_sensor_feature_vector(sfv3);
-  // std::pair<std::vector<SensorFeatureVector>::iterator,
-  //           std::vector<SensorFeatureVector>::iterator>it_pair = fv2.get_pair_iterator();
-
-  // std::pair<std::vector<float>::iterator,
-  //         std::vector<float>::iterator>it_pair2;
-  // int i = 0;
-  // for(; it_pair.first != it_pair.second ; it_pair.first++){
-  //   it_pair2 =it_pair.first->get_values_pair_iterator();
-  //   std::cout<<"tour "<<i++<<std::endl;
-  //   for(; it_pair2.first != it_pair2.second ; it_pair2.first++)
-  //      std::cout<<*it_pair2.first<<std::endl;
-  // }
-  
-  // FeatureVector fv3 = fv2.normalize();
-  // it_pair = fv3.get_pair_iterator();
-  // for(; it_pair.first != it_pair.second ; it_pair.first++){
-  //   it_pair2 =it_pair.first->get_values_pair_iterator();
-  //   std::cout<<"tour "<<i++<<std::endl;
-  //   for(; it_pair2.first != it_pair2.second ; it_pair2.first++)
-  //      std::cout<<*it_pair2.first<<std::endl;
-  // }
-
-  
-  //std::cout << fv4.get_values_number() << std::endl;
-
+  // SensorFeatureVector sfv5(vector3D);
+  // sfv5.print_vector();
+  // SensorFeatureVector sfv6(1,2,3);
+  // sfv6.print_vector();
+  // SensorFeatureVector sfv7(std::vector<float>(3,100));
+  // sfv7.print_vector();
+  // SensorFeatureVector sfv_n2 = sfv5.normalize();
+  // sfv_n2.print_vector();
   // std::ofstream ofile("/home/amayima/test.dat");
 
   // HTKHeader header;
-  // header.BytesPerSample =  fv4.get_values_number()*4; 
+  // header.BytesPerSample =  sfv_n2.get_size()*4; 
   // header.nSamples = 1;
   // header.Period = 100000;
   // header.FeatureType = HTK_USER;
   // header.write_to_file(ofile);
-  // fv4.write_to_file(ofile); 
+  // sfv_n2.write_to_file(ofile); 
   // ofile.close(); // verification of correct writing in binary file with HList -h command
+
+  /* ------ Tests of FeatureVector class ------ */
+  SensorFeatureVector sfv(1,2,3);
+  SensorFeatureVectorExtended sfv2(4,5,6,7,8,9,10);
+  std::vector<SensorFeatureVector*> feature_vector;
+  feature_vector.push_back(new SensorFeatureVector(1,2,3));
+  feature_vector.push_back(new SensorFeatureVectorExtended(4,5,6,7,8,9,10));
+  FeatureVector fv(feature_vector,std::vector<float>(2,2));
+  fv.print_vector();
+ 
+  fv.add_sensor_feature_vector(new SensorFeatureVector(11,12,13));
+  fv.add_sensor_feature_vector(new SensorFeatureVectorExtended(14,15,16,17,18,19,20));
+  fv.add_flag(1);
+  fv.print_vector();
+  fv.normalize();
+  fv.print_vector();
+
+  std::ofstream ofile("/home/amayima/test.dat");
+
+  HTKHeader header;
+  header.BytesPerSample = 12*4; 
+  header.nSamples = 1;
+  header.Period = 100000;
+  header.FeatureType = HTK_USER;
+  header.write_to_file(ofile);
+  fv.write_to_file(ofile); 
+  ofile.close(); // verification of correct writing in binary file with HList -h command 
 
   /* ------ Tests of FeatureMatrix class ------ */
   // SensorFeatureVector sfv3(1,2,3,4,5,6,7);

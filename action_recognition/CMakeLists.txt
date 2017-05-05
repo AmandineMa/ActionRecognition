@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS serialization system) #system)
+find_package(Boost REQUIRED COMPONENTS system) #system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -137,7 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(action_recognition src/main.cpp src/Vector3D.cpp src/SensorFeatureVector.cpp src/FeatureVector.cpp src/FeatureMatrix.cpp src/common.cpp src/Labels.cpp)
+add_executable(action_recognition src/main.cpp src/Vector3D.cpp src/SensorFeatureVector.cpp src/SensorFeatureVectorExtended.cpp src/FeatureVector.cpp src/FeatureMatrix.cpp src/common.cpp src/Labels.cpp src/HMM.cpp src/DataHandler.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

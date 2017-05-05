@@ -10,27 +10,24 @@
 class FeatureVector{
 
 private:
-  std::vector<SensorFeatureVector> feature_vector_;
-  int values_number_;
-  // int feature_vector_size_;
+  std::vector<SensorFeatureVector *> feature_vector_;
+  std::vector<float> flag_vector_; //float for compatibility with HTK
+
 
 public:
   FeatureVector();
-  FeatureVector(std::vector<SensorFeatureVector> feature_vector);
-  // FeatureVector(int feature_vector_size);
-  // FeatureVector(int feature_vector_size, std::vector<SensorFeatureVector> feature_vector);
+  FeatureVector(std::vector<SensorFeatureVector *> feature_vector, std::vector<float> flag_vector);
+  FeatureVector(std::vector<float> flag_vector);
+  ~FeatureVector();
 
-  void add_sensor_feature_vector(SensorFeatureVector sensor_feature_vector);
-  FeatureVector normalize(void);
+  void add_sensor_feature_vector(SensorFeatureVector * sensor_feature_vector);
+  void add_flag(float flag);
 
-  int get_sfv_number(void);
-
-  int get_values_number(void);
-
-  std::pair<std::vector<SensorFeatureVector>::iterator,
-            std::vector<SensorFeatureVector>::iterator> get_pair_iterator(void);
+  void normalize(void);
 
   void write_to_file(std::ofstream &os);
+
+  void print_vector(void);
 
 };
 

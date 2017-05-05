@@ -24,9 +24,15 @@ SensorFeatureVectorExtended::SensorFeatureVectorExtended(float x, float y, float
 
 tf2::Quaternion SensorFeatureVectorExtended::get_quaternion(void){return quaternion_;}
 
-SensorFeatureVectorExtended SensorFeatureVectorExtended::normalize(void){
-    return SensorFeatureVectorExtended(vector3D_.normalize(), quaternion_.normalize());
+// SensorFeatureVectorExtended SensorFeatureVectorExtended::normalize(void){
+//     return SensorFeatureVectorExtended(vector3D_.normalize(), quaternion_.normalize());
+// }
+
+void SensorFeatureVectorExtended::normalize(void){
+  SensorFeatureVector::normalize();
+  quaternion_ = quaternion_.normalize();
 }
+
 
 void SensorFeatureVectorExtended::write_to_file(std::ofstream &os){  
   std::vector<float> values_vector(SENSOR_FEATURE_VECTOR_EXTENDED_SIZE);
@@ -43,7 +49,7 @@ void SensorFeatureVectorExtended::write_to_file(std::ofstream &os){
 
 
 void SensorFeatureVectorExtended::print_vector(void){
-  std::cout << "[ "<< vector3D_.get_x() << ", " << vector3D_.get_y() << ", " << vector3D_.get_z() << ", " << quaternion_.getX() << ", " << quaternion_.getY() << ", " << quaternion_.getZ() << ", " <<quaternion_.getW()<< " ]" << std::endl; 
+  std::cout << "[ "<< vector3D_.get_x() << ", " << vector3D_.get_y() << ", " << vector3D_.get_z() << ", " << quaternion_.getX() << ", " << quaternion_.getY() << ", " << quaternion_.getZ() << ", " <<quaternion_.getW()<< " ]"; 
 
 }
 

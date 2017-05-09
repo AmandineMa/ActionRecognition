@@ -25,124 +25,51 @@ int main(int argc, char** argv){
 
   ros::NodeHandle node;
 
-  ros::Rate rate(10.0);
-  /*
-  Config config("/home/amayima/tests/","/home/amayima/catkin_ws/src/turtlesim_cleaner/src/input/");
-  FeaturesLoader f_loader;
-  f_loader.load_features(config.path_data, config.path_seg_files);
-  */
+  ros::Rate rate(10.0); 
 
-  /* ------ Tests of Vector3D class ------ */
-  //  Vector3D vector3D_1;
-  //  vector3D_1.set_x(1.0);
-  // vector3D_1.set_y(1.0);
-  // vector3D_1.set_z(1.0);
-  // std::cout << vector3D_1.get_x() << "  "<<vector3D_1.get_y() << "  "<<vector3D_1.get_z() << "  "<<std::endl;
-  
-  //Vector3D vector3D_2(1.2,1.0,1.0);
-  // std::cout <<"vector2 "<< vector3D_2.get_x() << std::endl;
-  //  vector3D_2.set_new_values(0,0,0);
-  // std::cout <<"vector2 "<< vector3D_2.get_x() << std::endl;
+  /* ------ Tests of FeatureMatrix class ------ */
 
-  // std::vector<float> vec(3,1);
-  // Vector3D vector3D_3(vec);
 
-  // std::vector<float> vec2(2,1);
-  // Vector3D vector3D_4(vec2);
- 
+  FeatureMatrix fm("take");
+  fm.new_feature_vector();
+  std::vector<float> vec2;
+  vec2.push_back(1);
+  vec2.push_back(2);
+  vec2.push_back(3);
+  fm.add_sensor_feature_vector(vec2);
+  std::vector<float> vec;
+  vec.push_back(1);
+  vec.push_back(2);
+  vec.push_back(3);
+  vec.push_back(4);
+  vec.push_back(5);
+  vec.push_back(6);
+  vec.push_back(7);
+  fm.add_sensor_feature_vector(vec);
+  fm.add_flag(1);
+  fm.add_flag(0);
 
-  /* ------ Tests of SensorFeatureVector class ------ */
-  // float w = 3.12121212;
-  // std::cout.precision(6);
-  // tf2::Quaternion quat(4,5,6,7); 
-  // Vector3D vector3D(1.2,1.0,1.0);
-  // SensorFeatureVectorExtended sfv(vector3D, quat);
-  // std::cout << quat.getY() << std::endl;
-  // sfv.print_vector();
-  // SensorFeatureVectorExtended sfv2(1,2,3, quat);
-  // sfv2.print_vector();
-  // SensorFeatureVectorExtended sfv3(1,2,3,4,5,6,7);
-  // sfv3.print_vector();
-  // SensorFeatureVectorExtended sfv4(std::vector<float>(7,100));
-  // sfv4.print_vector();
-  // SensorFeatureVectorExtended sfv_n = sfv.normalize();
-  // sfv_n.print_vector();
+  FeatureMatrix fm2("pour");
+  fm2.new_feature_vector(std::vector<float>(4,1));
+  fm2.add_sensor_feature_vector(std::vector<float>(3,5));
+  fm2.new_feature_vector();
+  fm2.add_sensor_feature_vector(std::vector<float>(3,6)); 
+  fm2.add_flag(1);
+  fm2.add_flag(0);
+  fm2.add_flag(1);
+  fm2.add_flag(0);
 
-  // SensorFeatureVector sfv5(vector3D);
-  // sfv5.print_vector();
-  // SensorFeatureVector sfv6(1,2,3);
-  // sfv6.print_vector();
-  // SensorFeatureVector sfv7(std::vector<float>(3,100));
-  // sfv7.print_vector();
-  // SensorFeatureVector sfv_n2 = sfv5.normalize();
-  // sfv_n2.print_vector();
-  // std::ofstream ofile("/home/amayima/test.dat");
-
-  // HTKHeader header;
-  // header.BytesPerSample =  sfv_n2.get_size()*4; 
-  // header.nSamples = 1;
-  // header.Period = 100000;
-  // header.FeatureType = HTK_USER;
-  // header.write_to_file(ofile);
-  // sfv_n2.write_to_file(ofile); 
-  // ofile.close(); // verification of correct writing in binary file with HList -h command
-
-  /* ------ Tests of FeatureVector class ------ */
-  SensorFeatureVector sfv(1,2,3);
-  SensorFeatureVectorExtended sfv2(4,5,6,7,8,9,10);
-  std::vector<SensorFeatureVector*> feature_vector;
-  feature_vector.push_back(new SensorFeatureVector(1,2,3));
-  feature_vector.push_back(new SensorFeatureVectorExtended(4,5,6,7,8,9,10));
-  FeatureVector fv(feature_vector,std::vector<float>(2,2));
-  fv.print_vector();
- 
-  fv.add_sensor_feature_vector(new SensorFeatureVector(11,12,13));
-  fv.add_sensor_feature_vector(new SensorFeatureVectorExtended(14,15,16,17,18,19,20));
-  fv.add_flag(1);
-  fv.print_vector();
-  fv.normalize();
-  fv.print_vector();
+  fm2.normalize();
 
   std::ofstream ofile("/home/amayima/test.dat");
-
   HTKHeader header;
-  header.BytesPerSample = 12*4; 
-  header.nSamples = 1;
+  header.BytesPerSample = fm.get_feature_vector_size()*4; 
+  header.nSamples = fm.get_samples_number();
   header.Period = 100000;
   header.FeatureType = HTK_USER;
   header.write_to_file(ofile);
-  fv.write_to_file(ofile); 
-  ofile.close(); // verification of correct writing in binary file with HList -h command 
-
-  /* ------ Tests of FeatureMatrix class ------ */
-  // SensorFeatureVector sfv3(1,2,3,4,5,6,7);
-  // SensorFeatureVector sfv(1,2,3,4,5,6,8);
-  // std::vector<SensorFeatureVector> feature_vector;
-  // feature_vector.push_back(sfv3);
-  // feature_vector.push_back(sfv);
-  // FeatureVector fv2(feature_vector);
-
-  // FeatureVector fv4;
-  // fv4.add_sensor_feature_vector(sfv);
-  // fv4.add_sensor_feature_vector(sfv3);
-  // std::vector<FeatureVector> feature_matrix;
-  // feature_matrix.push_back(fv2);
-  // feature_matrix.push_back(fv4);
-  // FeatureMatrix fm("take", feature_matrix);
-
-  // FeatureMatrix fm2("take");
-  // fm2.add_feature_vector(fv2);
-  // fm2.add_feature_vector(fv4);
-
-  // std::ofstream ofile("/home/amayima/test.dat");
-  // HTKHeader header;
-  // header.BytesPerSample = fm.get_feature_vector_size()*4; 
-  // header.nSamples = fm.get_samples_number();
-  // header.Period = 100000;
-  // header.FeatureType = HTK_USER;
-  // header.write_to_file(ofile);
-  // fm2.write_to_file(ofile); 
-  // ofile.close(); // verification of correct writing in binary file with HList -h command
+  fm.write_to_file(ofile); 
+  ofile.close();  // verification of correct writing in binary file with HList -h command
 
   /* ----- Test Labels ----- */
   // std::vector<std::string> lab_vec;

@@ -11,15 +11,9 @@ Vector3D::Vector3D(float x, float y, float z): vector3D_(VECTOR3D_SIZE){
   set_new_values(x,y,z);
 }
 
-Vector3D::Vector3D(std::vector<float> vector3D){
-  try{
-    if(vector3D.size() != VECTOR3D_SIZE)
-      throw std::string("A 3D vector has to be initialized with a vector of size "+VECTOR3D_SIZE);
-    else
-      std::vector<float> vector3D_(vector3D);
-  }catch(std::string const& error){
-    std::cerr<<error<<std::endl;
-  }
+Vector3D::Vector3D(std::vector<float> vector3D):vector3D_(vector3D){
+  if(vector3D.size() != VECTOR3D_SIZE)
+    std::cerr <<"A 3D vector has to be initialized with a vector of size "+VECTOR3D_SIZE << std::endl;
 }
 
 float Vector3D::get_x(void){return vector3D_[VectorElements::X];}

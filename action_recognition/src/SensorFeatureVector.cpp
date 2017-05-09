@@ -9,8 +9,7 @@ SensorFeatureVector::SensorFeatureVector(){}
 SensorFeatureVector::SensorFeatureVector(Vector3D vector3D):vector3D_(vector3D){}
 
 SensorFeatureVector::SensorFeatureVector(std::vector<float> values_vector){
-  int i = 0;
-  vector3D_ = Vector3D(values_vector[i++],values_vector[i++],values_vector[i++]);   
+  vector3D_ = Vector3D(values_vector); 
 }
 
 SensorFeatureVector::SensorFeatureVector(float x, float y, float z):vector3D_(x,y,z){} 

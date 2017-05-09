@@ -5,6 +5,8 @@
 #include "action_recognition/Labels.hpp"
 #include "action_recognition/common.hpp"
 
+Labels::Labels(){}
+
 Labels::Labels(std::string labels_list_path, std::string grammar_net_path, std::string dict_path, std::string grammar_path):
   labels_(0), labels_list_path_(labels_list_path), grammar_net_path_(grammar_net_path), dict_path_(dict_path), grammar_path_(grammar_path){}
 

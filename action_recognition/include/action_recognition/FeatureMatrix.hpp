@@ -38,6 +38,8 @@ public:
 
   void normalize(void);
 
+  void print(void);
+
  
 };
 

@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 #include "action_recognition/SensorFeatureVector.hpp"
 #include "action_recognition/SensorFeatureVectorExtended.hpp"
@@ -50,4 +51,11 @@ void FeatureMatrix::normalize(void){
   std::vector<FeatureVector>::iterator it = feature_vector_array_.begin();
   for( ; it != feature_vector_array_.end() ; it++)
     it->normalize();
+}
+
+void FeatureMatrix::print(void){
+ std::vector<FeatureVector>::iterator it = feature_vector_array_.begin();
+ std::cout << label_ << std::endl;
+  for( ; it != feature_vector_array_.end() ; it++)
+    it->print_vector();
 }

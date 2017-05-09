@@ -30,46 +30,50 @@ int main(int argc, char** argv){
   /* ------ Tests of FeatureMatrix class ------ */
 
 
-  FeatureMatrix fm("take");
-  fm.new_feature_vector();
-  std::vector<float> vec2;
-  vec2.push_back(1);
-  vec2.push_back(2);
-  vec2.push_back(3);
-  fm.add_sensor_feature_vector(vec2);
-  std::vector<float> vec;
-  vec.push_back(1);
-  vec.push_back(2);
-  vec.push_back(3);
-  vec.push_back(4);
-  vec.push_back(5);
-  vec.push_back(6);
-  vec.push_back(7);
-  fm.add_sensor_feature_vector(vec);
-  fm.add_flag(1);
-  fm.add_flag(0);
+  // FeatureMatrix fm("take");
+  // fm.new_feature_vector();
+  // std::vector<float> vec2;
+  // vec2.push_back(1);
+  // vec2.push_back(2);
+  // vec2.push_back(3);
+  // fm.add_sensor_feature_vector(vec2);
+  // std::vector<float> vec;
+  // vec.push_back(1);
+  // vec.push_back(2);
+  // vec.push_back(3);
+  // vec.push_back(4);
+  // vec.push_back(5);
+  // vec.push_back(6);
+  // vec.push_back(7);
+  // fm.add_sensor_feature_vector(vec);
+  // fm.add_flag(1);
+  // fm.add_flag(0);
 
-  FeatureMatrix fm2("pour");
-  fm2.new_feature_vector(std::vector<float>(4,1));
-  fm2.add_sensor_feature_vector(std::vector<float>(3,5));
-  fm2.new_feature_vector();
-  fm2.add_sensor_feature_vector(std::vector<float>(3,6)); 
-  fm2.add_flag(1);
-  fm2.add_flag(0);
-  fm2.add_flag(1);
-  fm2.add_flag(0);
+  // fm.print();
 
-  fm2.normalize();
+  // FeatureMatrix fm2("pour");
+  // fm2.new_feature_vector(std::vector<float>(4,1));
+  // fm2.add_sensor_feature_vector(std::vector<float>(3,5));
+  // fm2.new_feature_vector();
+  // fm2.add_sensor_feature_vector(std::vector<float>(3,6)); 
+  // fm2.add_flag(1);
+  // fm2.add_flag(0);
+  // fm2.add_flag(1);
+  // fm2.add_flag(0);
 
-  std::ofstream ofile("/home/amayima/test.dat");
-  HTKHeader header;
-  header.BytesPerSample = fm.get_feature_vector_size()*4; 
-  header.nSamples = fm.get_samples_number();
-  header.Period = 100000;
-  header.FeatureType = HTK_USER;
-  header.write_to_file(ofile);
-  fm.write_to_file(ofile); 
-  ofile.close();  // verification of correct writing in binary file with HList -h command
+  // fm2.print();
+
+  // fm2.normalize();
+
+  // std::ofstream ofile("/home/amayima/test.dat");
+  // HTKHeader header;
+  // header.BytesPerSample = fm.get_feature_vector_size()*4; 
+  // header.nSamples = fm.get_samples_number();
+  // header.Period = 100000;
+  // header.FeatureType = HTK_USER;
+  // header.write_to_file(ofile);
+  // fm.write_to_file(ofile); 
+  // ofile.close();  // verification of correct writing in binary file with HList -h command
 
   /* ----- Test Labels ----- */
   // std::vector<std::string> lab_vec;
@@ -98,10 +102,12 @@ int main(int argc, char** argv){
   // hmm.write_to_file(std::string("/home/amayima/test.hmm"));
 
   /* ----- Test DataHandler ----- */
-  // DataHandler datah;
+  DataHandler datah;
   // datah.raw_data_from_file_to_feature_matrices("/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/segmentation(copy)","/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/breakfast_data(copy)/s1", NormalizationTypes::no);
-
-
+  datah.raw_data_from_file_to_feature_matrices("/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/segmentation","/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data", NormalizationTypes::no);
+  datah.print_map();
+  datah.normalize();
+  datah.print_map();
   /** for a listener 
 
   while (node.ok()){

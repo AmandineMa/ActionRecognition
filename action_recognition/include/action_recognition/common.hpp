@@ -32,6 +32,17 @@ enum EmissionType
 }
 typedef EmissionTypes::EmissionType EmissionType;
 
+namespace StatesNumDefs
+{
+enum StatesNumDef
+  {
+    median,
+    linear_scaling,
+    fix_number
+  };
+}
+typedef StatesNumDefs::StatesNumDef StatesNumDef;
+
 namespace FeatureFileFormats
 {
 enum FeatureFileFormat

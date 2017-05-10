@@ -34,9 +34,9 @@ std::string tools::execute_command(std::string command) {
     while (!feof(stream))
       if (fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
     int stat = pclose(stream); 
-    if(stat != 0){
-      throw std::string(data);
-    }
+    // if(stat != 0){
+    //   throw std::string(data);
+    // }
   }
   return data;
 }

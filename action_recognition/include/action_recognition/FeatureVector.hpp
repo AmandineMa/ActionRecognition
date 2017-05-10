@@ -23,12 +23,13 @@ public:
 
   void add_sensor_feature_vector(std::vector<float> values_vector);
   void add_flag(float flag);
+  void add_flags(std::vector<float> flags);
 
-  int get_size(void);
+  int get_size(void) const;
 
   void normalize(void);
 
-  void write_to_file(std::ofstream &os);
+  void write_to_file(std::ofstream &os) const;
 
   void print_vector(void);
 

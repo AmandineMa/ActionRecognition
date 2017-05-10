@@ -26,15 +26,17 @@ public:
 
   void add_flag(float flag);
 
+  void add_flags(std::vector<float> flags);
+
   void set_label(std::string label);
 
-  std::string get_label(void);
+  std::string get_label(void) const;
 
-  int get_feature_vector_size(void);
+  int get_feature_vector_size(void) const;
 
-  int get_samples_number(void);
+  int get_samples_number(void) const;
 
-  void write_to_file(std::ofstream &os);
+  void write_to_file(std::ofstream &os) const;
 
   void normalize(void);
 

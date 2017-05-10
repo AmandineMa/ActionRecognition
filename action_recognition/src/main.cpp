@@ -19,6 +19,7 @@
 #include "action_recognition/Labels.hpp"
 #include "action_recognition/HMM.hpp"
 #include "action_recognition/DataHandler.hpp"
+#include "action_recognition/TrainHMM.hpp"
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
@@ -96,18 +97,33 @@ int main(int argc, char** argv){
   //   std::cerr << error << std::endl;
   // }
 
+  /* ----- Test DataHandler ----- */
+  // DataHandler datah;
+  // // datah.raw_data_from_file_to_feature_matrices("/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/segmentation(copy)","/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/breakfast_data(copy)/s1", NormalizationTypes::no);
+  // datah.raw_data_from_file_to_feature_matrices("/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/segmentation","/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data", NormalizationTypes::no);
+  // datah.print_map();
+  // datah.normalize();
+  // datah.print_map();
 
  /* ----- Test HMMs ----- */
-  // HMM hmm("take", 18, EmissionTypes::Gaussian);
+  // HMM hmm("take", 18,5, EmissionTypes::Gaussian,1);
   // hmm.write_to_file(std::string("/home/amayima/test.hmm"));
+  // HMM hmm2("take", 20, 5, EmissionTypes::GMM,1);
+  // hmm2.write_to_file(std::string("/home/amayima/test2.hmm"));
 
-  /* ----- Test DataHandler ----- */
-  DataHandler datah;
+  /*----- Test TrainHMM ----*/
+DataHandler datah;
   // datah.raw_data_from_file_to_feature_matrices("/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/segmentation(copy)","/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/breakfast_data(copy)/s1", NormalizationTypes::no);
   datah.raw_data_from_file_to_feature_matrices("/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/segmentation","/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data", NormalizationTypes::no);
-  datah.print_map();
-  datah.normalize();
-  datah.print_map();
+  //datah.print_map();
+
+  TrainHMM train;
+  std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
+          std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
+  for(; it.first != it.second ; it.first++)
+    train.train_HMM(EmissionTypes::Gaussian, it.first->second, StatesNumDefs::median,100,3,2);
+
+
   /** for a listener 
 
   while (node.ok()){

@@ -1,6 +1,7 @@
 <MotionLabeling>
-<MotionLabel name="SIL" startPoint="1" endPoint="4"/> 
 <MotionLabel name="take_bowl" startPoint="5" endPoint="7"/> 
 <MotionLabel name="pour_cereals" startPoint="8" endPoint="10"/> 
-<MotionLabel name="SIL" startPoint="11" endPoint="15"/> 
+<MotionLabel name="SIL" startPoint="11" endPoint="50"/> 
+<MotionLabel name="SIL" startPoint="51" endPoint="100"/>
+<MotionLabel name="SIL" startPoint="101" endPoint="160"/> 
 </MotionLabeling>

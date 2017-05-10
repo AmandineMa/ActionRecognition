@@ -26,6 +26,8 @@ public:
                                               NormalizationType normalization_type);
   void check_segmentation(void);
   void normalize(void);
+ std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
+          std::map<std::string, std::vector<FeatureMatrix> >::iterator > get_map_iterator();
 
   void print_map(void);
 

@@ -15,6 +15,7 @@ FeatureVector::FeatureVector(std::vector<float> flag_vector):flag_vector_(flag_v
 
 void FeatureVector::add_sensor_feature_vector(std::vector<float> values_vector){
   feature_vector_size_ += values_vector.size();
+  //std::cout << "add vector of size "<< values_vector.size() << " so total size is " << feature_vector_size_ << std::endl;
   switch(values_vector.size()){
     case SENSOR_FEATURE_VECTOR_SIZE:
       sensor_feature_vectors_.push_back(std::unique_ptr<SensorFeatureVector>(new SensorFeatureVector(values_vector))); //C++11
@@ -32,14 +33,19 @@ void FeatureVector::add_flag(float flag){
   feature_vector_size_ += 1;
 }
 
+void FeatureVector::add_flags(std::vector<float> flags){
+  flag_vector_ = flags;
+  feature_vector_size_ += flags.size();
+}
+
 void FeatureVector::normalize(){
   std::vector<std::unique_ptr<SensorFeatureVector> >::iterator it = sensor_feature_vectors_.begin();
   for( ; it != sensor_feature_vectors_.end() ; it++)
     (*it)->normalize();
 }
 
-void FeatureVector::write_to_file(std::ofstream &os){
-  std::vector<std::unique_ptr<SensorFeatureVector> >::iterator it = sensor_feature_vectors_.begin();
+void FeatureVector::write_to_file(std::ofstream &os) const{
+  std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
   for(; it != sensor_feature_vectors_.end() ; it++)
     (*it)->write_to_file(os);
   tools::swap_endian(flag_vector_.begin(), flag_vector_.end());
@@ -57,4 +63,4 @@ void FeatureVector::print_vector(void){
   std::cout << "\n";
 }
 
-int FeatureVector::get_size(void){return feature_vector_size_;}
+int FeatureVector::get_size(void) const{return feature_vector_size_;}

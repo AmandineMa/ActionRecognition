@@ -9,6 +9,8 @@
 #include "action_recognition/DataHandler.hpp"
 #include "action_recognition/common.hpp"
 #include "action_recognition/FeatureMatrix.hpp"
+#include "action_recognition/SensorFeatureVector.hpp"
+#include "action_recognition/SensorFeatureVectorExtended.hpp"
 #include "rapidxml/rapidxml.hpp"
 
 namespace bf = boost::filesystem;
@@ -64,36 +66,20 @@ void DataHandler::raw_data_from_file_to_feature_matrices(std::string seg_dir, st
             }
 
             fm.new_feature_vector();
-            count++;
+            count++; 
 
-            for (rapidxml::xml_node<> * sensor_feature_vector_node = feature_vector_node->first_node("SensFeatVect"); sensor_feature_vector_node; 
-                 sensor_feature_vector_node = sensor_feature_vector_node->next_sibling()){
-              std::vector<float> sensor_feature_vector;
-              std::stringstream string_stream(sensor_feature_vector_node->value());
+            for (rapidxml::xml_node<> * node = feature_vector_node->first_node(); node; node = node->next_sibling()){
+              std::vector<float> vector;
+              std::stringstream string_stream(node->value());
               int n;
               while(string_stream >> n)
-                sensor_feature_vector.push_back(n);
-              fm.add_sensor_feature_vector(sensor_feature_vector);
-            }
-
-            for (rapidxml::xml_node<> * sensor_feature_vector_extended_node = feature_vector_node->first_node("SensFeatVectExt"); sensor_feature_vector_extended_node; 
-                 sensor_feature_vector_extended_node = sensor_feature_vector_extended_node->next_sibling()){
-              std::vector<float> sensor_feature_vector;
-              std::stringstream string_stream(sensor_feature_vector_extended_node->value());
-              int n;
-              while(string_stream >> n)
-                sensor_feature_vector.push_back(n);
-              fm.add_sensor_feature_vector(sensor_feature_vector);
-            }
-
-            for (rapidxml::xml_node<> * flags_node = feature_vector_node->first_node("Flags"); flags_node; 
-                 flags_node = flags_node->next_sibling()){
-              std::vector<float> flag_vector;
-              std::stringstream string_stream(flags_node->value());
-              int n; 
-              while(string_stream >> n)
-                fm.add_flag(n);
-            }
+                vector.push_back(n);
+             
+              if(vector.size() != SENSOR_FEATURE_VECTOR_SIZE && vector.size() != SENSOR_FEATURE_VECTOR_EXTENDED_SIZE)
+                fm.add_flags(vector);
+              else
+                fm.add_sensor_feature_vector(vector);
+            }       
           }
         }
       }
@@ -115,6 +101,11 @@ std::map<std::string, std::vector<FeatureMatrix> >::iterator it_map = label_feat
     for(std::vector<FeatureMatrix>::iterator it_matrix = it_map->second.begin(); it_matrix != it_map->second.end(); it_matrix++)
       it_matrix->normalize();
   }
+}
+
+std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
+          std::map<std::string, std::vector<FeatureMatrix> >::iterator > DataHandler::get_map_iterator(){
+  return std::make_pair(label_features_map_.begin(),label_features_map_.end());
 }
 
 /****************** Private functions********************/

@@ -14,19 +14,19 @@ FeatureMatrix::FeatureMatrix():feature_vector_array_(0){}
 FeatureMatrix::FeatureMatrix(std::string label):label_(label),feature_vector_array_(0){}
 
 void FeatureMatrix::set_label(std::string label){label_=label;}
-std::string FeatureMatrix::get_label(void){return label_;}
+std::string FeatureMatrix::get_label(void) const{return label_;}
 
-int FeatureMatrix::get_feature_vector_size(void){
+int FeatureMatrix::get_feature_vector_size(void) const{
   if(feature_vector_array_.empty())
     return 0;
   else
     return feature_vector_array_[0].get_size();
 }
 
-int FeatureMatrix::get_samples_number(void){return feature_vector_array_.size();}
+int FeatureMatrix::get_samples_number(void) const{return feature_vector_array_.size();}
 
-void FeatureMatrix::write_to_file(std::ofstream &os){
- std::vector<FeatureVector>::iterator it = feature_vector_array_.begin();
+void FeatureMatrix::write_to_file(std::ofstream &os) const{
+ std::vector<FeatureVector>::const_iterator it = feature_vector_array_.begin();
   for(; it != feature_vector_array_.end() ; it++)
     it->write_to_file(os);
 }
@@ -45,6 +45,10 @@ void FeatureMatrix::add_sensor_feature_vector(std::vector<float> values_vector){
 
 void FeatureMatrix::add_flag(float flag){
   feature_vector_array_.back().add_flag(flag);
+}
+
+void FeatureMatrix::add_flags(std::vector<float> flags){
+  feature_vector_array_.back().add_flags(flags);
 }
 
 void FeatureMatrix::normalize(void){

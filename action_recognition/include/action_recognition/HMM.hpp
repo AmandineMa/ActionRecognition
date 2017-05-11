@@ -34,8 +34,8 @@ private:
 
 public: 
   std::string name_;
-  HMM();
-  HMM(std::string name, int nb_states, int dim, EmissionType emission_type, int nb_mixtures);
+
+  HMM(std::string name, int nb_states, int dim, EmissionType emission_type, int nb_mixtures = 1);
   ~HMM();
 
   void write_to_file(std::string file_path);

@@ -20,6 +20,7 @@
 #include "action_recognition/HMM.hpp"
 #include "action_recognition/DataHandler.hpp"
 #include "action_recognition/TrainHMM.hpp"
+#include "action_recognition/Setup.hpp"
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
@@ -112,16 +113,18 @@ int main(int argc, char** argv){
   // hmm2.write_to_file(std::string("/home/amayima/test2.hmm"));
 
   /*----- Test TrainHMM ----*/
-DataHandler datah;
-  // datah.raw_data_from_file_to_feature_matrices("/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/segmentation(copy)","/home/amayima/hmm_tools/HTK_actionRecognition/demo_breakfast/breakfast_data(copy)/s1", NormalizationTypes::no);
-  datah.raw_data_from_file_to_feature_matrices("/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/segmentation","/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data", NormalizationTypes::no);
+  Setup setup("/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/","/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/");
+  std::cout << setup.default_state_number << std::endl;
+
+  DataHandler datah;
+ 
+  datah.raw_data_from_file_to_feature_matrices(setup.path_seg_files,setup.path_data, NormalizationTypes::no);
   //datah.print_map();
 
-  TrainHMM train;
   std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
           std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
   for(; it.first != it.second ; it.first++)
-    train.train_HMM(EmissionTypes::Gaussian, it.first->second, StatesNumDefs::median,100,3,2);
+    TrainHMM::train_HMM(EmissionTypes::GMM, it.first->second, StatesNumDefs::median, 100, setup, 2);
 
 
   /** for a listener 

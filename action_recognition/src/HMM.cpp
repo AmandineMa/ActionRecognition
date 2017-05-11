@@ -9,7 +9,6 @@
 #include "action_recognition/HMM.hpp"
 #include "action_recognition/common.hpp"
 
-HMM::HMM(){}
 
 HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, int nb_mixtures):
   name_(name),nb_states_(nb_states), emission_type_(emission_type), start_proba_(nb_states,0),end_proba_(nb_states,0),
@@ -53,9 +52,9 @@ HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, i
 }
 
 HMM::~HMM(){
-  // for(std::vector<Gaussian*>::iterator it = observations_.begin(); it != observations_.end() ; it++)
-  //   delete (*it);
-  // observations_.clear();
+  for(std::vector<Gaussian*>::iterator it = observations_.begin(); it != observations_.end() ; it++)
+    delete (*it);
+  observations_.clear();
 }
 
 void HMM::write_to_file(std::string file_path){
@@ -87,9 +86,7 @@ void HMM::write_to_file(std::string file_path){
         ofile << "     <NumMixes> " << nb_mixtures << "\n";
         int j;
         for(j = 0; j < nb_mixtures; j++){
-          ofile << "        <MIXTURE> " << j << " ";
-          std::vector<float> priors =  static_cast<GMM*>(observations_[0])->priors_;
-          std::copy(priors.begin(), priors.end(), it_file);
+          ofile << "        <MIXTURE> " << j+1 << " " << static_cast<GMM*>(observations_[0])->priors_[j];
           ofile << "\n";
           ofile << "          <MEAN> " << ndim << "\n";
           std::copy(observations_[i]->means_[j].begin(), observations_[i]->means_[j].end(), it_file);

@@ -6,18 +6,14 @@
 #include "action_recognition/HMM.hpp"
 #include "action_recognition/common.hpp"
 #include "action_recognition/FeatureMatrix.hpp"
+#include "action_recognition/Setup.hpp"
 
-class TrainHMM{
-private:
-  HMM hmm_;
-  std::vector<std::unique_ptr<FeatureMatrix> > feature_vector_array_; //C++11
+namespace TrainHMM{
 
   float median(std::vector<int> samples_number);
 
-public:
-  TrainHMM();
-  void train_HMM(EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, StatesNumDef num_states_def, int iterations_nb, int mixtures_nb, int state_nb);
-  void init_hmm(void);
+  void train_HMM(EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb = 1);
+
 
 };
 

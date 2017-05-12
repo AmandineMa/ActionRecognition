@@ -7,30 +7,38 @@
 
 struct Setup
 {
-  std::string path_root;
-  std::string path_input; 
-  std::string path_data; 
-  std::string path_seg_files; 
-  std::string path_output; 
-  std::string path_htk_tmp_files;
+  std::string root_path;
+  std::string input_path; 
+  std::string data_path; 
+  std::string seg_files_path; 
+  std::string output_path; 
+  std::string htk_tmp_files_path;
+  std::string labels_list_path;
+  std::string grammar_net_path;
+  std::string dict_path;
+  std::string grammar_path;
 
   int default_state_number;
 
-  Setup(std::string path_r, std::string path_i, int default_state_nb = 5){
+  Setup(std::string root_p, std::string input_p, int default_state_nb = 5){
     default_state_number = default_state_nb;
-    path_root=path_r;
-    path_input=path_i;
-    path_data=path_input+"data/";
-    path_seg_files=path_input+"segmentation/";
-    path_htk_tmp_files=path_root+"htk_tmp/";
-    path_output=path_root+"output/";
+    root_path = root_p;
+    input_path = input_p;
+    data_path = input_p+"data/";
+    seg_files_path = input_p+"segmentation/";
+    htk_tmp_files_path = root_p+"htk_tmp/";
+    output_path = root_p+"output/";
+    labels_list_path = output_path+"labels.list";
+    grammar_net_path = output_path+"grammar.net.slf";
+    dict_path = root_path+"labels.dict";
+    grammar_path = root_path+"labels.grammar";
 
-    boost::filesystem::path dir(path_output.c_str());
+    boost::filesystem::path dir(output_path.c_str());
     try{
       if (boost::filesystem::create_directory(dir))
 	std::cout<<"output directory created"<<std::endl;
 
-      dir = path_htk_tmp_files.c_str();
+      dir = htk_tmp_files_path.c_str();
       if (boost::filesystem::create_directory(dir))
 	std::cout<<"tmp directory created"<<std::endl;
      

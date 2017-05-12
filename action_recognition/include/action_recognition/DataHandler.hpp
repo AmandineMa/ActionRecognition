@@ -10,6 +10,7 @@
 #include "action_recognition/common.hpp"
 #include "action_recognition/FeatureMatrix.hpp"
 #include "action_recognition/Labels.hpp"
+#include "action_recognition/Setup.hpp"
 
 class DataHandler{
 private:
@@ -22,12 +23,16 @@ private:
   bool is_hidden(boost::filesystem::path p);
 
 public:
+  DataHandler(Setup setup);
+
   void raw_data_from_file_to_feature_matrices(std::string seg_dir, std::string raw_data_dir,
                                               NormalizationType normalization_type);
   void check_segmentation(void);
   void normalize(void);
  std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
           std::map<std::string, std::vector<FeatureMatrix> >::iterator > get_map_iterator();
+
+  Labels get_labels(void);
 
   void print_map(void);
 

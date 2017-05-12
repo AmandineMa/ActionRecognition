@@ -1,19 +1,19 @@
 #include <vector>
 #include <math.h>
+#include <boost/filesystem.hpp>
 
 #include "action_recognition/TrainHMM.hpp"
 #include "action_recognition/HTKHeader.hpp"
-#include "action_recognition/Setup.hpp"
 
 
 void TrainHMM::train_HMM(EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb){
   std::vector<int> sample_numbers;
   int i = 0;
-  std::string data_files_list_path = setup.path_htk_tmp_files+feature_matrix_array[0].get_label()+".scp";
+  std::string data_files_list_path = setup.htk_tmp_files_path+feature_matrix_array[0].get_label()+".scp";
   std::ofstream data_files_list(data_files_list_path.c_str());
   for(std::vector<FeatureMatrix>::const_iterator it = feature_matrix_array.begin(); it != feature_matrix_array.end(); it++){
     sample_numbers.push_back(it->get_samples_number());
-    std::string data_file_name = setup.path_htk_tmp_files+feature_matrix_array[0].get_label()+"_"+std::to_string(i)+".dat"; //C++11
+    std::string data_file_name = setup.htk_tmp_files_path+feature_matrix_array[0].get_label()+"_"+std::to_string(i)+".dat"; //C++11
     std::ofstream ofile(data_file_name.c_str());
     HTKHeader header;
     header.BytesPerSample = it->get_feature_vector_size()*4; 
@@ -49,12 +49,16 @@ void TrainHMM::train_HMM(EmissionType emission_type, const std::vector<FeatureMa
     
   HMM hmm(feature_matrix_array[0].get_label(), state_number, dim, emission_type, mixtures_nb);
 
-  std::string hmm_path = setup.path_htk_tmp_files +hmm.name_+".hmm";
+  std::string hmm_path = setup.htk_tmp_files_path +hmm.name_+".hmm";
   hmm.write_to_file(hmm_path);
-  std::string command = "HInit -A -T 1 -M "+setup.path_output+" "+hmm_path+" -S "+data_files_list_path;
+  std::string command = "HInit -A -T 1 -M "+setup.htk_tmp_files_path+" "+hmm_path+" -S "+data_files_list_path;
 
-  std::string HInit_output = tools::execute_command(command);
-  std::cout << HInit_output << std::endl;
+  std::string output = tools::execute_command(command);
+  std::cout << output << std::endl;
+
+  command = "HRest -A -T 1 -M "+setup.output_path+" "+hmm_path+" -S "+data_files_list_path;
+  output = tools::execute_command(command);
+  std::cout << output << std::endl;
 }
 
 float TrainHMM::median(std::vector<int> samples_number){

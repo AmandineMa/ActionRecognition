@@ -1,4 +1,4 @@
-#include <vector>
+#include <set>
 #include <fstream>
 #include <iostream>
 
@@ -7,13 +7,17 @@
 
 Labels::Labels(){}
 
-Labels::Labels(std::string labels_list_path, std::string grammar_net_path, std::string dict_path, std::string grammar_path):
-  labels_(0), labels_list_path_(labels_list_path), grammar_net_path_(grammar_net_path), dict_path_(dict_path), grammar_path_(grammar_path){}
+Labels::Labels(std::string labels_list_path, std::string grammar_net_path, 
+               std::string dict_path, std::string grammar_path): 
+  labels_list_path_(labels_list_path), grammar_net_path_(grammar_net_path), 
+  dict_path_(dict_path), grammar_path_(grammar_path){}
 
-Labels::Labels(std::vector<std::string> labels, std::string labels_list_path, std::string grammar_net_path, std::string dict_path, std::string grammar_path):
-labels_(labels), labels_list_path_(labels_list_path), grammar_net_path_(grammar_net_path),dict_path_(dict_path), grammar_path_(grammar_path){}
+Labels::Labels(std::set<std::string> labels, std::string labels_list_path, 
+               std::string grammar_net_path, std::string dict_path, std::string grammar_path):
+  labels_(labels), labels_list_path_(labels_list_path),
+  grammar_net_path_(grammar_net_path),dict_path_(dict_path), grammar_path_(grammar_path){}
 
-void Labels::add_label(std::string label){labels_.push_back(label);} 
+void Labels::add_label(std::string label){labels_.insert(label);} 
 
 void Labels::set_labels_list_path(std::string labels_list_path){labels_list_path_ = labels_list_path;}
 
@@ -25,7 +29,7 @@ void Labels::set_grammar_path(std::string grammar_path){grammar_path_ = grammar_
 
 void Labels::write_to_file(LabelFileFormats::LabelFileFormat file_format){
   std::ofstream ofile;
-  std::vector<std::string>::iterator it = labels_.begin();
+  std::set<std::string>::iterator it = labels_.begin();
 
   switch(file_format){
     case LabelFileFormats::txt:

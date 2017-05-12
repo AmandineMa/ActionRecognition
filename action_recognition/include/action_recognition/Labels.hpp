@@ -1,7 +1,7 @@
 #ifndef LABELS_HPP
 #define LABELS_HPP
 
-#include <vector>
+#include <set>
 #include <string>
 
 #include "action_recognition/common.hpp"
@@ -9,7 +9,7 @@
 class Labels{
 
 private:
-  std::vector<std::string> labels_;
+  std::set<std::string> labels_;
   std::string labels_list_path_;
   std::string grammar_net_path_;
   std::string dict_path_;
@@ -18,7 +18,7 @@ private:
 public:
   Labels();
   Labels(std::string labels_list_path_, std::string grammar_net_path, std::string dict_path, std::string grammar_path_);
-  Labels(std::vector<std::string> labels, std::string labels_list_path_, std::string grammar_net_path, std::string dict_path, std::string grammar_path_);
+  Labels(std::set<std::string> labels, std::string labels_list_path_, std::string grammar_net_path, std::string dict_path, std::string grammar_path_);
 
   void add_label(std::string label);
   void set_labels_list_path(std::string labels_list_path);

@@ -1,0 +1,7 @@
+---
+
+action_recognition:
+    enable_recognition: false
+    enable_training: true
+
+

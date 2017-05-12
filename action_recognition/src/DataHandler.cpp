@@ -15,6 +15,8 @@
 
 namespace bf = boost::filesystem;
 
+DataHandler::DataHandler(Setup setup):labels_(setup.labels_list_path, setup.grammar_net_path, setup.dict_path, setup.grammar_path){}
+
 void DataHandler::raw_data_from_file_to_feature_matrices(std::string seg_dir, std::string raw_data_dir,
                                                          NormalizationType normalization_type){
 
@@ -47,7 +49,7 @@ void DataHandler::raw_data_from_file_to_feature_matrices(std::string seg_dir, st
           int begin = seg_element.second.first;
           int end = seg_element.second.second;
           FeatureMatrix fm(seg_element.first);
-          
+          labels_.add_label(seg_element.first);
 
           for (rapidxml::xml_node<> * feature_vector_node = root_node->first_node("FeatVect"); feature_vector_node; 
                feature_vector_node = feature_vector_node->next_sibling()){
@@ -60,6 +62,7 @@ void DataHandler::raw_data_from_file_to_feature_matrices(std::string seg_dir, st
                 seg_element = seg_queue.front(); 
                 seg_queue.pop();
                 fm = FeatureMatrix(seg_element.first);
+                labels_.add_label(seg_element.first);
                 begin = seg_element.second.first;
                 end = seg_element.second.second;       
               }  
@@ -107,6 +110,8 @@ std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
           std::map<std::string, std::vector<FeatureMatrix> >::iterator > DataHandler::get_map_iterator(){
   return std::make_pair(label_features_map_.begin(),label_features_map_.end());
 }
+
+Labels DataHandler::get_labels(void){return labels_;}
 
 /****************** Private functions********************/
 

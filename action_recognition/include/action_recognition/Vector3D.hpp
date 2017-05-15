@@ -1,22 +1,50 @@
 #ifndef VECTOR3D_HPP
 #define	VECTOR3D_HPP
 
-#include <vector>
+/**
+ * \file Vector3D.hpp
+ * \brief Vector3D class
+ * \author Amandine M.
+ */
 
+#include <vector>
+#include "action_recognition/common.hpp"
+
+/** Size of a 3D vector */
 #define VECTOR3D_SIZE 3
 
+/** 
+ * \brief A (x, y, z) vector
+ */
 class Vector3D{
 
 private:
-  std::vector<float> vector3D_;
+  std::vector<float> vector3D_; /** Values vector */
 
 public:
-  /* Constructor for an emtpy 3D vector*/
+  /** 
+   * \brief Constructor for an emtpy 3D vector
+   */
   Vector3D();
-  /*Constructor for a 3D vector*/
+  /** 
+   * \brief Constructor for a 3D vector
+   * \param x value
+   * \param y value
+   * \param z value
+   */
   Vector3D(float x, float y, float z);
+  /** 
+   * \brief Constructor for a 3D vector
+   * \param std::vector containing the values
+   */
   Vector3D(std::vector<float> vector3D);
 
+  /**
+   * \brief Set new values for the vector
+   * \param x value
+   * \param y value
+   * \param z value
+   */
   void set_new_values(float x, float y, float z);
 
   float get_x(void);
@@ -27,7 +55,13 @@ public:
   void set_y(float y);
   void set_z(float z);
 
-  Vector3D normalize(void);
+  /** 
+   * \brief Return a normalized vector with the method given in parameter. 
+   The values of the object remain unchanged.
+   * \param #NormalizationType
+   * \retval A normalized #Vector3D
+   */
+  Vector3D normalize(NormalizationType normalization_type);
 };
 
 

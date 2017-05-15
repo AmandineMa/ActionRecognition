@@ -47,14 +47,14 @@ void FeatureMatrix::add_flag(float flag){
   feature_vector_array_.back().add_flag(flag);
 }
 
-void FeatureMatrix::add_flags(std::vector<float> flags){
-  feature_vector_array_.back().add_flags(flags);
+void FeatureMatrix::set_flags(std::vector<float> flags){
+  feature_vector_array_.back().set_flags(flags);
 }
 
-void FeatureMatrix::normalize(void){
+void FeatureMatrix::normalize(NormalizationType normalization_type){
   std::vector<FeatureVector>::iterator it = feature_vector_array_.begin();
   for( ; it != feature_vector_array_.end() ; it++)
-    it->normalize();
+    it->normalize(normalization_type);
 }
 
 void FeatureMatrix::print(void){

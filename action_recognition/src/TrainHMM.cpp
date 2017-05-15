@@ -4,31 +4,57 @@
 
 #include "action_recognition/TrainHMM.hpp"
 #include "action_recognition/HTKHeader.hpp"
+#include "action_recognition/HMM.hpp"
+#include "action_recognition/common.hpp"
+#include "action_recognition/FeatureMatrix.hpp"
 
-
-void TrainHMM::train_HMM(EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb){
+void TrainHMM::train_HMM(EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, 
+                         StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb){
+  std::string label = feature_matrix_array[0].get_label();
+  // Vector that contains the number of samples of each matrix
   std::vector<int> sample_numbers;
+  // To give a different name to each data file
   int i = 0;
-  std::string data_files_list_path = setup.htk_tmp_files_path+feature_matrix_array[0].get_label()+".scp";
+  // Define the path of the file of the list of data files : ?/tmp_files/Label_x.scp
+  std::string data_files_list_path = setup.htk_tmp_files_path+label+".scp";
+  // Open the new scp file
   std::ofstream data_files_list(data_files_list_path.c_str());
-  for(std::vector<FeatureMatrix>::const_iterator it = feature_matrix_array.begin(); it != feature_matrix_array.end(); it++){
+
+  // Iteration on the vector of feature matrices to write each of them in a HTK format file
+  for(std::vector<FeatureMatrix>::const_iterator it = feature_matrix_array.begin(); 
+      it != feature_matrix_array.end(); it++){
+
+    // Add the number of samples of the feature matrix
     sample_numbers.push_back(it->get_samples_number());
-    std::string data_file_name = setup.htk_tmp_files_path+feature_matrix_array[0].get_label()+"_"+std::to_string(i)+".dat"; //C++11
-    std::ofstream ofile(data_file_name.c_str());
+
+    // Define the path of the data file corresponding to the (*it) matrix: ?/tmp_files/Label_x_i.dat
+    std::string data_file_name = setup.htk_tmp_files_path+label
+      +"_"+std::to_string(i)+".dat"; //C++11
+
+    // Open the new data file
+    std::ofstream data_file(data_file_name.c_str());
+
+    // Define the HTK header
     HTKHeader header;
     header.BytesPerSample = it->get_feature_vector_size()*4; 
     header.nSamples = it->get_samples_number();
     header.Period = 100000;
     header.FeatureType = HTK_USER;
-    header.write_to_file(ofile);
-    it->write_to_file(ofile); 
-    ofile.close();
+    // Write the header to the data file
+    header.write_to_file(data_file);
+    // Write the feature matrix to the data file
+    it->write_to_file(data_file); 
+    // Close the data file
+    data_file.close();
 
+    // Write the path of the data file to the scp file
     data_files_list << data_file_name.c_str() << "\n";
+
     i++;
   }
   data_files_list.close();
   
+  // Definition of the number of states for the HMM
   int state_number;
   switch(num_states_def){
     case StatesNumDefs::median:
@@ -46,17 +72,23 @@ void TrainHMM::train_HMM(EmissionType emission_type, const std::vector<FeatureMa
     state_number = 3;
 
   int dim = feature_matrix_array[0].get_feature_vector_size();
-    
+
+  // Instantiate a new HMM object   
   HMM hmm(feature_matrix_array[0].get_label(), state_number, dim, emission_type, mixtures_nb);
 
   std::string hmm_path = setup.htk_tmp_files_path +hmm.name_+".hmm";
+  // Write the HMM to an HTK format file
   hmm.write_to_file(hmm_path);
-  std::string command = "HInit -A -T 1 -M "+setup.htk_tmp_files_path+" "+hmm_path+" -S "+data_files_list_path;
 
+  // Inialize the HMM with the HInit command, the HMM file and the data files
+  // Write the initialized HMM in tmp/
+  std::string command = "HInit -A -T 1 -M "+setup.htk_tmp_files_path+" "+hmm_path+" -S "+data_files_list_path;
   std::string output = tools::execute_command(command);
   std::cout << output << std::endl;
 
-  command = "HRest -A -T 1 -M "+setup.output_path+" "+hmm_path+" -S "+data_files_list_path;
+  // Train the HMM with the HRest command, the initialized HMM model and the data files
+  // command = "HRest -A -T 1 -M "+setup.output_path+" "+hmm_path+" -S "+data_files_list_path;
+  command = "HRest -A -T 1 -M "+setup.output_path+" "+setup.htk_tmp_files_path+label+" -S "+data_files_list_path;
   output = tools::execute_command(command);
   std::cout << output << std::endl;
 }

@@ -34,7 +34,7 @@ void Vector3D::set_y(float y){vector3D_[VectorElements::Y]=y;}
 
 void Vector3D::set_z(float z){vector3D_[VectorElements::Z]=z;}
 
-Vector3D Vector3D::normalize(void){
+Vector3D Vector3D::normalize(NormalizationType normalization_type){
   return *this;
 }
 

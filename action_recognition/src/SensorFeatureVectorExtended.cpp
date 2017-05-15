@@ -25,8 +25,8 @@ SensorFeatureVectorExtended::SensorFeatureVectorExtended(float x, float y, float
 
 tf2::Quaternion SensorFeatureVectorExtended::get_quaternion(void){return quaternion_;}
 
-void SensorFeatureVectorExtended::normalize(void){
-  SensorFeatureVector::normalize();
+void SensorFeatureVectorExtended::normalize(NormalizationType normalization_type){
+  SensorFeatureVector::normalize(normalization_type);
   quaternion_ = quaternion_.normalize();
 }
 
@@ -39,13 +39,17 @@ void SensorFeatureVectorExtended::write_to_file(std::ofstream &os){
   values_vector[VectorElements::X_Q]=quaternion_.getX();
   values_vector[VectorElements::Y_Q]=quaternion_.getY();
   values_vector[VectorElements::Z_Q]=quaternion_.getZ();
-  values_vector[VectorElements::W]=quaternion_.getW();
-  tools::swap_endian(values_vector.begin(),values_vector.end());
+  values_vector[VectorElements::W]=quaternion_.getW(); 
+
+  // Swap endianess to be compatible with HTK
+  tools::swap_endian(values_vector.begin(),values_vector.end()); 
+  // Write the vector values in  the file given in parameter
   os.write((char *)&values_vector[0], values_vector.size()*sizeof(float));
 }
 
 
-void SensorFeatureVectorExtended::print_vector(void){
+void SensorFeatureVectorExtended::print_vector(void){ 
+  // Write the vector with the format [ x, y, z, x_q, y_q, z_q, w ]
   std::cout << "[ "<< vector3D_.get_x() << ", " << vector3D_.get_y() << ", " << vector3D_.get_z() << ", " << quaternion_.getX() << ", " << quaternion_.getY() << ", " << quaternion_.getZ() << ", " <<quaternion_.getW()<< " ]"; 
 
 }

@@ -27,7 +27,8 @@ int main(int argc, char** argv){
 
   if(enable_training){
  
-  datah.raw_data_from_file_to_feature_matrices(setup.seg_files_path, setup.data_path, NormalizationTypes::no);
+  datah.raw_data_from_file_to_feature_matrices(setup.seg_files_path, setup.data_path);
+  datah.normalize(NormalizationTypes::no);
 
   std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
           std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();

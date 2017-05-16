@@ -8,7 +8,8 @@
 #include "action_recognition/common.hpp"
 #include "action_recognition/FeatureMatrix.hpp"
 
-void TrainHMM::train_HMM(EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, 
+void TrainHMM::train_HMM(bool print_output, EmissionType emission_type, 
+                         const std::vector<FeatureMatrix> &feature_matrix_array, 
                          StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb){
   std::string label = feature_matrix_array[0].get_label();
   // Vector that contains the number of samples of each matrix
@@ -84,13 +85,15 @@ void TrainHMM::train_HMM(EmissionType emission_type, const std::vector<FeatureMa
   // Write the initialized HMM in tmp/
   std::string command = "HInit -A -T 1 -M "+setup.htk_tmp_files_path+" "+hmm_path+" -S "+data_files_list_path;
   std::string output = tools::execute_command(command);
-  std::cout << output << std::endl;
+  if(print_output)
+    std::cout << output << std::endl;
 
   // Train the HMM with the HRest command, the initialized HMM model and the data files
   // command = "HRest -A -T 1 -M "+setup.output_path+" "+hmm_path+" -S "+data_files_list_path;
   command = "HRest -A -T 1 -M "+setup.output_path+" "+setup.htk_tmp_files_path+label+" -S "+data_files_list_path;
   output = tools::execute_command(command);
-  std::cout << output << std::endl;
+  if(print_output)
+    std::cout << output << std::endl;
 }
 
 float TrainHMM::median(std::vector<int> samples_number){

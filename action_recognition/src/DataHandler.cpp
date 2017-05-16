@@ -63,56 +63,41 @@ void DataHandler::raw_data_from_file_to_feature_matrices
 
           // To count the number of FeatureVector to add to a FeatureMatrix
           int count = 0;
+          std::pair<std::string,std::pair<int, int> > seg_element;      
+          FeatureMatrix fm;         
+          int begin;        
+          int end;
 
-          // Get the first pair from the segmentation queue
-          std::pair<std::string,std::pair<int, int> > seg_element = seg_queue.front();
-          seg_queue.pop();
-          // Create a new FeatureMatrix for the action
-          FeatureMatrix fm(seg_element.first);
-          // Add the label to the Labels object if not already existing
-          labels_.add_label(seg_element.first);
-          // Get the line of the first vector of the action
-          int begin = seg_element.second.first;
-          // Get the line of the last vector of the action
-          int end = seg_element.second.second;
-          
-          // Iterate the feature vectors in the data file
-          for (rapidxml::xml_node<> * feature_vector_node = root_node->first_node("FeatVect"); feature_vector_node; 
-               feature_vector_node = feature_vector_node->next_sibling()){
+          // Iterate the feature vectors in the data file (do - while)
+          rapidxml::xml_node<> * feature_vector_node = root_node->first_node("FeatVect"); 
+          do{
 
-            // If the FeatureMatrix is filled
-            if(count > end - begin){
-              // Add the FeatureMatrix to the map, to the corresponding label
-              label_features_map_[seg_element.first].push_back(std::move(fm)); //C++11
-
-              // Reset the count
-              count = 0;
-              // If there is still some data from the file to read
-              if(!seg_queue.empty()){ // TODO : delete duplicated code
-                // Get the first pair from the segmentation queue
-                seg_element = seg_queue.front(); 
-                seg_queue.pop();
-                // Create a new FeatureMatrix for the action
-                fm = FeatureMatrix(seg_element.first);
-                // Add the label to the Labels object if not already existing
-                labels_.add_label(seg_element.first);
-                // Get the line of the first vector of the action
-                begin = seg_element.second.first;
-                // Get the line of the last vector of the action
-                end = seg_element.second.second;       
-              }  
-            }
+            // If there is still some data from the file to read
+            if(!seg_queue.empty() && count == 0){
+              // Get the first pair from the segmentation queue
+              seg_element = seg_queue.front(); 
+              seg_queue.pop();
+              // Create a new FeatureMatrix for the action
+              fm = FeatureMatrix(seg_element.first);
+              // Add the label to the Labels object if not already existing
+              labels_.add_label(seg_element.first);
+              // Get the line of the first vector of the action
+              begin = seg_element.second.first;
+              // Get the line of the last vector of the action
+              end = seg_element.second.second;      
+            }      
 
             // Add a new feature vector
             fm.new_feature_vector();
             count++; 
 
             // Iterate the sensor feature vectors and the flags in the data file
-            for (rapidxml::xml_node<> * node = feature_vector_node->first_node(); node; node = node->next_sibling()){
+            rapidxml::xml_node<> * node = feature_vector_node->first_node();
+            do{
               std::vector<float> vector;
               std::stringstream string_stream(node->value());
               int n;
-              // While there is a integer, it is push backed to the vector
+              // While there is an integer, it is push backed to the vector
               while(string_stream >> n)
                 vector.push_back(n);
              
@@ -123,8 +108,19 @@ void DataHandler::raw_data_from_file_to_feature_matrices
                 fm.set_flags(vector);
               else
                 fm.add_sensor_feature_vector(vector);
-            }       
-          }
+
+            }while(node = node->next_sibling());   
+        
+            // If the FeatureMatrix is filled
+            if(count > end - begin){
+              // Add the FeatureMatrix to the map, to the corresponding label
+              label_features_map_[seg_element.first].push_back(std::move(fm)); //C++11
+
+              // Reset the count
+              count = 0;
+            }
+
+          }while (feature_vector_node = feature_vector_node->next_sibling());
         }
       }
     }

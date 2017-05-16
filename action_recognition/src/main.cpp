@@ -33,14 +33,14 @@ int main(int argc, char** argv){
   std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
           std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
   for(; it.first != it.second ; it.first++)
-    TrainHMM::train_HMM(EmissionTypes::Gaussian, it.first->second, StatesNumDefs::median, 100, setup);
+    TrainHMM::train_HMM(true, EmissionTypes::Gaussian, it.first->second, StatesNumDefs::median, 100, setup);
 
   datah.get_labels().write_to_file(LabelFileFormats::txt);
   datah.get_labels().write_to_file(LabelFileFormats::grammar);
   datah.get_labels().write_to_file(LabelFileFormats::dict);
 
-  std::cout <<  datah.get_labels().compile_grammar() << std::endl;
-  std::cout <<  datah.get_labels().test_grammar() << std::endl;
+  // std::cout <<  datah.get_labels().compile_grammar() << std::endl;
+  // std::cout <<  datah.get_labels().test_grammar() << std::endl;
 
   }
 

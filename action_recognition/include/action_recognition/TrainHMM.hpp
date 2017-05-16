@@ -29,8 +29,8 @@ namespace TrainHMM{
  * \param #Setup for the files paths
  * \param Number of mixtures for the HMM, default value = 1
  */
-  void train_HMM(EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, 
-                 StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb = 1);
+void train_HMM(bool print_output, EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, 
+               StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb = 1);
 
 
 };

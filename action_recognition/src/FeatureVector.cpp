@@ -50,8 +50,10 @@ void FeatureVector::write_to_file(std::ofstream &os) const{
   std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
   for(; it != sensor_feature_vectors_.end() ; it++)
     (*it)->write_to_file(os);
-  // Swap endianess to be compatible with HTK
-  tools::swap_endian(flag_vector_.begin(), flag_vector_.end()); 
+
+  // Swap endianess to be compatible with default HTK configuration
+  //tools::swap_endian(flag_vector_.begin(), flag_vector_.end()); 
+
   // Write the vector values in  the file given in parameter
   os.write((char *)&flag_vector_[0], flag_vector_.size()*sizeof(float));
 }

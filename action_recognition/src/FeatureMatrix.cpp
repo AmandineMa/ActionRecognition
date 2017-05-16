@@ -27,7 +27,7 @@ int FeatureMatrix::get_samples_number(void) const{return feature_vector_array_.s
 
 void FeatureMatrix::write_to_file(std::ofstream &os) const{
  std::vector<FeatureVector>::const_iterator it = feature_vector_array_.begin();
-  for(; it != feature_vector_array_.end() ; it++)
+ for(; it != feature_vector_array_.end() ; it++)
     it->write_to_file(os);
 }
 

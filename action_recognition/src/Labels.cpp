@@ -27,6 +27,10 @@ void Labels::set_dict_path(std::string dict_path){dict_path_ = dict_path;}
 
 void Labels::set_grammar_path(std::string grammar_path){grammar_path_ = grammar_path;}
 
+std::pair<std::set<std::string>::iterator, std::set<std::string>::iterator>  Labels::get_iterator(void){
+  return std::make_pair(labels_.begin(), labels_.end());
+}
+
 void Labels::write_to_file(LabelFileFormats::LabelFileFormat file_format){
   std::ofstream ofile;
   std::set<std::string>::iterator it = labels_.begin();

@@ -65,6 +65,13 @@ public:
    * \param Location of the data files
    */
   void raw_data_from_file_to_feature_matrices(std::string seg_dir, std::string raw_data_dir);
+
+  /**
+   * \brief Get raw data from file to format it to #FeatureMatrix
+   * \param Location of the data file
+   * \retval Generated #FeatureMatrix from the data file
+   */
+  FeatureMatrix raw_data_from_file_to_feature_matrix(std::string raw_data_file);
   /**
    * \brief Check if the segmentation is valid
    */

@@ -1,7 +1,7 @@
 ---
 
 action_recognition:
-    enable_recognition: false
-    enable_training: true
+    enable_recognition: true
+    enable_training: false
 
 

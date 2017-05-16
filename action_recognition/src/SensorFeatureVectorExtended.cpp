@@ -41,8 +41,9 @@ void SensorFeatureVectorExtended::write_to_file(std::ofstream &os){
   values_vector[VectorElements::Z_Q]=quaternion_.getZ();
   values_vector[VectorElements::W]=quaternion_.getW(); 
 
-  // Swap endianess to be compatible with HTK
-  tools::swap_endian(values_vector.begin(),values_vector.end()); 
+  // Swap endianess to be compatible with default HTK configuration
+  //tools::swap_endian(values_vector.begin(),values_vector.end()); 
+
   // Write the vector values in  the file given in parameter
   os.write((char *)&values_vector[0], values_vector.size()*sizeof(float));
 }

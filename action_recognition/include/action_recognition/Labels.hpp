@@ -58,6 +58,8 @@ public:
   void set_dict_path(std::string dict_path);
   void set_grammar_path(std::string grammar_path_);
 
+  std::pair<std::set<std::string>::iterator, std::set<std::string>::iterator> get_iterator(void);
+
   /** 
    * \brief Write the labels to a dictionnary file, a grammar file or a text file (list)
    * in the location given at the #Labels initialization

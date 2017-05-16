@@ -25,8 +25,9 @@ void SensorFeatureVector::write_to_file(std::ofstream &os){
   values_vector[VectorElements::Y]=vector3D_.get_y();
   values_vector[VectorElements::Z]=vector3D_.get_z();
 
-  // Swap endianess to be compatible with HTK
-  tools::swap_endian(values_vector.begin(),values_vector.end());
+  // Swap endianess to be compatible with default HTK configuration
+  // tools::swap_endian(values_vector.begin(),values_vector.end());
+
   // Write the vector values in  the file given in parameter
   os.write((char *)&values_vector[0], values_vector.size()*sizeof(float));
 }

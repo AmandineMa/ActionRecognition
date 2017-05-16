@@ -34,16 +34,16 @@ public:
 
     void write_to_file(ostream& out) const
     {
-        HTKHeader h;
-        h.nSamples = tools::swap_endian(nSamples);
-        h.Period = tools::swap_endian(Period);
-        h.BytesPerSample = tools::swap_endian(BytesPerSample);
-        h.FeatureType = tools::swap_endian(FeatureType);
+        // HTKHeader h;
+        // h.nSamples = tools::swap_endian(nSamples);
+        // h.Period = tools::swap_endian(Period);
+        // h.BytesPerSample = tools::swap_endian(BytesPerSample);
+        // h.FeatureType = tools::swap_endian(FeatureType);      
 
-        out.write((char*)&h.nSamples, sizeof(h.nSamples));
-        out.write((char*)&h.Period, sizeof(h.Period));
-        out.write((char*)&h.BytesPerSample, sizeof(h.BytesPerSample));
-        out.write((char*)&h.FeatureType, sizeof(h.FeatureType));
+        out.write((char*)&nSamples, sizeof(nSamples));
+        out.write((char*)&Period, sizeof(Period));
+        out.write((char*)&BytesPerSample, sizeof(BytesPerSample));
+        out.write((char*)&FeatureType, sizeof(FeatureType));
     }
 };
 

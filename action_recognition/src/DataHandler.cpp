@@ -119,12 +119,53 @@ void DataHandler::raw_data_from_file_to_feature_matrices
               // Reset the count
               count = 0;
             }
-
-          }while (feature_vector_node = feature_vector_node->next_sibling());
+            fm.print();
+          }while (feature_vector_node = feature_vector_node->next_sibling());          
         }
       }
     }
   }
+}
+
+FeatureMatrix DataHandler::raw_data_from_file_to_feature_matrix(std::string raw_data_file_path){
+  FeatureMatrix fm;
+  // To parse the data file
+  rapidxml::xml_document<> doc;
+  rapidxml::xml_node<> * root_node;
+  std::ifstream data_file(raw_data_file_path.c_str());
+  std::vector<char> buffer((std::istreambuf_iterator<char>(data_file)), std::istreambuf_iterator<char>());
+  buffer.push_back('\0');
+  doc.parse<0>(&buffer[0]);
+  root_node = doc.first_node("Data");
+  // Iterate the feature vectors in the data file (do - while)
+  int count = 0;
+  rapidxml::xml_node<> * feature_vector_node = root_node->first_node("FeatVect"); 
+  do{
+    // Add a new feature vector
+    fm.new_feature_vector();
+    count++;
+    // Iterate the sensor feature vectors and the flags in the data file
+    rapidxml::xml_node<> * node = feature_vector_node->first_node();
+    do{
+      std::vector<float> vector;
+      std::stringstream string_stream(node->value());
+      int n;
+      // While there is an integer, it is push backed to the vector
+      while(string_stream >> n)
+        vector.push_back(n);
+             
+      // When the vector is filled, it is added to the feature vector 
+      // as a flags vector or a sensor feature vector according to its size
+      // TODO : Problem if the flag vector is of the size of a sensor feature vector
+      if(vector.size() != SENSOR_FEATURE_VECTOR_SIZE && vector.size() != SENSOR_FEATURE_VECTOR_EXTENDED_SIZE)
+        fm.set_flags(vector);
+      else
+        fm.add_sensor_feature_vector(vector);
+
+    }while(node = node->next_sibling());   
+
+  }while (feature_vector_node = feature_vector_node->next_sibling());
+  return fm;
 }
 
 void DataHandler::print_map(void){

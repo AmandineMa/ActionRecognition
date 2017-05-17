@@ -14,9 +14,9 @@ const unsigned HTK_MFCC_E_D_Z = 326 + 2048;
 
 struct HTKHeader {
     unsigned nSamples;              // number of samples
-    unsigned Period;                // period [100ns]
+    unsigned Period = 100000;                // period [100ns]
     unsigned short BytesPerSample;
-    unsigned short FeatureType;     // if you use a user-defined type, set to HTK_USER.
+    unsigned short FeatureType = HTK_USER;     // if you use a user-defined type, set to HTK_USER.
 
 public:
     // void read(istream& in)

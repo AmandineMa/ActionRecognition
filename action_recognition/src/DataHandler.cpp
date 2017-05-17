@@ -119,7 +119,6 @@ void DataHandler::raw_data_from_file_to_feature_matrices
               // Reset the count
               count = 0;
             }
-            fm.print();
           }while (feature_vector_node = feature_vector_node->next_sibling());          
         }
       }

@@ -1,4 +1,7 @@
 #include <ros/ros.h>
+#include <ros/console.h>
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <iostream>
 #include <string>
 #include <stdio.h>
@@ -11,11 +14,12 @@
 
 void generate_MMF_from_HMM_files(std::string files_directory, std::string hmmsdef_path, Labels labels);
 
+
 int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
 
   ros::NodeHandle node;
-
+  
   ros::Rate rate(10.0); 
 
   std::string path_root = "/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/";
@@ -34,28 +38,27 @@ int main(int argc, char** argv){
 
   bool enable_recognition; 
   bool enable_training; 
-  node.getParam("action_recognition/enable_recognition", enable_recognition);
-  node.getParam("action_recognition/enable_training", enable_training);
-
-
+  node.getParam("setup/enable_recognition", enable_recognition);
+  node.getParam("setup/enable_training", enable_training);
+  
   if(enable_training){
  
-  datah.raw_data_from_file_to_feature_matrices(setup.seg_files_path, setup.data_path);
-  datah.normalize(NormalizationTypes::no);
+    datah.raw_data_from_file_to_feature_matrices(setup.seg_files_path, setup.data_path);
+    datah.normalize(NormalizationTypes::no);
 
-  std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
-          std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
-  for(; it.first != it.second ; it.first++)
-    TrainHMM::train_HMM(true, EmissionTypes::Gaussian, it.first->second, StatesNumDefs::median, 100, setup);
+    std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
+              std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
+    for(; it.first != it.second ; it.first++)
+      TrainHMM::train_HMM(true, EmissionTypes::Gaussian, it.first->second, StatesNumDefs::median, 100, setup);
 
-  datah.get_labels().write_to_file(LabelFileFormats::txt);
-  datah.get_labels().write_to_file(LabelFileFormats::grammar);
-  datah.get_labels().write_to_file(LabelFileFormats::dict);
+    datah.get_labels().write_to_file(LabelFileFormats::txt);
+    datah.get_labels().write_to_file(LabelFileFormats::grammar);
+    datah.get_labels().write_to_file(LabelFileFormats::dict);
 
-  // std::cout <<  datah.get_labels().compile_grammar() << std::endl;
-  // std::cout <<  datah.get_labels().test_grammar() << std::endl;
+    // ROS_INFO(datah.get_labels().compile_grammar().c_str());
+    // ROS_INFO(datah.get_labels().test_grammar().c_str());
   
-  generate_MMF_from_HMM_files(setup.htk_tmp_files_path, hmmsdef_path, datah.get_labels());
+    generate_MMF_from_HMM_files(setup.htk_tmp_files_path, hmmsdef_path, datah.get_labels());
   
   }
 
@@ -64,13 +67,11 @@ int main(int argc, char** argv){
     FeatureMatrix fm = datah.raw_data_from_file_to_feature_matrix(data_file_name);
     fm.normalize(NormalizationTypes::no);
     // Open the new data file
-    std::ofstream data_file((data_file_name+".dat").c_str());
+    std::ofstream data_file("/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/htk_tmp/test_seg.dat");
     // Define the HTK header
     HTKHeader header;
     header.BytesPerSample = fm.get_feature_vector_size()*4; 
     header.nSamples = fm.get_samples_number();
-    header.Period = 100000;
-    header.FeatureType = HTK_USER;
     // Write the header to the data file
     header.write_to_file(data_file);
     fm.write_to_file(data_file);
@@ -86,20 +87,6 @@ int main(int argc, char** argv){
     std::cout << output << std::endl;
 
   }
-
-  /** for a listener 
-
-  while (node.ok()){
-    rate.sleep();
-  }
-
-  **/
-
-  /** for a broadcaster 
-
-  ros::spin();
-
-  **/
 
   return 0;
 };
@@ -130,3 +117,5 @@ void generate_MMF_from_HMM_files(std::string files_directory, std::string hmmsde
   remove((hmmsdef_path).c_str());
   rename((files_directory+"temp").c_str(), (hmmsdef_path).c_str());
 }
+
+

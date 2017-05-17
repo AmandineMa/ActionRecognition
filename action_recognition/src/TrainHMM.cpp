@@ -39,8 +39,6 @@ void TrainHMM::train_HMM(bool print_output, EmissionType emission_type,
     HTKHeader header;
     header.BytesPerSample = it->get_feature_vector_size()*4; 
     header.nSamples = it->get_samples_number();
-    header.Period = 100000;
-    header.FeatureType = HTK_USER;
     // Write the header to the data file
     header.write_to_file(data_file);
     // Write the feature matrix to the data file

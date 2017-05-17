@@ -1,0 +1,9 @@
+---
+
+setup:
+    enable_recognition: true
+    enable_training: true
+
+    data_file_name: test.txt
+
+

@@ -138,6 +138,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(action_recognition src/main.cpp src/Vector3D.cpp src/SensorFeatureVector.cpp src/SensorFeatureVectorExtended.cpp src/FeatureVector.cpp src/FeatureMatrix.cpp src/common.cpp src/Labels.cpp src/HMM.cpp src/DataHandler.cpp src/TrainHMM.cpp)
+add_executable(data_recorder src/data_recorder.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,7 +156,9 @@ target_link_libraries(action_recognition
    ${Boost_FILESYSTEM_LIBRARY}
    ${Boost_LIBRARIES}
 )
-
+target_link_libraries(data_recorder
+   ${catkin_LIBRARIES}
+)
 #############
 ## Install ##
 #############

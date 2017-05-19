@@ -55,19 +55,19 @@ int main(int argc, char** argv){
     datah.get_labels().write_to_file(LabelFileFormats::grammar);
     datah.get_labels().write_to_file(LabelFileFormats::dict);
 
-    // ROS_INFO(datah.get_labels().compile_grammar().c_str());
-    // ROS_INFO(datah.get_labels().test_grammar().c_str());
+    ROS_INFO("%s", datah.get_labels().compile_grammar().c_str());
+    ROS_INFO("%s", datah.get_labels().test_grammar().c_str());
   
     generate_MMF_from_HMM_files(setup.htk_tmp_files_path, hmmsdef_path, datah.get_labels());
   
   }
 
   if(enable_recognition){
-    std::string data_file_name = setup.data_path+"act1/test_seg.txt";
+    std::string data_file_name = setup.data_path+"act1/test.txt";
     FeatureMatrix fm = datah.raw_data_from_file_to_feature_matrix(data_file_name);
     fm.normalize(NormalizationTypes::no);
     // Open the new data file
-    std::ofstream data_file("/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/htk_tmp/test_seg.dat");
+    std::ofstream data_file("/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/htk_tmp/test.dat");
     // Define the HTK header
     HTKHeader header;
     header.BytesPerSample = fm.get_feature_vector_size()*4; 

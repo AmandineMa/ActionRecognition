@@ -9,8 +9,6 @@
 #include "action_recognition/DataHandler.hpp"
 #include "action_recognition/common.hpp"
 #include "action_recognition/FeatureMatrix.hpp"
-#include "action_recognition/SensorFeatureVector.hpp"
-#include "action_recognition/SensorFeatureVectorExtended.hpp"
 #include "rapidxml/rapidxml.hpp"
 
 namespace bf = boost::filesystem;
@@ -96,15 +94,14 @@ void DataHandler::raw_data_from_file_to_feature_matrices
             do{
               std::vector<float> vector;
               std::stringstream string_stream(node->value());
-              int n;
+              float n;
               // While there is an integer, it is push backed to the vector
               while(string_stream >> n)
                 vector.push_back(n);
-             
+              
               // When the vector is filled, it is added to the feature vector 
-              // as a flags vector or a sensor feature vector according to its size
-              // TODO : Problem if the flag vector is of the size of a sensor feature vector
-              if(vector.size() != SENSOR_FEATURE_VECTOR_SIZE && vector.size() != SENSOR_FEATURE_VECTOR_EXTENDED_SIZE)
+              // as a flags vector or a sensor feature vector
+              if((std::string(node->name())).compare("Flags") == 0)
                 fm.set_flags(vector);
               else
                 fm.add_sensor_feature_vector(vector);
@@ -112,14 +109,15 @@ void DataHandler::raw_data_from_file_to_feature_matrices
             }while(node = node->next_sibling());   
         
             // If the FeatureMatrix is filled
-            if(count > end - begin){
+            if(count > end - begin){  
               // Add the FeatureMatrix to the map, to the corresponding label
               label_features_map_[seg_element.first].push_back(std::move(fm)); //C++11
 
               // Reset the count
               count = 0;
             }
-          }while (feature_vector_node = feature_vector_node->next_sibling());          
+          }while (feature_vector_node = feature_vector_node->next_sibling());
+                 
         }
       }
     }
@@ -154,9 +152,8 @@ FeatureMatrix DataHandler::raw_data_from_file_to_feature_matrix(std::string raw_
         vector.push_back(n);
              
       // When the vector is filled, it is added to the feature vector 
-      // as a flags vector or a sensor feature vector according to its size
-      // TODO : Problem if the flag vector is of the size of a sensor feature vector
-      if(vector.size() != SENSOR_FEATURE_VECTOR_SIZE && vector.size() != SENSOR_FEATURE_VECTOR_EXTENDED_SIZE)
+      // as a flags vector or a sensor feature vector
+       if((std::string(node->name())).compare("Flags") == 0)
         fm.set_flags(vector);
       else
         fm.add_sensor_feature_vector(vector);

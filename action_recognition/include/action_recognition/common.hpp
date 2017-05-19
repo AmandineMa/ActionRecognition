@@ -14,22 +14,30 @@
 #include <algorithm>
 #include <boost/type_traits.hpp>
 
+namespace SensorFeatureVectorTypes{
+enum SensorFeatureVectorType
+  {
+  SensorFeatureVector = 3,
+  SensorFeatureVectorExtended = 7
+  };
+}
+typedef SensorFeatureVectorTypes::SensorFeatureVectorType SensorFeatureVectorType;
 
 namespace VectorElements{
 /**
  * \addtogroup VectorElements
  * Indexes of the elements in #SensorFeatureVector and #SensorFeatureVectorExtended
  */
- enum VectorElement
-    {
-      X = 0,
-      Y = 1,
-      Z = 2,
-      X_Q = 3,
-      Y_Q = 4,
-      Z_Q = 5,
-      W = 6
-    };
+enum VectorElement
+  {
+    X = 0,
+    Y = 1,
+    Z = 2,
+    X_Q = 3,
+    Y_Q = 4,
+    Z_Q = 5,
+    W = 6
+  };
 }
 typedef VectorElements::VectorElement VectorElement;
 

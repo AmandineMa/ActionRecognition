@@ -2,9 +2,6 @@
 #include <ros/console.h>
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <geometry_msgs/Pose.h>
-#include <Eigen/Geometry>
-#include <tf2_eigen/tf2_eigen.h>
 #include <fstream>
 #include <string>
 #include <stdio.h>
@@ -12,8 +9,6 @@
 #include <fcntl.h>
 
 #include "action_recognition/common.hpp"
-#include "toaster_msgs/HumanListStamped.h"
-
 
 /**
  * \brief Structure for tf_frames/transforms params
@@ -31,28 +26,10 @@ struct Frame{
 /* -------- Global variables ---------- */
 std::vector<Frame> tf_frames_array;
 ros::NodeHandle* node_;
-geometry_msgs::Pose hand_pose_,head_pose_ ;
+
 /* -------- Function declarations -------- */
 void initialize_tf2_frames(void);
 int getch();
-
-void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg)
-{
-  if (!msg->humanList.empty())
-  {
-    for (unsigned int i = 0; i < msg->humanList.size(); ++i)
-    {
-      if(msg->humanList[i].meAgent.meEntity.id=="HERAKLES_HUMAN1")
-        for( unsigned int j = 0 ; j < msg->humanList[i].meAgent.skeletonJoint.size() ; ++j )
-        {
-          if(msg->humanList[i].meAgent.skeletonNames[j]=="head")
-            head_pose_=msg->humanList[i].meAgent.skeletonJoint[j].meEntity.pose;
-          if(msg->humanList[i].meAgent.skeletonNames[j]=="rightHand")
-            hand_pose_=msg->humanList[i].meAgent.skeletonJoint[j].meEntity.pose; 
-        }
-    }
-  }
-}
 
 /* ------- main ------- */
 int main(int argc, char** argv){
@@ -62,18 +39,16 @@ int main(int argc, char** argv){
   node_ = &node;
   ros::Rate rate(10.0); 
 
-  std::string path_root;
-  node.getParam("recorder/path_root", path_root);
+  std::string path_root = "/home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/";
 
   // Get frames from tf2 initialization
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
-  ros::Subscriber human_list_sub_ = node.subscribe("/pdg/humanList", 1, humanListCallback);
   geometry_msgs::TransformStamped transformStamped; 
   std::string data_file_name;  
   std::string seg_file_name;
-  node.getParam("recorder/data_file_name", data_file_name);  
-  node.getParam("recorder/seg_file_name", seg_file_name);
+  node.getParam("setup/data_file_name", data_file_name);  
+  node.getParam("setup/seg_file_name", seg_file_name);
   std::ofstream data_file(path_root+data_file_name);
   std::ofstream write_seg(path_root+seg_file_name);
 
@@ -83,7 +58,6 @@ int main(int argc, char** argv){
   char c;
   int n, tem;
   int count = 0;
-  int count_frame = 0;
   tem = fcntl(0, F_GETFL, 0);
   fcntl (0, F_SETFL, (tem | O_NDELAY));
 
@@ -91,42 +65,31 @@ int main(int argc, char** argv){
   std::vector<Frame>::iterator it;
   data_file << "<Data>\n";
   while (node.ok()){
-    ros::spinOnce();
+      
     try{
-      data_file << "<FeatVect>"; 
-      for(it = tf_frames_array.begin(); it != tf_frames_array.end(); it++){
-        Eigen::Affine3d limb_eigen;
-        transformStamped = tfBuffer.lookupTransform("map", 
-                                                    it->source_frame, 
-                                                    ros::Time(0));
-        Eigen::Affine3d object_eigen;
-        object_eigen = tf2::transformToEigen(transformStamped);
-        //if(count_frame < tf_frames_array.size()/2)
-          tf2::fromMsg(hand_pose_, limb_eigen);
-        // else
-        //   tf2::fromMsg(head_pose_, limb_eigen);
-        Eigen::Affine3d t = limb_eigen.inverse()*object_eigen;
-        transformStamped = tf2::eigenToTransform(t);
-        if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
-          data_file << "<SensFeatExt>" << 
-            transformStamped.transform.translation.x << " " << 
-            transformStamped.transform.translation.y << " " << 
-            transformStamped.transform.translation.z << " " << 
-            transformStamped.transform.rotation.x << " " << 
-            transformStamped.transform.rotation.y << " " << 
-            transformStamped.transform.rotation.z << " " <<
-            transformStamped.transform.rotation.w <<
-            "</SensFeatExt>";
-        }else if(it->type == SensorFeatureVectorType::SensorFeatureVector){
-          data_file << "<SensFeat>" << 
-            transformStamped.transform.translation.x << " " << 
+        data_file << "<FeatVect>"; 
+        for(it = tf_frames_array.begin(); it != tf_frames_array.end(); it++){
+          transformStamped = tfBuffer.lookupTransform(it->target_frame, 
+                                                      it->source_frame, 
+                                                      ros::Time(0));
+          if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
+            data_file << "<SensFeatExt>" << 
+              transformStamped.transform.translation.x << " " << 
+              transformStamped.transform.translation.y << " " << 
+              transformStamped.transform.translation.z << " " << 
+              transformStamped.transform.rotation.x << " " << 
+              transformStamped.transform.rotation.y << " " << 
+              transformStamped.transform.rotation.z << " " <<
+              transformStamped.transform.rotation.w <<
+              "</SensFeatExt>";
+          }else if(it->type == SensorFeatureVectorType::SensorFeatureVector){
+            data_file << "<SensFeat>" << 
+              transformStamped.transform.translation.x << " " << 
               transformStamped.transform.translation.y << " " << 
               transformStamped.transform.translation.z <<
               "</SensFeat>";
+          }
         }
-        count_frame++;
-      }
-      count_frame = 0;
         data_file << "</FeatVect>\n";
         count++;
     }

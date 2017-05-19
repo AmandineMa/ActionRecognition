@@ -1,13 +1,23 @@
 ---
 
 tf_frames:
-    transforms_nb: 2
+    transforms_nb: 4
     transforms:
-        nb0: 
-            targetFrame: "turtle1"
-            sourceFrame: "world"
-            type: 3
-        nb1: 
-            targetFrame: "turtle1"
-            sourceFrame: "world"
+        nb0:
+            targetFrame: "sonof/HERAKLES_HUMAN1/hand"
+            sourceFrame: "black_cube"
             type: 7
+        nb1:
+            targetFrame: "sonof/HERAKLES_HUMAN1/hand"
+            sourceFrame: "red_cube"
+            type: 7
+        nb2:
+            targetFrame: "sonof/HERAKLES_HUMAN1/hand"
+            sourceFrame: "blue_cube"
+            type: 7
+        nb3:
+            targetFrame: "sonof/HERAKLES_HUMAN1/hand"
+            sourceFrame: "low_table"
+            type: 7
+            
+

@@ -1,5 +1,6 @@
 <launch>
 	<rosparam command="load" file="$(find action_recognition)/params/action_recognition.yaml" />
 	<rosparam command="load" file="$(find action_recognition)/params/tf_frames.yaml" />
+        <rosparam command="load" file="$(find action_recognition)/params/data_recorder.yaml" />
 	<node name="data_recorder" pkg="action_recognition" type="data_recorder" output="screen"/>  <!-- Launch data_recorder -->
 </launch>

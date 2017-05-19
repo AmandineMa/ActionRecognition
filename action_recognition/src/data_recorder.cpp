@@ -48,7 +48,7 @@ int main(int argc, char** argv){
   std::string data_file_name;  
   std::string seg_file_name;
   node.getParam("setup/data_file_name", data_file_name);  
-  node.getParam("setup/data_file_name", seg_file_name);
+  node.getParam("setup/seg_file_name", seg_file_name);
   std::ofstream data_file(path_root+data_file_name);
   std::ofstream write_seg(path_root+seg_file_name);
 

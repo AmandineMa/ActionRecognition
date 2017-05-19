@@ -1,0 +1,34 @@
+nb0:
+            targetFrame: "sonof/HERAKLES_HUMAN1/hand"
+            sourceFrame: "black_cube"
+            type: 7
+        nb1:
+            targetFrame: "sonof/HERAKLES_HUMAN1/hand"
+            sourceFrame: "red_cube"
+            type: 7
+        nb2:
+            targetFrame: "sonof/HERAKLES_HUMAN1/hand"
+            sourceFrame: "blue_cube"
+            type: 7
+        nb3:
+            targetFrame: "sonof/HERAKLES_HUMAN1/hand"
+            sourceFrame: "low_table"
+            type: 7
+        nb4:
+            targetFrame: "sonof/HERAKLES_HUMAN1/head"
+            sourceFrame: "black_cube"
+            type: 7
+        nb5:
+            targetFrame: "sonof/HERAKLES_HUMAN1/head"
+            sourceFrame: "red_cube"
+            type: 7
+        nb6:
+            targetFrame: "sonof/HERAKLES_HUMAN1/head"
+            sourceFrame: "blue_cube"
+            type: 7
+        nb7:
+            targetFrame: "sonof/HERAKLES_HUMAN1/head"
+            sourceFrame: "low_table"
+            type: 7
+            
+

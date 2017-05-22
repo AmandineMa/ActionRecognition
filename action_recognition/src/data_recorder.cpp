@@ -1,10 +1,9 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <tf2_ros/transform_listener.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Pose.h>
-#include <Eigen/Geometry>
-#include <tf2_eigen/tf2_eigen.h>
 #include <fstream>
 #include <string>
 #include <stdio.h>
@@ -95,33 +94,33 @@ int main(int argc, char** argv){
     try{
       data_file << "<FeatVect>"; 
       for(it = tf_frames_array.begin(); it != tf_frames_array.end(); it++){
-        Eigen::Affine3d limb_eigen;
         transformStamped = tfBuffer.lookupTransform("map", 
                                                     it->source_frame, 
                                                     ros::Time(0));
-        Eigen::Affine3d object_eigen;
-        object_eigen = tf2::transformToEigen(transformStamped);
+        tf2::Transform element_transform;
+        tf2::Transform result_transform;
+        tf2::Transform limb_transform;
+        tf2::fromMsg(transformStamped.transform, element_transform);
+        tf2::fromMsg(hand_pose_, limb_transform);
         //if(count_frame < tf_frames_array.size()/2)
-          tf2::fromMsg(hand_pose_, limb_eigen);
+        result_transform = element_transform.inverseTimes(limb_transform);
         // else
-        //   tf2::fromMsg(head_pose_, limb_eigen);
-        Eigen::Affine3d t = limb_eigen.inverse()*object_eigen;
-        transformStamped = tf2::eigenToTransform(t);
+        //result_transform = element_transform.inverseTimes(head_pose_);
         if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
           data_file << "<SensFeatExt>" << 
-            transformStamped.transform.translation.x << " " << 
-            transformStamped.transform.translation.y << " " << 
-            transformStamped.transform.translation.z << " " << 
-            transformStamped.transform.rotation.x << " " << 
-            transformStamped.transform.rotation.y << " " << 
-            transformStamped.transform.rotation.z << " " <<
-            transformStamped.transform.rotation.w <<
+            result_transform.getOrigin().x() << " " << 
+            result_transform.getOrigin().y() << " " << 
+            result_transform.getOrigin().z() << " " << 
+            result_transform.getRotation().x() << " " << 
+            result_transform.getRotation().y() << " " << 
+            result_transform.getRotation().z() << " " <<
+            result_transform.getRotation().w() <<
             "</SensFeatExt>";
         }else if(it->type == SensorFeatureVectorType::SensorFeatureVector){
           data_file << "<SensFeat>" << 
-            transformStamped.transform.translation.x << " " << 
-              transformStamped.transform.translation.y << " " << 
-              transformStamped.transform.translation.z <<
+            result_transform.getOrigin().x() << " " << 
+            result_transform.getOrigin().y() << " " << 
+            result_transform.getOrigin().z() <<
               "</SensFeat>";
         }
         count_frame++;

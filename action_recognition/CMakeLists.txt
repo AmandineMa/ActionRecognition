@@ -13,14 +13,14 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf2
   tf2_ros
-  tf2_eigen
+  #tf2_eigen
   toaster_msgs
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system) #system)
 
-find_package(Eigen3 REQUIRED)
+#find_package(Eigen3 REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -110,7 +110,8 @@ find_package(Eigen3 REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES action_recognition
-  CATKIN_DEPENDS pluginlib roscpp std_msgs tf2 tf2_ros tf2_eigen
+  CATKIN_DEPENDS pluginlib roscpp std_msgs tf2 tf2_ros 
+# tf2_eigen
 #  DEPENDS system_lib
 )
 
@@ -125,8 +126,8 @@ include_directories(
   include
   ${Boost_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
-  $ENV{EIGEN_DIR}
+  #${EIGEN3_INCLUDE_DIRS}
+  #$ENV{EIGEN_DIR} #add EIGEN_DIR in .bashrc if needed
 )
 
 ## Declare a C++ library

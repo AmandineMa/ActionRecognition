@@ -28,30 +28,15 @@ struct Frame{
 };
 
 /* -------- Global variables ---------- */
-std::vector<Frame> tf_frames_array;
+std::vector<Frame> tf_frames_array;   
+std::vector<std::vector<Frame> > transforms_array;
+std::vector<int> tf_nb_per_limb;
 ros::NodeHandle* node_;
 geometry_msgs::Pose hand_pose_,head_pose_ ;
 /* -------- Function declarations -------- */
 void initialize_tf2_frames(void);
 int getch();
-
-void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg)
-{
-  if (!msg->humanList.empty())
-  {
-    for (unsigned int i = 0; i < msg->humanList.size(); ++i)
-    {
-      if(msg->humanList[i].meAgent.meEntity.id=="HERAKLES_HUMAN1")
-        for( unsigned int j = 0 ; j < msg->humanList[i].meAgent.skeletonJoint.size() ; ++j )
-        {
-          if(msg->humanList[i].meAgent.skeletonNames[j]=="head")
-            head_pose_=msg->humanList[i].meAgent.skeletonJoint[j].meEntity.pose;
-          if(msg->humanList[i].meAgent.skeletonNames[j]=="rightHand")
-            hand_pose_=msg->humanList[i].meAgent.skeletonJoint[j].meEntity.pose; 
-        }
-    }
-  }
-}
+void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg);
 
 /* ------- main ------- */
 int main(int argc, char** argv){
@@ -93,41 +78,62 @@ int main(int argc, char** argv){
     ros::spinOnce();
     try{
       data_file << "<FeatVect>"; 
-      for(it = tf_frames_array.begin(); it != tf_frames_array.end(); it++){
-        transformStamped = tfBuffer.lookupTransform("map", 
-                                                    it->source_frame, 
-                                                    ros::Time(0));
-        tf2::Transform element_transform;
-        tf2::Transform result_transform;
-        tf2::Transform limb_transform;
-        tf2::fromMsg(transformStamped.transform, element_transform);
-        tf2::fromMsg(hand_pose_, limb_transform);
-        //if(count_frame < tf_frames_array.size()/2)
-        result_transform = element_transform.inverseTimes(limb_transform);
-        // else
-        //result_transform = element_transform.inverseTimes(head_pose_);
-        if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
-          data_file << "<SensFeatExt>" << 
-            result_transform.getOrigin().x() << " " << 
-            result_transform.getOrigin().y() << " " << 
-            result_transform.getOrigin().z() << " " << 
-            result_transform.getRotation().x() << " " << 
-            result_transform.getRotation().y() << " " << 
-            result_transform.getRotation().z() << " " <<
-            result_transform.getRotation().w() <<
-            "</SensFeatExt>";
-        }else if(it->type == SensorFeatureVectorType::SensorFeatureVector){
-          data_file << "<SensFeat>" << 
-            result_transform.getOrigin().x() << " " << 
-            result_transform.getOrigin().y() << " " << 
-            result_transform.getOrigin().z() <<
-              "</SensFeat>";
+      for(std::vector<std::vector<Frame> >::iterator it_tf_array = transforms_array.begin(); 
+          it_tf_array != transforms_array.end(); it_tf_array++){
+
+        geometry_msgs::Pose* limb_pose;
+        switch(it_tf_array - transforms_array.begin()){ //iterator on index n
+          case 0:
+            limb_pose = &hand_pose_;
+            break;
+          case 1:
+            limb_pose = &head_pose_;
+            break;
+          default:
+            break;
         }
-        count_frame++;
-      }
-      count_frame = 0;
+
+        data_file << "<SensFeatExt>" << 
+          limb_pose->position.x << " " << 
+          limb_pose->position.y << " " << 
+          limb_pose->position.z << " " << 
+          limb_pose->orientation.x << " " << 
+          limb_pose->orientation.y << " " << 
+          limb_pose->orientation.z << " " <<
+          limb_pose->orientation.w <<
+          "</SensFeatExt>";
+        for(it = it_tf_array->begin(); it != it_tf_array->end(); it++){
+          transformStamped = tfBuffer.lookupTransform("map", 
+                                                      it->source_frame, 
+                                                      ros::Time(0));
+          tf2::Transform element_transform;
+          tf2::Transform result_transform;
+          tf2::Transform limb_transform;
+          tf2::fromMsg(transformStamped.transform, element_transform);
+          tf2::fromMsg(*limb_pose, limb_transform);
+
+          result_transform = element_transform.inverseTimes(limb_transform);
+          if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
+            data_file << "<SensFeatExt>" << 
+              result_transform.getOrigin().x() << " " << 
+              result_transform.getOrigin().y() << " " << 
+              result_transform.getOrigin().z() << " " << 
+              result_transform.getRotation().x() << " " << 
+              result_transform.getRotation().y() << " " << 
+              result_transform.getRotation().z() << " " <<
+              result_transform.getRotation().w() <<
+              "</SensFeatExt>";
+          }else if(it->type == SensorFeatureVectorType::SensorFeatureVector){
+            data_file << "<SensFeat>" << 
+              result_transform.getOrigin().x() << " " << 
+              result_transform.getOrigin().y() << " " << 
+              result_transform.getOrigin().z() <<
+              "</SensFeat>";
+          }
+        }
         data_file << "</FeatVect>\n";
         count++;
+      }
     }
     catch (tf2::TransformException &ex) {
       ROS_WARN("%s",ex.what());
@@ -154,18 +160,45 @@ int main(int argc, char** argv){
 
 void initialize_tf2_frames(void){
   int transforms_nb;
-  node_->getParam("tf_frames/transforms_nb", transforms_nb);
+  int i = 0;
+  std::string n = std::to_string(i); //C++11
+  while(node_->getParam("tf_frames/transforms_nb/limb"+n, transforms_nb)){
+    tf_nb_per_limb.push_back(transforms_nb);
+    i++; 
+    n = std::to_string(i);
+  }
+
   std::string path = "tf_frames/transforms/nb";
   std::string target_frame;
   std::string source_frame;
-  int type;
-  for(int i = 0; i < transforms_nb; i++){
-    std::string n = std::to_string(i); //C++11
-    node_->getParam(path+n+"/targetFrame", target_frame);
-    node_->getParam(path+n+"/sourceFrame", source_frame);
-    node_->getParam(path+n+"/type", type);
-    tf_frames_array.emplace_back(target_frame, source_frame, static_cast<SensorFeatureVectorType>(type));
+  int type; 
+  int count = 0;
+  for(std::vector<int>::iterator it = tf_nb_per_limb.begin(); it != tf_nb_per_limb.end(); ++it){
+    transforms_array.emplace_back();
+    for(int c = 0; c < *it; c++){
+      std::string n = std::to_string(count++); //C++11
+      node_->getParam(path+n+"/targetFrame", target_frame);
+      node_->getParam(path+n+"/sourceFrame", source_frame);
+      node_->getParam(path+n+"/type", type);
+      transforms_array.back().emplace_back(target_frame, source_frame, static_cast<SensorFeatureVectorType>(type));
+    }
   }
 }
 
 
+void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg){
+  if (!msg->humanList.empty())
+  {
+    for (unsigned int i = 0; i < msg->humanList.size(); ++i)
+    {
+      if(msg->humanList[i].meAgent.meEntity.id=="HERAKLES_HUMAN1")
+        for( unsigned int j = 0 ; j < msg->humanList[i].meAgent.skeletonJoint.size() ; ++j )
+        {
+          if(msg->humanList[i].meAgent.skeletonNames[j]=="head")
+            head_pose_=msg->humanList[i].meAgent.skeletonJoint[j].meEntity.pose;
+          if(msg->humanList[i].meAgent.skeletonNames[j]=="rightHand")
+            hand_pose_=msg->humanList[i].meAgent.skeletonJoint[j].meEntity.pose; 
+        }
+    }
+  }
+}

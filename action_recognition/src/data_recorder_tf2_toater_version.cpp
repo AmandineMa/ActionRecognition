@@ -69,8 +69,8 @@ int main(int argc, char** argv){
     try{
         data_file << "<FeatVect>"; 
         for(it = tf_frames_array.begin(); it != tf_frames_array.end(); it++){
-          transformStamped = tfBuffer.lookupTransform(it->target_frame, 
-                                                      it->source_frame, 
+          transformStamped = tfBuffer.lookupTransform(it->source_frame, 
+                                                      it->target_frame, 
                                                       ros::Time(0));
           if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
             data_file << "<SensFeatExt>" << 

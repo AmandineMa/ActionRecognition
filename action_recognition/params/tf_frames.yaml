@@ -1,7 +1,9 @@
 ---
 
 tf_frames:
-    transforms_nb: 4
+    transforms_nb:
+        limb0: 4
+        limb1: 4
     transforms:
         nb0:
             targetFrame: "sonof/HERAKLES_HUMAN1/hand"
@@ -20,4 +22,19 @@ tf_frames:
             sourceFrame: "low_table"
             type: 7
             
-
+        nb4:
+            targetFrame: "sonof/HERAKLES_HUMAN1/head"
+            sourceFrame: "black_cube"
+            type: 7
+        nb5:
+            targetFrame: "sonof/HERAKLES_HUMAN1/head"
+            sourceFrame: "red_cube"
+            type: 7
+        nb6:
+            targetFrame: "sonof/HERAKLES_HUMAN1/head"
+            sourceFrame: "blue_cube"
+            type: 7
+        nb7:
+            targetFrame: "sonof/HERAKLES_HUMAN1/head"
+            sourceFrame: "low_table"
+            type: 7

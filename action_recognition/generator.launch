@@ -1,0 +1,4 @@
+<launch>
+	<rosparam command="load" file="$(find action_recognition)/params/generator.yaml" />
+	<node name="generator" pkg="action_recognition" type="generator" output="screen"/>  <!-- Launch data_recorder -->
+</launch>

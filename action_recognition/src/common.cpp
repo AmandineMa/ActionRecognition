@@ -1,7 +1,10 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <boost/filesystem.hpp>
 
 #include "action_recognition/common.hpp"
+
+namespace bf = boost::filesystem;
 
 uint16_t tools::swap_endian(uint16_t n) {
   return ((uint16_t)((n & 0x00ff) << 8) |
@@ -42,4 +45,20 @@ std::string tools::execute_command(std::string command) {
 }
 
 
+std::string tools::get_file_name(bf::path path){return path.stem().c_str();}
 
+std::string tools::get_last_dir_name(bf::path path){
+  std::string path_str = path.c_str();
+  std::string dir_and_file = path_str.substr(path_str.find_last_of("/", path_str.find_last_of("/")-1)+1);
+  return dir_and_file.substr(0, dir_and_file.find_last_of("/"));
+
+}
+
+bool tools::is_hidden(bf::path p)
+{
+  std::string name = p.filename().string();
+  if((name != ".." && name != "."  && name[0] == '.') || name.find("~")!=std::string::npos)    
+    return true;
+
+  return false;
+}

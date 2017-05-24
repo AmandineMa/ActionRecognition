@@ -1,3 +1,4 @@
+#include <ros/console.h>
 #include <vector>
 #include <math.h>
 #include <boost/filesystem.hpp>
@@ -84,14 +85,14 @@ void TrainHMM::train_HMM(bool print_output, EmissionType emission_type,
   std::string command = "HInit -A -T 1 -M "+setup.htk_tmp_files_path+" "+hmm_path+" -S "+data_files_list_path;
   std::string output = tools::execute_command(command);
   if(print_output)
-    std::cout << output << std::endl;
+    ROS_INFO("%s", output.c_str());
 
   // Train the HMM with the HRest command, the initialized HMM model and the data files
   // command = "HRest -A -T 1 -M "+setup.output_path+" "+hmm_path+" -S "+data_files_list_path;
-  command = "HRest -A -T 1 -M "+setup.output_path+" "+setup.htk_tmp_files_path+label+" -S "+data_files_list_path;
+  command = "HRest -i 30 -A -T 1 -M "+setup.output_path+" "+setup.htk_tmp_files_path+label+" -S "+data_files_list_path;
   output = tools::execute_command(command);
   if(print_output)
-    std::cout << output << std::endl;
+    ROS_INFO("%s", output.c_str());
 }
 
 float TrainHMM::median(std::vector<int> samples_number){

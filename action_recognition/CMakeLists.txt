@@ -145,6 +145,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(action_recognition src/main.cpp src/Vector3D.cpp src/SensorFeatureVector.cpp src/SensorFeatureVectorExtended.cpp src/FeatureVector.cpp src/FeatureMatrix.cpp src/common.cpp src/Labels.cpp src/HMM.cpp src/DataHandler.cpp src/TrainHMM.cpp)
 add_executable(data_recorder src/data_recorder.cpp)
+add_executable(generator src/generate_seg_file.cpp src/common.cpp)
+add_executable(patch src/correct_bug.cpp src/common.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -164,6 +166,16 @@ target_link_libraries(action_recognition
 )
 target_link_libraries(data_recorder
    ${catkin_LIBRARIES}
+)
+
+target_link_libraries(generator
+   ${catkin_LIBRARIES}
+   ${Boost_FILESYSTEM_LIBRARY}
+)
+
+target_link_libraries(patch
+   ${catkin_LIBRARIES}
+   ${Boost_FILESYSTEM_LIBRARY}
 )
 #############
 ## Install ##

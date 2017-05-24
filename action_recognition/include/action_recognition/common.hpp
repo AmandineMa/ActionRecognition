@@ -13,6 +13,7 @@
 #include <iterator>
 #include <algorithm>
 #include <boost/type_traits.hpp>
+#include <boost/filesystem.hpp>
 
 namespace SensorFeatureVectorTypes{
 enum SensorFeatureVectorType
@@ -49,8 +50,8 @@ namespace EmissionTypes
  */
 enum EmissionType
   {
-    Gaussian,
-    GMM
+    Gaussian = 0,
+    GMM = 1
   };
 }
 typedef EmissionTypes::EmissionType EmissionType;
@@ -64,11 +65,11 @@ namespace StatesNumDefs
 enum StatesNumDef
   {
     /** ceil(sqrt(median(sample_numbers))) **/
-    median,
+    median = 0,
     /** ceil(median(sample_numbers)/10) **/
-    linear_scaling,
+    linear_scaling = 1,
     /** Number of states defined by user **/
-    fix_number
+    fix_number = 2
   };
 }
 typedef StatesNumDefs::StatesNumDef StatesNumDef;
@@ -191,6 +192,23 @@ void swap_endian(InputIterator first, InputIterator last){
  */
 std::string execute_command(std::string command);
 
+/** 
+ * \brief Get a file name from an absolute path
+ * \param Path
+ */
+std::string get_file_name(boost::filesystem::path path);
+/** 
+ * \brief Get the last directory from an absolute path 
+ * Example : /home/user/LAST_DIRECTORY_NAME/example.txt
+ * \param Path
+ */
+std::string get_last_dir_name(boost::filesystem::path path);
+
+/** 
+ * \brief To determine if a file or directory is hidden or not
+ * \retval True if is hidden, False if not
+ */
+bool is_hidden(boost::filesystem::path p);
 
 }
 

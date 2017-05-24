@@ -1,5 +1,4 @@
 <launch>
 	<rosparam command="load" file="$(find action_recognition)/params/action_recognition.yaml" />
-	<rosparam command="load" file="$(find action_recognition)/params/tf_frames.yaml" />
 	<node name="action_recognition" pkg="action_recognition" type="action_recognition" output="screen"/>  <!-- Launch action_recognition -->
 </launch>

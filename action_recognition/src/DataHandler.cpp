@@ -31,13 +31,13 @@ void DataHandler::raw_data_from_file_to_feature_matrices
     bf::path path_action_dir = action_it->path();
 
     // If the iterator is on a directory and that directory is not empty
-    if( bf::is_directory(path_action_dir) && !is_hidden(path_action_dir)){
+    if( bf::is_directory(path_action_dir) && !tools::is_hidden(path_action_dir)){
       
       // Iterate files of the directory (1 file = 1 data example of the general activity)
       for(bf::directory_iterator file_it(path_action_dir); file_it != end_it; file_it++){
  
         bf::path file_path = file_it->path();
-        if(bf::is_regular_file(file_path) && !is_hidden(file_path)){ 
+        if(bf::is_regular_file(file_path) && !tools::is_hidden(file_path)){ 
     
           // Get the segmentation file corresponding to the data file
           /*
@@ -47,18 +47,19 @@ void DataHandler::raw_data_from_file_to_feature_matrices
                take_object {0, 324}
                put_object {325, 600}
            */
+         
           std::queue<std::pair<std::string,std::pair<int, int> > > seg_queue 
-            = parse_seg_file(seg_dir+"/"+get_last_dir_name(file_path)+"/"+get_file_name(file_path)+".xml");
-        
+            = parse_seg_file(seg_dir+"/"+tools::get_last_dir_name(file_path)+"/"+tools::get_file_name(file_path)+".xml");
           // To parse the data file
           rapidxml::xml_document<> doc;
           rapidxml::xml_node<> * root_node;
           std::ifstream data_file(file_path.c_str());
-          std::vector<char> buffer((std::istreambuf_iterator<char>(data_file)), std::istreambuf_iterator<char>());
-          buffer.push_back('\0');
+          std::vector<char> buffer((std::istreambuf_iterator<char>(data_file)), std::istreambuf_iterator<char>()); 
+          buffer.push_back('\0'); 
+          std::cout << file_path << std::endl;
           doc.parse<0>(&buffer[0]);
           root_node = doc.first_node("Data");
-
+         
           // To count the number of FeatureVector to add to a FeatureMatrix
           int count = 0;
           std::pair<std::string,std::pair<int, int> > seg_element;      
@@ -124,6 +125,7 @@ void DataHandler::raw_data_from_file_to_feature_matrices
   }
 }
 
+//TODO: check file extension
 FeatureMatrix DataHandler::raw_data_from_file_to_feature_matrix(std::string raw_data_file_path){
   FeatureMatrix fm;
   // To parse the data file
@@ -131,6 +133,7 @@ FeatureMatrix DataHandler::raw_data_from_file_to_feature_matrix(std::string raw_
   rapidxml::xml_node<> * root_node;
   std::ifstream data_file(raw_data_file_path.c_str());
   std::vector<char> buffer((std::istreambuf_iterator<char>(data_file)), std::istreambuf_iterator<char>());
+  std::cout << raw_data_file_path << std::endl;
   buffer.push_back('\0');
   doc.parse<0>(&buffer[0]);
   root_node = doc.first_node("Data");
@@ -146,7 +149,7 @@ FeatureMatrix DataHandler::raw_data_from_file_to_feature_matrix(std::string raw_
     do{
       std::vector<float> vector;
       std::stringstream string_stream(node->value());
-      int n;
+      float n;
       // While there is an integer, it is push backed to the vector
       while(string_stream >> n)
         vector.push_back(n);
@@ -189,15 +192,6 @@ Labels DataHandler::get_labels(void){return labels_;}
 
 /****************** Private functions********************/
 
-std::string DataHandler::get_file_name(bf::path path){return path.stem().c_str();}
-
-std::string DataHandler::get_last_dir_name(bf::path path){
-  std::string path_str = path.c_str();
-  std::string dir_and_file = path_str.substr(path_str.find_last_of("/", path_str.find_last_of("/")-1)+1);
-  return dir_and_file.substr(0, dir_and_file.find_last_of("/"));
-
-}
-
 std::queue<std::pair<std::string,std::pair<int, int> > > DataHandler::parse_seg_file(std::string file_path){
   std::queue<std::pair<std::string,std::pair<int, int> > > segmentation_queue;
   rapidxml::xml_document<> doc;
@@ -217,13 +211,6 @@ std::queue<std::pair<std::string,std::pair<int, int> > > DataHandler::parse_seg_
   return segmentation_queue;
 }
 
-bool DataHandler::is_hidden(bf::path p)
-{
-  std::string name = p.filename().string();
-  if((name != ".." && name != "."  && name[0] == '.') || name.find("~")!=std::string::npos)    
-    return true;
 
-  return false;
-}
 
 

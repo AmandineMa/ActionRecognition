@@ -28,17 +28,6 @@ private:
   Labels labels_; /** Labels object */
 
   /** 
-   * \brief Get a file name from an absolute path
-   * \param Path
-   */
-  std::string get_file_name(boost::filesystem::path path);
-  /** 
-   * \brief Get the last directory from an absolute path 
-   * Example : /home/user/LAST_DIRECTORY_NAME/example.txt
-   * \param Path
-   */
-  std::string get_last_dir_name(boost::filesystem::path path);
-  /** 
    * \brief Parse an XML segmentation file to a queue of pairs of {"action", {start_point, end_point} }
    * Example :
    *    take_object {0, 324}
@@ -46,11 +35,7 @@ private:
    * \param Path of the XML file
    */
   std::queue<std::pair<std::string,std::pair<int, int> > > parse_seg_file(std::string file_path);
-  /** 
-   * \brief To determine if a file or directory is hidden or not
-   * \retval True if is hidden, False if not
-   */
-  bool is_hidden(boost::filesystem::path p);
+
 
 public:
   /** 

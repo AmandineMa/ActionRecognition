@@ -58,9 +58,9 @@ void Labels::write_to_file(LabelFileFormats::LabelFileFormat file_format){
       ofile.open(grammar_path_.c_str());
       if(ofile.is_open()){
         ofile << "$ACT = ";
-        ofile << "<" << *it++ << ">" ;
+        ofile  << *it++  ;
         for(; it != labels_.end() ; it++)
-          ofile << " | <" << *it << ">" ;
+          ofile << " | " << *it  ;
        
         ofile << ";\n" << "([$ACT])";
       }else

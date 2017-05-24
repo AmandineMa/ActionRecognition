@@ -1,8 +1,16 @@
 ---
 
 setup:
-    enable_recognition: false
+    enable_recognition: true
     enable_training: true
+
+    path_root: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
+    path_input: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
+    path_data_to_reco: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco/
+
+    state_num_def: 0
+    iteration_nb: 100
+    emission_type: 0
 
 
 

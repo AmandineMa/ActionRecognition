@@ -131,9 +131,9 @@ int main(int argc, char** argv){
               "</SensFeat>";
           }
         }
-        data_file << "</FeatVect>\n";
-        count++;
       }
+      data_file << "</FeatVect>\n";
+      count++;
     }
     catch (tf2::TransformException &ex) {
       ROS_WARN("%s",ex.what());
@@ -142,13 +142,11 @@ int main(int argc, char** argv){
 
     // Write in file when an keyboard input is detected, to signal a new segmentation
     n = read(0, &c, 1);
-    if (n > 0){
+    if (n > 0)
       write_seg << "new segmentation at vector " << count << "\n";
-    }
 
     rate.sleep();
   }
-
   // Close before exit node
   fcntl(0, F_SETFL, tem);
   write_seg.close();

@@ -16,7 +16,7 @@ SensorFeatureVector::SensorFeatureVector(float x, float y, float z):vector3D_(x,
 Vector3D SensorFeatureVector::get_vector3D(void){return vector3D_;}
 
 void SensorFeatureVector::normalize(NormalizationType normalization_type){
-  vector3D_ = vector3D_.normalize(normalization_type);
+  vector3D_.normalize(normalization_type);
 }
 
 void SensorFeatureVector::write_to_file(std::ofstream &os){  

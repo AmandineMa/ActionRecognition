@@ -2,5 +2,4 @@
 
 recorder:
     path_root: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
-    data_file_name: take_put_object_6.txt
-    seg_file_name: seg_take_put_object_6.txt
+    data_file_name: take_object

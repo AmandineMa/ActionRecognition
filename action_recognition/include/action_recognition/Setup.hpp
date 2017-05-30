@@ -18,10 +18,7 @@ struct Setup
   std::string dict_path;
   std::string grammar_path;
 
-  int default_state_number;
-
-  Setup(std::string root_p, std::string input_p, int default_state_nb = 5){
-    default_state_number = default_state_nb;
+  Setup(std::string root_p, std::string input_p){
     root_path = root_p;
     input_path = input_p;
     data_path = input_p+"data/";

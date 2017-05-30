@@ -13,6 +13,7 @@
 #include "action_recognition/common.hpp"
 #include "toaster_msgs/HumanListStamped.h"
 
+namespace bf = boost::filesystem;
 
 /**
  * \brief Structure for tf_frames/transforms params
@@ -57,7 +58,21 @@ int main(int argc, char** argv){
   std::string data_file_name;  
   std::string seg_file_name;
   node.getParam("recorder/data_file_name", data_file_name);  
-  node.getParam("recorder/seg_file_name", seg_file_name);
+
+  int count_file = 0;
+  bf::directory_iterator end_it;
+  for(bf::directory_iterator file_it(path_root); file_it != end_it; file_it++){
+    bf::path file_path = file_it->path();
+    if(bf::is_regular_file(file_path) && !tools::is_hidden(file_path)){  
+      std::string file_name = tools::get_file_name(file_path);
+      std::string label_name = file_name.substr(0, file_name.find_last_of("_"));
+      if(label_name.compare(data_file_name) == 0 && bf::extension(file_path).compare(".txt") == 0)
+        count_file += 1;
+    }
+  }
+  
+  seg_file_name = data_file_name+"_"+std::to_string(count_file)+".xml"; //C++11
+  data_file_name = data_file_name+"_"+std::to_string(count_file)+".txt"; //C++11
   std::ofstream data_file(path_root+data_file_name);
   std::ofstream write_seg(path_root+seg_file_name);
 
@@ -140,10 +155,11 @@ int main(int argc, char** argv){
       ros::Duration(1.0).sleep();
     }
 
-    // Write in file when an keyboard input is detected, to signal a new segmentation
+    // Write in file when an enter key input is detected, to signal a new segmentation 
+    // ( do not press other key)
     n = read(0, &c, 1);
     if (n > 0)
-      write_seg << "new segmentation at vector " << count << "\n";
+      write_seg << "new segmentation at vector " << count << " " << "\n";
 
     rate.sleep();
   }

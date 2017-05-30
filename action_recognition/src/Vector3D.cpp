@@ -34,7 +34,24 @@ void Vector3D::set_y(float y){vector3D_[VectorElements::Y]=y;}
 
 void Vector3D::set_z(float z){vector3D_[VectorElements::Z]=z;}
 
-Vector3D Vector3D::normalize(NormalizationType normalization_type){
-  return *this;
+void Vector3D::normalize(NormalizationType normalization_type){
+  switch(normalization_type){
+    case NormalizationType::no:
+      break;
+    case NormalizationType::standard:{
+      float accum = 0;
+      for (std::vector<float>::iterator it = vector3D_.begin() ; it != vector3D_.end() ; it++)
+        accum += (*it) * (*it);
+      float length = std::sqrt(accum);
+      for (std::vector<float>::iterator it = vector3D_.begin() ; it != vector3D_.end() ; it++)
+        *it = (*it)/length;
+      break;
+    }
+    case NormalizationType::log:
+      break;
+    default:
+      break;
+
+  }
 }
 

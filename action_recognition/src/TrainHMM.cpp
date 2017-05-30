@@ -64,7 +64,7 @@ void TrainHMM::train_HMM(bool print_output, EmissionType emission_type,
       state_number = ceil(median(sample_numbers)/10);
       break;
     default:
-      state_number = setup.default_state_number;
+      state_number = num_states_def;
       break;
   }
 

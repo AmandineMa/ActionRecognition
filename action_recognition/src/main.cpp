@@ -24,17 +24,26 @@ int main(int argc, char** argv){
   
   ros::Rate rate(10.0); 
 
+
+  // Vector3D vector(7.3, 8.5, 0.2);  
+  // SensorFeatureVector sfv(vector);
+  // sfv.normalize(NormalizationTypes::standard);
+  // sfv.print_vector();
+
   std::string path_root;
   std::string path_input;
   int state_num_def;
   int iterations_nb;
   int emission_type;
+  int normalization_type;
 
   node.getParam("setup/path_root", path_root);
   node.getParam("setup/path_input", path_input);
   node.getParam("setup/state_num_def", state_num_def);
   node.getParam("setup/iteration_nb", iterations_nb);
   node.getParam("setup/emission_type", emission_type);
+
+  node.getParam("setup/normalization", normalization_type);
 
   Setup setup(path_root,path_input);
   std::string hmmsdef_path = setup.output_path+"hmmsdef";
@@ -56,7 +65,9 @@ int main(int argc, char** argv){
   if(enable_training){
  
     datah.raw_data_from_file_to_feature_matrices(setup.seg_files_path, setup.data_path);
-    datah.normalize(NormalizationTypes::no);
+    //datah.print_map();
+    datah.normalize(static_cast<NormalizationType>(normalization_type));
+    //datah.print_map();
 
     std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
               std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
@@ -86,7 +97,7 @@ int main(int argc, char** argv){
       if(bf::is_regular_file(file_path) && !tools::is_hidden(file_path)){ 
     
         FeatureMatrix fm = datah.raw_data_from_file_to_feature_matrix(file_path.c_str());
-        fm.normalize(NormalizationTypes::no);
+        fm.normalize(static_cast<NormalizationType>(normalization_type));
         // Open the new data file
         std::string file_name = dir_data+tools::get_file_name(file_path)+".dat";
         std::ofstream data_file(file_name);

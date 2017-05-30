@@ -56,12 +56,11 @@ public:
   void set_z(float z);
 
   /** 
-   * \brief Return a normalized vector with the method given in parameter. 
+   * \brief Normalize the vector with the method given in parameter. 
    The values of the object remain unchanged.
    * \param #NormalizationType
-   * \retval A normalized #Vector3D
    */
-  Vector3D normalize(NormalizationType normalization_type);
+  void normalize(NormalizationType normalization_type);
 };
 
 

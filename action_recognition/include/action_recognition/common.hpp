@@ -117,11 +117,11 @@ namespace NormalizationTypes
 enum NormalizationType
   {
     /** No normalization **/
-    no,
+    no = 0,
     /** Standard normalization **/
-    standard,
+    standard = 1,
     /** Log normalization **/
-    log
+    log = 2
   };
 }
 typedef NormalizationTypes::NormalizationType NormalizationType;

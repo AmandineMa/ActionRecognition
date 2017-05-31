@@ -1,14 +1,23 @@
 <launch>
 <node pkg="tf" type="static_transform_publisher" name="env2red_cube"
-args="3.8993 6.8152 0.7062 1.57 0 0 /map /red_cube 100"/>
+args="3.6150 6.7635 0.7027 1.57 0 0 /map /red_cube 100"/>
 
 <node pkg="tf" type="static_transform_publisher" name="env2black_cube"
-args="3.8857 7.1383 0.6983 1.57 0 0 /map /black_cube 100"/>
+args="3.610 7.0116 0.6953 1.57 0 0 /map /black_cube 100"/>
 
 <node pkg="tf" type="static_transform_publisher" name="env2blue_cube"
-args="3.9341 7.5645 0.6872 1.57 0 0 /map /blue_cube 100"/>
+args="3.3643 7.0030 0.6886 1.57 0 0 /map /blue_cube 100"/>
 
-<node pkg="tf" type="static_transform_publisher" name="low_table"
-args="3.6 6.91 0.72 0 0 0 /map /low_table 100"/>
+<node pkg="tf" type="static_transform_publisher" name="table_area_1"
+args="3.6742 7.2839 0.6349 0 0 0 /map /table_area_1 100"/>
+
+<node pkg="tf" type="static_transform_publisher" name="table_area_2"
+args="3.2700 7.3797 0.6304 0 0 0 /map /table_area_2 100"/>
+
+<node pkg="tf" type="static_transform_publisher" name="table_area_3"
+args="3.3206 6.4785 0.6424 0 0 0 /map /table_area_3 100"/>
+
+<node pkg="tf" type="static_transform_publisher" name="small_table"
+args="4.5239 5.2166 0.7619 0 0 0 /map /small_table 100"/>
 
 </launch>

@@ -3,3 +3,4 @@
 generator:
     data_path: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data
     seg_path: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/segmentation
+    pre_seg_path: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/pre_segmentation

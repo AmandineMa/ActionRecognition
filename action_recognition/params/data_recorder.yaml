@@ -2,4 +2,4 @@
 
 recorder:
     path_root: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
-    data_file_name: take_object
+    data_file_name: scenario6

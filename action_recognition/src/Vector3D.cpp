@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <math.h>
 
 #include "action_recognition/Vector3D.hpp"
 #include "action_recognition/common.hpp"
@@ -38,7 +39,7 @@ void Vector3D::normalize(NormalizationType normalization_type){
   switch(normalization_type){
     case NormalizationType::no:
       break;
-    case NormalizationType::standard:{
+    case NormalizationType::unit_vec:{
       float accum = 0;
       for (std::vector<float>::iterator it = vector3D_.begin() ; it != vector3D_.end() ; it++)
         accum += (*it) * (*it);
@@ -48,7 +49,25 @@ void Vector3D::normalize(NormalizationType normalization_type){
       break;
     }
     case NormalizationType::log:
+      for (std::vector<float>::iterator it = vector3D_.begin() ; it != vector3D_.end() ; it++)
+        *it = log(*it);
       break;
+    case NormalizationType::score:{
+      float sum = std::accumulate(vector3D_.begin(), vector3D_.end(), 0.0);
+      float mean = sum/vector3D_.size();
+      float sq_sum = std::inner_product(vector3D_.begin(), vector3D_.end(), 
+                                        vector3D_.begin(), 0.0);
+      float stdev = std::sqrt(sq_sum / vector3D_.size() - mean * mean);
+      for (std::vector<float>::iterator it = vector3D_.begin() ; it != vector3D_.end() ; it++)
+        *it =( (*it)-mean )/stdev;
+      break;
+    }case NormalizationType::scaling:{
+       float min = *std::min_element(vector3D_.begin(), vector3D_.end());
+       float max = *std::max_element(vector3D_.begin(), vector3D_.end());
+       for (std::vector<float>::iterator it = vector3D_.begin() ; it != vector3D_.end() ; it++)
+         *it = ( (*it)-min )/(max - min);
+      break;
+    }
     default:
       break;
 

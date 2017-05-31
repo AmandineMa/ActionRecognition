@@ -118,10 +118,14 @@ enum NormalizationType
   {
     /** No normalization **/
     no = 0,
-    /** Standard normalization **/
-    standard = 1,
+    /** unit vector **/
+    unit_vec = 1,
     /** Log normalization **/
-    log = 2
+    log = 2,
+    /** Standard score **/
+    score = 3,
+    /** Feature scaling **/
+    scaling = 4
   };
 }
 typedef NormalizationTypes::NormalizationType NormalizationType;

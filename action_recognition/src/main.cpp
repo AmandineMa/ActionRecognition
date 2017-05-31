@@ -75,7 +75,11 @@ int main(int argc, char** argv){
       TrainHMM::train_HMM(true, static_cast<EmissionType>(emission_type), it.first->second, static_cast<StatesNumDef>(state_num_def), iterations_nb, setup);
 
     datah.get_labels().write_to_file(LabelFileFormats::txt);
-    datah.get_labels().write_to_file(LabelFileFormats::grammar);
+
+    bool gen_gram_file;
+    node.getParam("setup/generate_grammar_file", gen_gram_file);
+    if(gen_gram_file)
+      datah.get_labels().write_to_file(LabelFileFormats::grammar);
     datah.get_labels().write_to_file(LabelFileFormats::dict);
 
     ROS_INFO("%s", datah.get_labels().compile_grammar().c_str());
@@ -121,6 +125,13 @@ int main(int argc, char** argv){
       +" "+setup.labels_list_path
       +" -S "+dir_data+"file_list.scp";
     std::string output = tools::execute_command(command);
+    ROS_INFO("%s", output.c_str());
+
+    command = "HResults -A -T 1 -C "+HTK_conf_file_name +
+      " -p -I "+path_root+"test_ref.mlf"
+      +" "+setup.labels_list_path
+      +" "+setup.output_path+"reco.mlf";
+    output = tools::execute_command(command);
     ROS_INFO("%s", output.c_str());
   }
 

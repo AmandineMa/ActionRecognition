@@ -12,7 +12,9 @@ setup:
     iteration_nb: 100
     emission_type: 0
 
-    normalization: 0
+    normalization: 4
+
+    generate_grammar_file: false
 
 
 

@@ -46,15 +46,15 @@ int main(int argc, char** argv){
 
   node.getParam("setup/enable_recognition", enable_recognition);
   node.getParam("setup/enable_training", enable_training);  
-  node.getParam("setup/isolated_unit_init", isolated_unit_init);  
-  node.getParam("setup/isolated_unit_flat_init", isolated_unit_flat_init);
-  node.getParam("setup/isolated_unit_training", isolated_unit_training);   
-  node.getParam("setup/embedded_unit_flat_init", embedded_unit_flat_init); 
-  node.getParam("setup/embedded_unit_training", embedded_unit_training);
-  node.getParam("setup/normalization", normalization_type);
-  node.getParam("setup/state_num_def", state_num_def);
-  node.getParam("setup/iteration_nb", iterations_nb);
-  node.getParam("setup/emission_type", emission_type);
+  node.getParam("training_options/isolated_unit_init", isolated_unit_init);  
+  node.getParam("training_options/isolated_unit_flat_init", isolated_unit_flat_init);
+  node.getParam("training_options/isolated_unit_training", isolated_unit_training);   
+  node.getParam("training_options/embedded_unit_flat_init", embedded_unit_flat_init); 
+  node.getParam("training_options/embedded_unit_training", embedded_unit_training);
+  node.getParam("training_options/normalization", normalization_type);
+  node.getParam("training_options/state_num_def", state_num_def);
+  node.getParam("training_options/iterations_nb", iterations_nb);
+  node.getParam("training_options/emission_type", emission_type);
 
   Setup setup(path_root,path_data, path_segmentation);
   setup.hmmsdef_path = setup.output_path+"hmmsdef";
@@ -67,7 +67,6 @@ int main(int argc, char** argv){
   setenv("HCONFIG",const_cast<char*>(HTK_conf_file_name.c_str()),true);
 
   DataHandler datah(setup);
-
   if(enable_training){
     bf::path path(setup.output_hmm);
     for (bf::directory_iterator end_dir_it, it(path); it!=end_dir_it; ++it)
@@ -93,11 +92,10 @@ int main(int argc, char** argv){
                                             state_num_def, dim,
                                             static_cast<EmissionType>(emission_type));
 
-        if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init)
-          TrainHMM::train_HMM(true, isolated_unit_init, isolated_unit_flat_init, 
-                              isolated_unit_training, static_cast<EmissionType>(emission_type),
-                              it.first->second, static_cast<StatesNumDef>(state_num_def), 
-                              iterations_nb, setup);
+        if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init){
+          int median_samp_nb = datah.feature_matrices_to_file(setup, it.first->second);
+          TrainHMM::train_HMM(it.first->second[0].get_label(), true, isolated_unit_init, isolated_unit_flat_init, isolated_unit_training, static_cast<EmissionType>(emission_type), it.first->second[0].get_feature_vector_size(), median_samp_nb, static_cast<StatesNumDef>(state_num_def), iterations_nb, setup);
+        }
       }
     }
     

@@ -5,6 +5,7 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <utility>
+#include <math.h>
 
 #include "action_recognition/DataHandler.hpp"
 #include "action_recognition/common.hpp"
@@ -178,18 +179,55 @@ void DataHandler::raw_data_from_files_to_data_files(Setup &setup, NormalizationT
       // Open the new data file
       std::string file_name = output_data_path+tools::get_file_name(file_path)+".dat";
       std::ofstream data_file(file_name);
-      // Define the HTK header
-      HTKHeader header;
-      header.BytesPerSample = fm.get_feature_vector_size()*4; 
-      header.nSamples = fm.get_samples_number();
-      // Write the header to the data file
-      header.write_to_file(data_file);
+      write_HTK_header_to_file(data_file, fm.get_feature_vector_size(), fm.get_samples_number());
       fm.write_to_file(data_file);
       data_file.close();
       file_list << file_name << "\n";         
     }
   }
   file_list.close();
+}
+
+int DataHandler::feature_matrices_to_file(Setup setup, const std::vector<FeatureMatrix> &feature_matrix_array){
+std::string label = feature_matrix_array[0].get_label();
+  // Vector that contains the number of samples of each matrix
+  std::vector<int> sample_numbers;
+  // To give a different name to each data file
+  int i = 0;
+  // Define the path of the file of the list of data files : ?/tmp_files/Label_x.scp
+  std::string data_files_list_path = setup.htk_tmp_files_path+label+".scp";
+  // Open the new scp file
+  std::ofstream data_files_list(data_files_list_path.c_str());
+
+  // Iteration on the vector of feature matrices to write each of them in a HTK format file
+  for(std::vector<FeatureMatrix>::const_iterator it = feature_matrix_array.begin(); 
+      it != feature_matrix_array.end(); it++){
+
+    // Add the number of samples of the feature matrix
+    sample_numbers.push_back(it->get_samples_number());
+
+    // Define the path of the data file corresponding to the (*it) matrix: ?/tmp_files/Label_x_i.dat
+    std::string data_file_name = setup.htk_tmp_files_path+label
+      +"_"+std::to_string(i)+".dat"; //C++11
+
+    // Open the new data file
+    std::ofstream data_file(data_file_name.c_str());
+
+    write_HTK_header_to_file(data_file, it->get_feature_vector_size(), it->get_samples_number());
+    // Write the feature matrix to the data file
+    it->write_to_file(data_file); 
+    // Close the data file
+    data_file.close();
+
+    // Write the path of the data file to the scp file
+    data_files_list << data_file_name.c_str() << "\n";
+
+    i++;
+  }
+  data_files_list.close();
+
+  return tools::median(sample_numbers); 
+
 }
 
 void DataHandler::seg_files_to_MLF(Setup &setup){
@@ -269,6 +307,11 @@ std::queue<std::pair<std::string,std::pair<int, int> > > DataHandler::parse_seg_
   return segmentation_queue;
 }
 
-
-
-
+void DataHandler::write_HTK_header_to_file(ofstream& data_file, int vector_size, int samp_nb){
+  // Define the HTK header
+  HTKHeader header;
+  header.BytesPerSample = vector_size*HTK_SAMPLE_SIZE;
+  header.nSamples = samp_nb;
+  // Write the header to the data file
+  header.write_to_file(data_file);
+}

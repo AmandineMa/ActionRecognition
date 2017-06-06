@@ -15,14 +15,7 @@
 
 namespace TrainHMM{
 
-/**
- * \brief Return the median value of the elements of the std::vector
- * \param Median value of the elements of the std::vector
- */
-  float median(std::vector<int> samples_number);
-
-
-void train_HMM(bool print_output, bool isolated_unit_init, bool isolated_unit_flat_init, bool isolated_unit_training, EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb=1);
+void train_HMM(std::string label, bool print_output, bool isolated_unit_init, bool isolated_unit_flat_init, bool isolated_unit_training, EmissionType emission_type, int dim, int median_samp_nb, StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb=1);
 
 void train_HMMs(bool print_output, Setup setup);
 

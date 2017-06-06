@@ -57,7 +57,9 @@ int main(int argc, char** argv){
   geometry_msgs::TransformStamped transformStamped; 
   std::string data_file_name;  
   std::string seg_file_name;
+  bool transform_limb_map;
   node.getParam("recorder/data_file_name", data_file_name);  
+  node.getParam("recorder/transform_limb_map", transform_limb_map);
 
   int count_file = 0;
   bf::directory_iterator end_it;
@@ -108,15 +110,17 @@ int main(int argc, char** argv){
             break;
         }
 
-        data_file << "<SensFeatExt>" << 
-          limb_pose->position.x << " " << 
-          limb_pose->position.y << " " << 
-          limb_pose->position.z << " " << 
-          limb_pose->orientation.x << " " << 
-          limb_pose->orientation.y << " " << 
-          limb_pose->orientation.z << " " <<
-          limb_pose->orientation.w <<
-          "</SensFeatExt>";
+        if(transform_limb_map){
+          data_file << "<SensFeatExt>" << 
+            limb_pose->position.x << " " << 
+            limb_pose->position.y << " " << 
+            limb_pose->position.z << " " << 
+            limb_pose->orientation.x << " " << 
+            limb_pose->orientation.y << " " << 
+            limb_pose->orientation.z << " " <<
+            limb_pose->orientation.w <<
+            "</SensFeatExt>";
+        }
         for(it = it_tf_array->begin(); it != it_tf_array->end(); it++){
           transformStamped = tfBuffer.lookupTransform("map", 
                                                       it->source_frame, 

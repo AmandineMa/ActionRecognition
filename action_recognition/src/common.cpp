@@ -62,3 +62,17 @@ bool tools::is_hidden(bf::path p)
 
   return false;
 }
+
+float tools::median(std::vector<int> samples_number){
+  float median;
+  int size = samples_number.size();
+
+  std::sort(samples_number.begin(), samples_number.end());
+
+  if (size  % 2 == 0)
+    median = (samples_number[size / 2 - 1] + samples_number[size / 2]) / 2;
+  else 
+    median = samples_number[size / 2];
+
+  return median;
+}

@@ -4,6 +4,7 @@ tf_frames:
     transforms_nb:
         limb0: 7
         limb1: 3
+    transform_limb_map: true
     transforms:
         nb0:
             targetFrame: "sonof/HERAKLES_HUMAN1/hand"

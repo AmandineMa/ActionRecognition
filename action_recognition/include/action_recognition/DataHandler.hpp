@@ -12,11 +12,14 @@
 #include <string>
 #include <queue>
 #include <boost/filesystem.hpp>
+#include <fstream>
 
 #include "action_recognition/common.hpp"
 #include "action_recognition/FeatureMatrix.hpp"
 #include "action_recognition/Labels.hpp"
 #include "action_recognition/Setup.hpp"
+
+#define HTK_SAMPLE_SIZE 4
 
 /**
  * \brief Class that handles data from sensors and format them to #FeatureMatrix
@@ -51,6 +54,8 @@ public:
    */
   void raw_data_from_file_to_feature_matrices(Setup setup);
 
+  int feature_matrices_to_file(Setup setup, const std::vector<FeatureMatrix> &feature_matrix_array);
+
   /**
    * \brief Get raw data from file to format it to #FeatureMatrix
    * \param Location of the data file
@@ -77,6 +82,8 @@ public:
    */
   std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
             std::map<std::string, std::vector<FeatureMatrix> >::iterator > get_map_iterator(void);
+
+  void write_HTK_header_to_file(std::ofstream& data_file, int bytes_per_sample, int samp_nb);
 
   Labels get_labels(void);
 

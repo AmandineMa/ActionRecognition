@@ -213,7 +213,11 @@ std::string get_last_dir_name(boost::filesystem::path path);
  * \retval True if is hidden, False if not
  */
 bool is_hidden(boost::filesystem::path p);
-
+/**
+ * \brief Return the median value of the elements of the std::vector
+ * \param Median value of the elements of the std::vector
+ */
+float median(std::vector<int> samples_number);
 }
 
 #endif

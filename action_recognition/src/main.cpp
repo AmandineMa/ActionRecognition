@@ -14,7 +14,7 @@
 
 namespace bf = boost::filesystem;
 
-void generate_MMF_from_HMM_files(std::string files_directory, std::string hmmsdef_path, Labels labels);
+void generate_MMF_from_HMM_files(Setup setup, Labels labels);
 
 
 int main(int argc, char** argv){
@@ -24,29 +24,40 @@ int main(int argc, char** argv){
   
   ros::Rate rate(10.0); 
 
-
-  // Vector3D vector(7.3, 8.5, 0.2);  
-  // SensorFeatureVector sfv(vector);
-  // sfv.normalize(NormalizationTypes::standard);
-  // sfv.print_vector();
-
   std::string path_root;
-  std::string path_input;
+  std::string path_segmentation;
+  std::string path_data;
+
+  bool enable_recognition; 
+  bool enable_training;   
+  bool isolated_unit_init;
+  bool isolated_unit_flat_init;    
+  bool embedded_unit_flat_init;
+  bool isolated_unit_training;
+  bool embedded_unit_training;  
   int state_num_def;
   int iterations_nb;
   int emission_type;
   int normalization_type;
 
   node.getParam("setup/path_root", path_root);
-  node.getParam("setup/path_input", path_input);
+  node.getParam("setup/path_data", path_data);
+  node.getParam("setup/path_segmentation", path_segmentation);
+
+  node.getParam("setup/enable_recognition", enable_recognition);
+  node.getParam("setup/enable_training", enable_training);  
+  node.getParam("setup/isolated_unit_init", isolated_unit_init);  
+  node.getParam("setup/isolated_unit_flat_init", isolated_unit_flat_init);
+  node.getParam("setup/isolated_unit_training", isolated_unit_training);   
+  node.getParam("setup/embedded_unit_flat_init", embedded_unit_flat_init); 
+  node.getParam("setup/embedded_unit_training", embedded_unit_training);
+  node.getParam("setup/normalization", normalization_type);
   node.getParam("setup/state_num_def", state_num_def);
   node.getParam("setup/iteration_nb", iterations_nb);
   node.getParam("setup/emission_type", emission_type);
 
-  node.getParam("setup/normalization", normalization_type);
-
-  Setup setup(path_root,path_input);
-  std::string hmmsdef_path = setup.output_path+"hmmsdef";
+  Setup setup(path_root,path_data, path_segmentation);
+  setup.hmmsdef_path = setup.output_path+"hmmsdef";
 
   std::string HTK_conf_file_name = path_root+"HTK_conf_file";
   std::ofstream HTK_conf_file(HTK_conf_file_name);
@@ -57,24 +68,47 @@ int main(int argc, char** argv){
 
   DataHandler datah(setup);
 
-  bool enable_recognition; 
-  bool enable_training; 
-  node.getParam("setup/enable_recognition", enable_recognition);
-  node.getParam("setup/enable_training", enable_training);
-  
   if(enable_training){
- 
-    datah.raw_data_from_file_to_feature_matrices(setup.seg_files_path, setup.data_path);
-    //datah.print_map();
-    datah.normalize(static_cast<NormalizationType>(normalization_type));
-    //datah.print_map();
+    bf::path path(setup.output_hmm);
+    for (bf::directory_iterator end_dir_it, it(path); it!=end_dir_it; ++it)
+      bf::remove(it->path());
 
-    std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
-              std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
-    for(; it.first != it.second ; it.first++)
-      TrainHMM::train_HMM(true, static_cast<EmissionType>(emission_type), it.first->second, static_cast<StatesNumDef>(state_num_def), iterations_nb, setup);
+    std::string data_list_path;
+    if(embedded_unit_flat_init || embedded_unit_training){
+      datah.raw_data_from_files_to_data_files
+        (setup, static_cast<NormalizationType>(normalization_type));
+    }
 
+    if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init || embedded_unit_flat_init){
+      datah.raw_data_from_file_to_feature_matrices(setup);
+      datah.normalize(static_cast<NormalizationType>(normalization_type));
+
+      std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
+                std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
+      int dim = it.first->second[0].get_feature_vector_size();
+      for(; it.first != it.second ; it.first++){ 
+
+        if(embedded_unit_flat_init)
+          TrainHMM::embedded_unit_flat_init(true, setup, it.first->first, 
+                                            state_num_def, dim,
+                                            static_cast<EmissionType>(emission_type));
+
+        if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init)
+          TrainHMM::train_HMM(true, isolated_unit_init, isolated_unit_flat_init, 
+                              isolated_unit_training, static_cast<EmissionType>(emission_type),
+                              it.first->second, static_cast<StatesNumDef>(state_num_def), 
+                              iterations_nb, setup);
+      }
+    }
+    
     datah.get_labels().write_to_file(LabelFileFormats::txt);
+    generate_MMF_from_HMM_files(setup, datah.get_labels());
+
+    if(embedded_unit_training){
+      datah.seg_files_to_MLF(setup);
+      TrainHMM::train_HMMs(true, setup);
+     }
+    
 
     bool gen_gram_file;
     node.getParam("setup/generate_grammar_file", gen_gram_file);
@@ -84,9 +118,7 @@ int main(int argc, char** argv){
 
     ROS_INFO("%s", datah.get_labels().compile_grammar().c_str());
     ROS_INFO("%s", datah.get_labels().test_grammar().c_str());
-  
-    generate_MMF_from_HMM_files(setup.output_path, hmmsdef_path, datah.get_labels());
-  
+    
   }
 
   if(enable_recognition){    
@@ -118,7 +150,7 @@ int main(int argc, char** argv){
     }
     file_list.close();
     std::string command = "HVite -A -T 1 -C "+HTK_conf_file_name +
-      " -H "+hmmsdef_path
+      " -H "+setup.hmmsdef_path
       +" -i "+setup.output_path+"reco.mlf"
       +" -w "+setup.grammar_net_path
       +" "+setup.dict_path
@@ -138,33 +170,38 @@ int main(int argc, char** argv){
   return 0;
 };
 
+void get_params(void){
 
 
-void generate_MMF_from_HMM_files(std::string files_directory, std::string hmmsdef_path, Labels labels){
+}
+
+
+void generate_MMF_from_HMM_files(Setup setup, Labels labels){
   std::pair<std::set<std::string>::iterator, std::set<std::string>::iterator> it = labels.get_iterator();
-  std::ofstream MMF_file(hmmsdef_path);
+  std::ofstream MMF_file(setup.hmmsdef_path);
   for(; it.first != it.second ; it.first++){
-    std::ifstream hmm((files_directory+(*it.first)).c_str());
+    std::ifstream hmm((setup.output_hmm+(*it.first)).c_str());
     MMF_file << hmm.rdbuf();
   }
   MMF_file.close();
 
-  std::ifstream MMF_file_2(hmmsdef_path);
-  std::ofstream temp(files_directory+"temp");
+  std::ifstream MMF_file_2(setup.hmmsdef_path);
+  std::ofstream temp(setup.output_hmm+"temp");
   std::string line;
   int count = 0;
   while(std::getline(MMF_file_2, line)){
     if( ( (line.find("<VECSIZE>") == std::string::npos && line.find("~o") == std::string::npos 
-           && line.find("<STREAMINFO>") == std::string::npos) && count >= 3) ||
-        ( (line.find("<VECSIZE>") != std::string::npos || line.find("~o") != std::string::npos) && count < 3) ){
+            &&  line.find("<STREAMINFO>") == std::string::npos) && count >= 3) ||
+        ( (line.find("<VECSIZE>") != std::string::npos || line.find("~o") != std::string::npos
+           || line.find("<STREAMINFO>") != std::string::npos) && count < 3) ){
       temp << line << std::endl;
     }
     count++;
   }
   MMF_file_2.close();
   temp.close();
-  remove((hmmsdef_path).c_str());
-  rename((files_directory+"temp").c_str(), (hmmsdef_path).c_str());
+  remove((setup.hmmsdef_path).c_str());
+  rename((setup.output_hmm+"temp").c_str(), (setup.hmmsdef_path).c_str());
 }
 
 

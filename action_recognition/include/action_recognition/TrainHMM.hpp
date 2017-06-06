@@ -20,19 +20,14 @@ namespace TrainHMM{
  * \param Median value of the elements of the std::vector
  */
   float median(std::vector<int> samples_number);
-/**
- * \brief Train a HMM for all the feature matrices corresponding to the same label
- * \param Distribution type of the HMM
- * \param Vector of #FeatureMatrix passed by const reference (read-only)
- * \param HMM states number
- * \param Number of iterations for the training
- * \param #Setup for the files paths
- * \param Number of mixtures for the HMM, default value = 1
- */
-void train_HMM(bool print_output, EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, 
-               StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb = 1);
 
+
+void train_HMM(bool print_output, bool isolated_unit_init, bool isolated_unit_flat_init, bool isolated_unit_training, EmissionType emission_type, const std::vector<FeatureMatrix> &feature_matrix_array, StatesNumDef num_states_def, int iterations_nb, Setup setup, int mixtures_nb=1);
+
+void train_HMMs(bool print_output, Setup setup);
+
+
+void embedded_unit_flat_init(bool print_output, Setup setup, std::string hmm_name, int state_number, int dim, EmissionType emission_type, int mixtures_nb=1);
 
 };
-
 #endif

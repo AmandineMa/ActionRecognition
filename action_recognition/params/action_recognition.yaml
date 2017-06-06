@@ -5,16 +5,23 @@ setup:
     enable_training: true
 
     path_root: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
-    path_input: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
-    path_data_to_reco: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco/
+        
+    path_data: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data/
+    path_segmentation: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/segmentation/
 
+
+#training_options: 
+    isolated_unit_init: false
+    isolated_unit_flat_init: false
+    embedded_unit_flat_init: true
+    isolated_unit_training: true
+    embedded_unit_training: false
     state_num_def: 1
     iteration_nb: 100
     emission_type: 0
+    normalization: 1
 
-    normalization: 4
 
-    generate_grammar_file: false
 
 
 

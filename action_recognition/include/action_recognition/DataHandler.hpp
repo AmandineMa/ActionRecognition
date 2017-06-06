@@ -49,7 +49,7 @@ public:
    * \param Location of the segmentation files
    * \param Location of the data files
    */
-  void raw_data_from_file_to_feature_matrices(std::string seg_dir, std::string raw_data_dir);
+  void raw_data_from_file_to_feature_matrices(Setup setup);
 
   /**
    * \brief Get raw data from file to format it to #FeatureMatrix
@@ -57,6 +57,11 @@ public:
    * \retval Generated #FeatureMatrix from the data file
    */
   FeatureMatrix raw_data_from_file_to_feature_matrix(std::string raw_data_file);
+
+ void raw_data_from_files_to_data_files(Setup &setup, NormalizationType normalization_type);
+
+  void seg_files_to_MLF(Setup &setup);
+
   /**
    * \brief Check if the segmentation is valid
    */

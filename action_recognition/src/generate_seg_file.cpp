@@ -87,23 +87,21 @@ int main(int argc, char** argv){
   node.getParam("generator/seg_path", seg_dir);
   node.getParam("generator/pre_seg_path", pre_seg_dir);
   bf::directory_iterator end_it;
-  bf::directory_iterator action_it(data_dir);
 
-  // Iterate directories (1 directory = 1 general activity)
-  for(action_it; action_it != end_it; action_it++){
-  
-    bf::path path_action_dir = action_it->path();
+  if (bf::create_directory(seg_dir))
+	std::cout<<"segmentation directory created"<<std::endl;
+
+  std::string data_path = data_dir;
 
     // If the iterator is on a directory and that directory is not empty
-    if( bf::is_directory(path_action_dir) && !tools::is_hidden(path_action_dir)){
+    if( bf::is_directory(data_path) && !tools::is_hidden(data_path)){
       int count_file = 0;int c=0;
       // Iterate files of the directory (1 file = 1 data example of the general activity)
-      for(bf::directory_iterator file_it(path_action_dir); file_it != end_it; file_it++){
+      for(bf::directory_iterator file_it(data_path); file_it != end_it; file_it++){
  
         bf::path file_path = file_it->path();
         if(bf::is_regular_file(file_path) && !tools::is_hidden(file_path)){ 
-          std::ofstream file(seg_dir+"/"+tools::get_last_dir_name(file_path)+"/"
-                             +tools::get_file_name(file_path)+".xml");
+          std::ofstream file(seg_dir+tools::get_file_name(file_path)+".xml");
           // Count line number in data file
           int i = 0;
           std::string line;
@@ -112,8 +110,7 @@ int main(int argc, char** argv){
             ++i;
           }
 
-          std::ifstream pre_seg_file(pre_seg_dir+"/"
-                                     +tools::get_file_name(file_path)+".xml");
+          std::ifstream pre_seg_file(pre_seg_dir+tools::get_file_name(file_path)+".xml");
           std::string file_name = tools::get_file_name(file_path);
           std::string label_name = file_name.substr(0, file_name.find_last_of("_"));
          
@@ -171,8 +168,6 @@ int main(int argc, char** argv){
       }
 
     }
-
-  }
   return 0;
 }
 

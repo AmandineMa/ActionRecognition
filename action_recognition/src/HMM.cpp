@@ -29,9 +29,10 @@ HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, i
   switch(emission_type_){
     case EmissionTypes::Gaussian:{
       observations_.emplace_back(new Gaussian());
-      std::vector<std::vector<float> > temp(nb_states, std::vector<float>(dim,1));
-      observations_.back()->means_ = temp;
-      observations_.back()->covars_ = temp;
+      std::vector<std::vector<float> > temp0(nb_states, std::vector<float>(dim,0));
+      std::vector<std::vector<float> > temp1(nb_states, std::vector<float>(dim,1));
+      observations_.back()->means_ = temp0;
+      observations_.back()->covars_ = temp1;
       break;
     }
     case EmissionTypes::GMM:{
@@ -40,9 +41,10 @@ HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, i
         observations_.emplace_back(new GMM());
         static_cast<GMM*>(observations_.back())->nb_mixtures_ = nb_mixtures;
         static_cast<GMM*>(observations_.back())->priors_ = priors;
-        std::vector<std::vector<float> > temp(nb_states, std::vector<float>(dim,1));
-        observations_.back()->means_ = temp;
-        observations_.back()->covars_ = temp;
+        std::vector<std::vector<float> > temp0(nb_states, std::vector<float>(dim,0));
+        std::vector<std::vector<float> > temp1(nb_states, std::vector<float>(dim,1));
+        observations_.back()->means_ = temp0;
+        observations_.back()->covars_ = temp1;
       }
       break;
     }
@@ -67,7 +69,7 @@ void HMM::write_to_file(std::string file_path){
   ofile << "<VecSize> " << ndim << " <USER>\n";
   ofile << "~h " <<"'"<< name_<< "'" << "\n";
   ofile << "<BeginHMM>\n";
-  ofile << "   <NumStates> " << nb_states_+2;
+  ofile << "   <NumStates> " << nb_states_+2 << "\n";
   int i;
   for(i = 0; i < nb_states_; i++){
     switch(emission_type_){

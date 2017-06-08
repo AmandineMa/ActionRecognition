@@ -1,0 +1,4 @@
+<launch>
+	<rosparam command="load" file="$(find action_recognition)/params/data_file_processing.yaml" />
+	<node name="data_file_processing" pkg="action_recognition" type="data_file_processing" output="screen"/> 
+</launch>

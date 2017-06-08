@@ -29,6 +29,7 @@ private:
   std::map<std::string, std::vector<FeatureMatrix> > label_features_map_; /** Map of {label, vector of FeatureMatrix}
                                                                               Association of FeatureMatrix with the same label */
   Labels labels_; /** Labels object */
+  //std::map<std::string, bool> map_features_;
 
   /** 
    * \brief Parse an XML segmentation file to a queue of pairs of {"action", {start_point, end_point} }
@@ -38,7 +39,9 @@ private:
    * \param Path of the XML file
    */
   std::queue<std::pair<std::string,std::pair<int, int> > > parse_seg_file(std::string file_path);
+ 
 
+void write_HTK_header_to_file(std::ofstream& data_file, int bytes_per_sample, int samp_nb);
 
 public:
   /** 
@@ -82,8 +85,6 @@ public:
    */
   std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
             std::map<std::string, std::vector<FeatureMatrix> >::iterator > get_map_iterator(void);
-
-  void write_HTK_header_to_file(std::ofstream& data_file, int bytes_per_sample, int samp_nb);
 
   Labels get_labels(void);
 

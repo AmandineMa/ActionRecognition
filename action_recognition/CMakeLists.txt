@@ -147,6 +147,7 @@ add_executable(action_recognition src/main.cpp src/Vector3D.cpp src/SensorFeatur
 add_executable(data_recorder src/data_recorder.cpp src/common.cpp)
 add_executable(generator src/generate_seg_file.cpp src/common.cpp)
 add_executable(patch src/correct_bug.cpp src/common.cpp)
+add_executable(data_file_processing src/data_file_processing.cpp src/common.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -174,6 +175,11 @@ target_link_libraries(generator
 )
 
 target_link_libraries(patch
+   ${catkin_LIBRARIES}
+   ${Boost_FILESYSTEM_LIBRARY}
+)
+
+target_link_libraries(data_file_processing
    ${catkin_LIBRARIES}
    ${Boost_FILESYSTEM_LIBRARY}
 )

@@ -89,85 +89,85 @@ int main(int argc, char** argv){
   bf::directory_iterator end_it;
 
   if (bf::create_directory(seg_dir))
-	std::cout<<"segmentation directory created"<<std::endl;
+    std::cout<<"segmentation directory created"<<std::endl;
 
   std::string data_path = data_dir;
 
-    // If the iterator is on a directory and that directory is not empty
-    if( bf::is_directory(data_path) && !tools::is_hidden(data_path)){
-      int count_file = 0;int c=0;
-      // Iterate files of the directory (1 file = 1 data example of the general activity)
-      for(bf::directory_iterator file_it(data_path); file_it != end_it; file_it++){
+  // If the iterator is on a directory and that directory is not empty
+  if( bf::is_directory(data_path) && !tools::is_hidden(data_path)){
+    int count_file = 0;int c=0;
+    // Iterate files of the directory (1 file = 1 data example of the general activity)
+    for(bf::directory_iterator file_it(data_path); file_it != end_it; file_it++){
  
-        bf::path file_path = file_it->path();
-        if(bf::is_regular_file(file_path) && !tools::is_hidden(file_path)){ 
-          std::ofstream file(seg_dir+tools::get_file_name(file_path)+".xml");
-          // Count line number in data file
-          int i = 0;
-          std::string line;
-          std::ifstream f(file_path.c_str());
-          while(std::getline(f, line)){
-            ++i;
-          }
-
-          std::ifstream pre_seg_file(pre_seg_dir+tools::get_file_name(file_path)+".xml");
-          std::string file_name = tools::get_file_name(file_path);
-          std::string label_name = file_name.substr(0, file_name.find_last_of("_"));
-         
-          std::string pre_seg_line;
-          boost::smatch match;
-          boost::regex reg_exp("\\d+");
-          int match_prev;
-          std::queue<int> num_queue;
-          int count_line = 0;
-          while(std::getline(pre_seg_file, pre_seg_line)){ 
-            if(boost::regex_search(pre_seg_line, match, reg_exp)){
-              num_queue.push(stoi(match[0]));
-            }
-            count_line++;
-          }
-          
-          if((label_name.compare("scenario1")==0 && count_line != 4) 
-             || (label_name.compare("scenario1bis")==0 && count_line != 5)
-             || (label_name.compare("scenario2")==0 && count_line != 4) 
-             || (label_name.compare("scenario4")==0 && count_line != 4))
-            std::cout << "error in file " << file_name << std::endl;
-
-
-          file << "<MotionLabeling>\n";
-          while(!num_queue.empty()){
-            if(c > 1)
-              file << match_prev-1 << "\"/>\n" ;
-            
-            file << "<MotionLabel name=\"";
-             
-            file << filling(label_name, c);
-
-            if(c == 1){
-              file <<"\" startPoint=\""<< 1;
-              file <<"\" endPoint=\"" << num_queue.front()-1 << "\"/>\n";
-            }
-            else{
-              file  <<"\" startPoint=\"" << match_prev;
-              file <<"\" endPoint=\"";
-            }
-            match_prev = num_queue.front();
-            num_queue.pop();
-          }
-          file << match_prev-1 << "\"/>\n" ;
-          file << "<MotionLabel name=\"";
-          file << filling(label_name, c);
-          file  <<"\" startPoint=\"" << match_prev; 
-          file <<"\" endPoint=\"";
-          file << i << "\"/>\n</MotionLabeling>";
-          file.close();
-          
-          count_file++;
+      bf::path file_path = file_it->path();
+      if(bf::is_regular_file(file_path) && !tools::is_hidden(file_path)){ 
+        std::ofstream file(seg_dir+tools::get_file_name(file_path)+".xml");
+        // Count line number in data file
+        int i = 0;
+        std::string line;
+        std::ifstream f(file_path.c_str());
+        while(std::getline(f, line)){
+          ++i;
         }
 
+        std::ifstream pre_seg_file(pre_seg_dir+tools::get_file_name(file_path)+".xml");
+        std::string file_name = tools::get_file_name(file_path);
+        std::string label_name = file_name.substr(0, file_name.find_last_of("_"));
+         
+        std::string pre_seg_line;
+        boost::smatch match;
+        boost::regex reg_exp("\\d+");
+        int match_prev;
+        std::queue<int> num_queue;
+        int count_line = 0;
+        while(std::getline(pre_seg_file, pre_seg_line)){ 
+          if(boost::regex_search(pre_seg_line, match, reg_exp)){
+            num_queue.push(stoi(match[0]));
+          }
+          count_line++;
+        }
+          
+        if((label_name.compare("scenario1")==0 && count_line != 4) 
+           || (label_name.compare("scenario1bis")==0 && count_line != 5)
+           || (label_name.compare("scenario2")==0 && count_line != 4) 
+           || (label_name.compare("scenario4")==0 && count_line != 4))
+          std::cout << "error in file " << file_name << std::endl;
+
+
+        file << "<MotionLabeling>\n";
+        while(!num_queue.empty()){
+          if(c > 1)
+            file << match_prev-1 << "\"/>\n" ;
+            
+          file << "<MotionLabel name=\"";
+             
+          file << filling(label_name, c);
+
+          if(c == 1){
+            file <<"\" startPoint=\""<< 1;
+            file <<"\" endPoint=\"" << num_queue.front()-1 << "\"/>\n";
+          }
+          else{
+            file  <<"\" startPoint=\"" << match_prev;
+            file <<"\" endPoint=\"";
+          }
+          match_prev = num_queue.front();
+          num_queue.pop();
+        }
+        file << match_prev-1 << "\"/>\n" ;
+        file << "<MotionLabel name=\"";
+        file << filling(label_name, c);
+        file  <<"\" startPoint=\"" << match_prev; 
+        file <<"\" endPoint=\"";
+        file << i << "\"/>\n</MotionLabeling>";
+        file.close();
+          
+        count_file++;
       }
 
     }
+
+  }
   return 0;
 }
 

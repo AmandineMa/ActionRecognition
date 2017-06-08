@@ -40,6 +40,8 @@ int main(int argc, char** argv){
   int emission_type;
   int normalization_type;
 
+  std::map<std::string, bool> map_features;
+
   node.getParam("setup/path_root", path_root);
   node.getParam("setup/path_data", path_data);
   node.getParam("setup/path_segmentation", path_segmentation);
@@ -55,6 +57,8 @@ int main(int argc, char** argv){
   node.getParam("training_options/state_num_def", state_num_def);
   node.getParam("training_options/iterations_nb", iterations_nb);
   node.getParam("training_options/emission_type", emission_type);
+
+  //node.getParam("feature_vector", map_features);
 
   Setup setup(path_root,path_data, path_segmentation);
   setup.hmmsdef_path = setup.output_path+"hmmsdef";
@@ -108,7 +112,7 @@ int main(int argc, char** argv){
      }
     
 
-    bool gen_gram_file;
+    bool gen_gram_file=false;
     node.getParam("setup/generate_grammar_file", gen_gram_file);
     if(gen_gram_file)
       datah.get_labels().write_to_file(LabelFileFormats::grammar);
@@ -122,9 +126,11 @@ int main(int argc, char** argv){
   if(enable_recognition){    
     std::string path_dir;
     node.getParam("setup/path_data_to_reco", path_dir);
-    bf::directory_iterator end_it;
-    std::ofstream file_list(path_dir+"dat/file_list.scp"); 
+    bf::directory_iterator end_it;    
     std::string dir_data = path_dir+"dat/";
+    bf::create_directory(dir_data);
+    std::ofstream file_list(path_dir+"dat/file_list.scp"); 
+
     for(bf::directory_iterator file_it(path_dir); file_it != end_it; file_it++){  
 
       bf::path file_path = file_it->path();

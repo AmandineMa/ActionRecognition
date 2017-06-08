@@ -17,14 +17,16 @@ namespace bf = boost::filesystem;
 
 //TODO:split class into 2 classes : base class DataHandler, child class SegDataHandler with map in child class
 
-DataHandler::DataHandler(Setup setup):labels_(setup.labels_list_path, 
-                                              setup.grammar_net_path, 
-                                              setup.dict_path, 
-                                              setup.grammar_path){}
+DataHandler::DataHandler(Setup setup/*, std::map<std::string, bool> map_features*/):labels_
+                                                             (setup.labels_list_path,
+                                                              setup.grammar_net_path, 
+                                                              setup.dict_path,
+                                                              setup.grammar_path)
+                                                              /*map_features_(map_features)*/{}
 
 void DataHandler::raw_data_from_file_to_feature_matrices(Setup setup){
 
-  // To iterate the contents of a directory
+  // To iterate the contents of a directoryg
   bf::directory_iterator end_it;
   
   std::string data_path = setup.data_path;
@@ -89,21 +91,24 @@ void DataHandler::raw_data_from_file_to_feature_matrices(Setup setup){
 
           // Iterate the sensor feature vectors and the flags in the data file
           rapidxml::xml_node<> * node = feature_vector_node->first_node();
+          //std::map<std::string, bool>::iterator map_features_it = map_features_.begin();
           do{
-            std::vector<float> vector;
-            std::stringstream string_stream(node->value());
-            float n;
-            // While there is an integer, it is push backed to the vector
-            while(string_stream >> n)
-              vector.push_back(n);
+            //if(map_features_it->second){
+              std::vector<float> vector;
+              std::stringstream string_stream(node->value());
+              float n;
+              // While there is an integer, it is push backed to the vector
+              while(string_stream >> n)
+                vector.push_back(n);
               
-            // When the vector is filled, it is added to the feature vector 
-            // as a flags vector or a sensor feature vector
-            if((std::string(node->name())).compare("Flags") == 0)
-              fm.set_flags(vector);
-            else
-              fm.add_sensor_feature_vector(vector);
-
+              // When the vector is filled, it is added to the feature vector 
+              // as a flags vector or a sensor feature vector
+              if((std::string(node->name())).compare("Flags") == 0)
+                fm.set_flags(vector);
+              else
+                fm.add_sensor_feature_vector(vector);
+              //}
+              //map_features_it++;
           }while(node = node->next_sibling());   
         
           // If the FeatureMatrix is filled
@@ -142,21 +147,24 @@ FeatureMatrix DataHandler::raw_data_from_file_to_feature_matrix(std::string raw_
     count++;
     // Iterate the sensor feature vectors and the flags in the data file
     rapidxml::xml_node<> * node = feature_vector_node->first_node();
+    //std::map<std::string, bool>::iterator map_features_it = map_features_.begin();
     do{
-      std::vector<float> vector;
-      std::stringstream string_stream(node->value());
-      float n;
-      // While there is an integer, it is push backed to the vector
-      while(string_stream >> n)
-        vector.push_back(n);
+      //if(map_features_it->second){
+        std::vector<float> vector;
+        std::stringstream string_stream(node->value());
+        float n;
+        // While there is an integer, it is push backed to the vector
+        while(string_stream >> n)
+          vector.push_back(n);
              
-      // When the vector is filled, it is added to the feature vector 
-      // as a flags vector or a sensor feature vector
-      if((std::string(node->name())).compare("Flags") == 0)
-        fm.set_flags(vector);
-      else
-        fm.add_sensor_feature_vector(vector);
-
+        // When the vector is filled, it is added to the feature vector 
+        // as a flags vector or a sensor feature vector
+        if((std::string(node->name())).compare("Flags") == 0)
+          fm.set_flags(vector);
+        else
+          fm.add_sensor_feature_vector(vector);
+        //}
+        // map_features_it++;
     }while(node = node->next_sibling());   
 
   }while (feature_vector_node = feature_vector_node->next_sibling());
@@ -307,7 +315,7 @@ std::queue<std::pair<std::string,std::pair<int, int> > > DataHandler::parse_seg_
   return segmentation_queue;
 }
 
-void DataHandler::write_HTK_header_to_file(ofstream& data_file, int vector_size, int samp_nb){
+void DataHandler::write_HTK_header_to_file(std::ofstream& data_file, int vector_size, int samp_nb){
   // Define the HTK header
   HTKHeader header;
   header.BytesPerSample = vector_size*HTK_SAMPLE_SIZE;
@@ -315,3 +323,4 @@ void DataHandler::write_HTK_header_to_file(ofstream& data_file, int vector_size,
   // Write the header to the data file
   header.write_to_file(data_file);
 }
+

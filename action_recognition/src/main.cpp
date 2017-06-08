@@ -141,14 +141,7 @@ int main(int argc, char** argv){
         // Open the new data file
         std::string file_name = dir_data+tools::get_file_name(file_path)+".dat";
         std::ofstream data_file(file_name);
-        // Define the HTK header
-        HTKHeader header;
-        header.BytesPerSample = fm.get_feature_vector_size()*4; 
-        header.nSamples = fm.get_samples_number();
-        // Write the header to the data file
-        header.write_to_file(data_file);
-        fm.write_to_file(data_file);
-        data_file.close();
+        fm.write_to_file(data_file, FeatureFileFormat::dat);
         file_list << file_name << "\n";         
       }
     }

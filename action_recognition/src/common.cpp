@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 
 #include "action_recognition/common.hpp"
+#include "action_recognition/HTKHeader.hpp"
 
 namespace bf = boost::filesystem;
 
@@ -75,4 +76,14 @@ float tools::median(std::vector<int> samples_number){
     median = samples_number[size / 2];
 
   return median;
+}
+
+
+void tools::write_HTK_header_to_file(std::ofstream& data_file, int vector_size, int samp_nb){
+  // Define the HTK header
+  HTKHeader header;
+  header.BytesPerSample = vector_size*HTK_SAMPLE_SIZE;
+  header.nSamples = samp_nb;
+  // Write the header to the data file
+  header.write_to_file(data_file);
 }

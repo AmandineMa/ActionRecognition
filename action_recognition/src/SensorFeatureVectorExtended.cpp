@@ -31,7 +31,7 @@ void SensorFeatureVectorExtended::normalize(NormalizationType normalization_type
 }
 
 
-void SensorFeatureVectorExtended::write_to_file(std::ofstream &os){  
+void SensorFeatureVectorExtended::write_to_file(std::ofstream &os, FeatureFileFormat file_format){  
   std::vector<float> values_vector(SENSOR_FEATURE_VECTOR_EXTENDED_SIZE);
   values_vector[VectorElements::X]=vector3D_.get_x();
   values_vector[VectorElements::Y]=vector3D_.get_y();
@@ -41,11 +41,21 @@ void SensorFeatureVectorExtended::write_to_file(std::ofstream &os){
   values_vector[VectorElements::Z_Q]=quaternion_.getZ();
   values_vector[VectorElements::W]=quaternion_.getW(); 
 
-  // Swap endianess to be compatible with default HTK configuration
-  //tools::swap_endian(values_vector.begin(),values_vector.end()); 
-
-  // Write the vector values in  the file given in parameter
-  os.write((char *)&values_vector[0], values_vector.size()*sizeof(float));
+  switch(file_format){
+    case FeatureFileFormat::dat:{
+      // Write the vector values in  the file given in parameter
+      os.write((char *)&values_vector[0], values_vector.size()*sizeof(float));
+      break;
+    } case FeatureFileFormat::lab:{
+        os << "<SensorFeatureVectorExtended>";
+        std::ostream_iterator<float> output_iterator(os, " ");
+        std::copy(values_vector.begin(), values_vector.end(), output_iterator); 
+        os << "</SensorFeatureVectorExtended>";
+        break;
+      }
+    default:
+      break;
+  }
 }
 
 

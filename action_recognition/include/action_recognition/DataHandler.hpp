@@ -19,7 +19,6 @@
 #include "action_recognition/Labels.hpp"
 #include "action_recognition/Setup.hpp"
 
-#define HTK_SAMPLE_SIZE 4
 
 /**
  * \brief Class that handles data from sensors and format them to #FeatureMatrix
@@ -41,7 +40,7 @@ private:
   std::queue<std::pair<std::string,std::pair<int, int> > > parse_seg_file(std::string file_path);
  
 
-void write_HTK_header_to_file(std::ofstream& data_file, int bytes_per_sample, int samp_nb);
+
 
 public:
   /** 

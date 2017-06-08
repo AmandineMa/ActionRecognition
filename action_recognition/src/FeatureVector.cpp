@@ -46,16 +46,25 @@ void FeatureVector::normalize(NormalizationType normalization_type){
     (*it)->normalize(normalization_type);
 }
 
-void FeatureVector::write_to_file(std::ofstream &os) const{
-  std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
-  for(; it != sensor_feature_vectors_.end() ; it++)
-    (*it)->write_to_file(os);
-
-  // Swap endianess to be compatible with default HTK configuration
-  //tools::swap_endian(flag_vector_.begin(), flag_vector_.end()); 
-
-  // Write the vector values in  the file given in parameter
-  os.write((char *)&flag_vector_[0], flag_vector_.size()*sizeof(float));
+void FeatureVector::write_to_file(std::ofstream &os, FeatureFileFormat file_format) const{
+  switch(file_format){
+    case FeatureFileFormat::dat:{
+      std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
+      for(; it != sensor_feature_vectors_.end() ; it++)
+        (*it)->write_to_file(os, file_format);
+      // Write the vector values in  the file given in parameter
+      os.write((char *)&flag_vector_[0], flag_vector_.size()*sizeof(float));
+      break;
+    }
+    case FeatureFileFormat::lab:{
+      std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
+      for(; it != sensor_feature_vectors_.end() ; it++)
+        (*it)->write_to_file(os, file_format);
+      break;
+    }
+    default:
+      break;
+  }
 }
 
 void FeatureVector::print_vector(void){

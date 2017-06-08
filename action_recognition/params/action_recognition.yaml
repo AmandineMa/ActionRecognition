@@ -20,7 +20,7 @@ training_options:
     state_num_def: 1
     iterations_nb: 45
     emission_type: 0
-    normalization: 3
+    normalization: 0
 
 feature_vector:
     - true #map_hand

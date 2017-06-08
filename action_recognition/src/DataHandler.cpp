@@ -187,9 +187,9 @@ void DataHandler::raw_data_from_files_to_data_files(Setup &setup, NormalizationT
       // Open the new data file
       std::string file_name = output_data_path+tools::get_file_name(file_path)+".dat";
       std::ofstream data_file(file_name);
-      write_HTK_header_to_file(data_file, fm.get_feature_vector_size(), fm.get_samples_number());
-      fm.write_to_file(data_file);
-      data_file.close();
+      // write_HTK_header_to_file(data_file, fm.get_feature_vector_size(), fm.get_samples_number());
+      fm.write_to_file(data_file, FeatureFileFormat::dat);
+      //data_file.close();
       file_list << file_name << "\n";         
     }
   }
@@ -221,11 +221,11 @@ std::string label = feature_matrix_array[0].get_label();
     // Open the new data file
     std::ofstream data_file(data_file_name.c_str());
 
-    write_HTK_header_to_file(data_file, it->get_feature_vector_size(), it->get_samples_number());
+    //write_HTK_header_to_file(data_file, it->get_feature_vector_size(), it->get_samples_number());
     // Write the feature matrix to the data file
-    it->write_to_file(data_file); 
+    it->write_to_file(data_file, FeatureFileFormat::dat); 
     // Close the data file
-    data_file.close();
+    //data_file.close();
 
     // Write the path of the data file to the scp file
     data_files_list << data_file_name.c_str() << "\n";
@@ -315,12 +315,5 @@ std::queue<std::pair<std::string,std::pair<int, int> > > DataHandler::parse_seg_
   return segmentation_queue;
 }
 
-void DataHandler::write_HTK_header_to_file(std::ofstream& data_file, int vector_size, int samp_nb){
-  // Define the HTK header
-  HTKHeader header;
-  header.BytesPerSample = vector_size*HTK_SAMPLE_SIZE;
-  header.nSamples = samp_nb;
-  // Write the header to the data file
-  header.write_to_file(data_file);
-}
+
 

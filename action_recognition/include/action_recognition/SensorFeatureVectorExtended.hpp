@@ -69,7 +69,7 @@ public:
   /** 
    * \brief Write the vector values to the standard output
    */
-  virtual void write_to_file(std::ofstream &os);
+  virtual void write_to_file(std::ofstream &os, FeatureFileFormat file_format);
   /** 
    * \brief Write the vector values to the standard output
    */

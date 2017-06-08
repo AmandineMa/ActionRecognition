@@ -57,7 +57,7 @@ public:
    * \brief Write the vector values to the file given in parameter
    * \param Reference to an opened std::ofstream file
    */
-  virtual void write_to_file(std::ofstream &os);
+  virtual void write_to_file(std::ofstream &os, FeatureFileFormat file_format);
   /** 
    * \brief Write the vector values to the standard output
    */

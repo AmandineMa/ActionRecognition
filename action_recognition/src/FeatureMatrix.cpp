@@ -25,10 +25,32 @@ int FeatureMatrix::get_feature_vector_size(void) const{
 
 int FeatureMatrix::get_samples_number(void) const{return feature_vector_array_.size();}
 
-void FeatureMatrix::write_to_file(std::ofstream &os) const{
- std::vector<FeatureVector>::const_iterator it = feature_vector_array_.begin();
- for(; it != feature_vector_array_.end() ; it++)
-    it->write_to_file(os);
+void FeatureMatrix::write_to_file(std::ofstream &os, FeatureFileFormat file_format) const{
+  switch(file_format){
+    case FeatureFileFormat::dat:{
+      tools::write_HTK_header_to_file(os, get_feature_vector_size(), 
+                               get_samples_number());
+      std::vector<FeatureVector>::const_iterator it = feature_vector_array_.begin();
+      for(; it != feature_vector_array_.end() ; it++)
+        it->write_to_file(os, file_format); 
+      os.close();
+      break;
+    }
+    case FeatureFileFormat::lab:{
+      os << "<Data>\n";
+      std::vector<FeatureVector>::const_iterator it = feature_vector_array_.begin();
+      for(; it != feature_vector_array_.end() ; it++){
+        os << "<FeatVect>";
+        it->write_to_file(os, file_format); 
+        os << "</FeatVect>\n";
+      }
+      os << "</Data>";
+      os.close();
+      break;
+    }
+    default:
+      break;  
+  }
 }
 
 void FeatureMatrix::new_feature_vector(void){

@@ -63,7 +63,8 @@ int main(int argc, char** argv){
             //if((std::string(node->name())).compare("SensFeatExt") == 0)
             if(*vector_it == SensorFeatureVectorType::SensorFeatureVector){
               f2<<"<SensFeat>";
-              while(string_stream >> n && count < 3){
+              while(string_stream >> n 
+                    && count < SensorFeatureVectorType::SensorFeatureVector){
                 f2 << n << " ";
                 count++;
               }

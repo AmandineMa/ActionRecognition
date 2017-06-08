@@ -2,6 +2,8 @@
 #include <ros/console.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Vector3.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <fstream>
@@ -12,6 +14,7 @@
 
 #include "action_recognition/common.hpp"
 #include "toaster_msgs/HumanListStamped.h"
+#include "action_recognition/FeatureMatrix.hpp"
 
 namespace bf = boost::filesystem;
 
@@ -45,7 +48,11 @@ int main(int argc, char** argv){
   ros::init(argc, argv, "data_record");
   ros::NodeHandle node;
   node_ = &node;
-  ros::Rate rate(10.0); 
+  ros::Rate rate(30.0); 
+
+  uint64_t time_prev;
+  uint64_t time_now;
+  std::vector<uint64_t> time_diff_vector;
 
   std::string path_root;
   node.getParam("recorder/path_root", path_root);
@@ -59,7 +66,7 @@ int main(int argc, char** argv){
   std::string seg_file_name;
   bool transform_limb_map;
   node.getParam("recorder/data_file_name", data_file_name);  
-  node.getParam("recorder/transform_limb_map", transform_limb_map);
+  node.getParam("tf_frames/transform_limb_map", transform_limb_map);
 
   int count_file = 0;
   bf::directory_iterator end_it;
@@ -87,17 +94,24 @@ int main(int argc, char** argv){
   int count_frame = 0;
   tem = fcntl(0, F_GETFL, 0);
   fcntl (0, F_SETFL, (tem | O_NDELAY));
-
+  bool first = true;
   // Listen to tf2 broadcaster and write the frames in file
   std::vector<Frame>::iterator it;
-  data_file << "<Data>\n";
+  FeatureMatrix fm;
   while (node.ok()){
     ros::spinOnce();
-    try{
-      data_file << "<FeatVect>"; 
+    try{ 
+
+      time_now = ros::Time::now().toNSec();
+      if(!first)
+        time_diff_vector.push_back(time_now - time_prev);
+      first = false;
+      time_prev = time_now;
+
+     fm.new_feature_vector();
       for(std::vector<std::vector<Frame> >::iterator it_tf_array = transforms_array.begin(); 
           it_tf_array != transforms_array.end(); it_tf_array++){
-
+        
         geometry_msgs::Pose* limb_pose;
         switch(it_tf_array - transforms_array.begin()){ //iterator on index n
           case 0:
@@ -111,17 +125,21 @@ int main(int argc, char** argv){
         }
 
         if(transform_limb_map){
-          data_file << "<SensFeatExt>" << 
-            limb_pose->position.x << " " << 
-            limb_pose->position.y << " " << 
-            limb_pose->position.z << " " << 
-            limb_pose->orientation.x << " " << 
-            limb_pose->orientation.y << " " << 
-            limb_pose->orientation.z << " " <<
-            limb_pose->orientation.w <<
-            "</SensFeatExt>";
+
+          std::vector<float> vector;
+          vector.push_back(limb_pose->position.x);
+          vector.push_back(limb_pose->position.y);
+          vector.push_back(limb_pose->position.z);
+          vector.push_back(limb_pose->orientation.x);
+          vector.push_back(limb_pose->orientation.y);
+          vector.push_back(limb_pose->orientation.z);
+          vector.push_back(limb_pose->orientation.w);
+
+          fm.add_sensor_feature_vector(vector); 
+
         }
         for(it = it_tf_array->begin(); it != it_tf_array->end(); it++){
+
           transformStamped = tfBuffer.lookupTransform("map", 
                                                       it->source_frame, 
                                                       ros::Time(0));
@@ -132,26 +150,21 @@ int main(int argc, char** argv){
           tf2::fromMsg(*limb_pose, limb_transform);
 
           result_transform = element_transform.inverseTimes(limb_transform);
+
+          std::vector<float> vector;
+          vector.push_back(result_transform.getOrigin().x());
+          vector.push_back(result_transform.getOrigin().y());
+          vector.push_back(result_transform.getOrigin().z());
           if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
-            data_file << "<SensFeatExt>" << 
-              result_transform.getOrigin().x() << " " << 
-              result_transform.getOrigin().y() << " " << 
-              result_transform.getOrigin().z() << " " << 
-              result_transform.getRotation().x() << " " << 
-              result_transform.getRotation().y() << " " << 
-              result_transform.getRotation().z() << " " <<
-              result_transform.getRotation().w() <<
-              "</SensFeatExt>";
-          }else if(it->type == SensorFeatureVectorType::SensorFeatureVector){
-            data_file << "<SensFeat>" << 
-              result_transform.getOrigin().x() << " " << 
-              result_transform.getOrigin().y() << " " << 
-              result_transform.getOrigin().z() <<
-              "</SensFeat>";
+            vector.push_back(result_transform.getRotation().x());
+            vector.push_back(result_transform.getRotation().y());
+            vector.push_back(result_transform.getRotation().z());
+            vector.push_back(result_transform.getRotation().w());
           }
+
+          fm.add_sensor_feature_vector(vector); 
         }
       }
-      data_file << "</FeatVect>\n";
       count++;
     }
     catch (tf2::TransformException &ex) {
@@ -167,11 +180,13 @@ int main(int argc, char** argv){
 
     rate.sleep();
   }
+  fm.write_to_file(data_file, FeatureFileFormat::lab);
   // Close before exit node
+  double sum = std::accumulate(time_diff_vector.begin(), time_diff_vector.end(), 0.0);
+  double mean = sum / time_diff_vector.size();
   fcntl(0, F_SETFL, tem);
   write_seg.close();
-  data_file << "</Data>";
-  data_file.close();
+  std::cout << mean << std::endl;
   return 0;
 
 }

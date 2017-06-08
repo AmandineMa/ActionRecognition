@@ -84,7 +84,7 @@ public:
    * \brief Write the matrix values to the file given in parameter
    * \param Reference to an opened std::ofstream file
    */
-  void write_to_file(std::ofstream &os) const;
+  void write_to_file(std::ofstream &os, FeatureFileFormat file_format) const;
   /** 
    * \brief Normalize the values of all the #FeatureVector with the method given in parameter
    * \param #NormalizationType

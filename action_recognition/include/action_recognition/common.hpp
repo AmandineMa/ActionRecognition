@@ -15,6 +15,8 @@
 #include <boost/type_traits.hpp>
 #include <boost/filesystem.hpp>
 
+#define HTK_SAMPLE_SIZE 4
+
 namespace SensorFeatureVectorTypes{
 enum SensorFeatureVectorType
   {
@@ -218,6 +220,8 @@ bool is_hidden(boost::filesystem::path p);
  * \param Median value of the elements of the std::vector
  */
 float median(std::vector<int> samples_number);
+
+void write_HTK_header_to_file(std::ofstream& data_file, int bytes_per_sample, int samp_nb);
 }
 
 #endif

@@ -144,7 +144,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(action_recognition src/main.cpp src/Vector3D.cpp src/SensorFeatureVector.cpp src/SensorFeatureVectorExtended.cpp src/FeatureVector.cpp src/FeatureMatrix.cpp src/common.cpp src/Labels.cpp src/HMM.cpp src/DataHandler.cpp src/TrainHMM.cpp)
-add_executable(data_recorder src/data_recorder.cpp src/common.cpp)
+add_executable(data_recorder src/data_recorder.cpp src/common.cpp src/FeatureMatrix.cpp src/Vector3D.cpp src/SensorFeatureVector.cpp src/SensorFeatureVectorExtended.cpp src/FeatureVector.cpp)
 add_executable(generator src/generate_seg_file.cpp src/common.cpp)
 add_executable(patch src/correct_bug.cpp src/common.cpp)
 add_executable(data_file_processing src/data_file_processing.cpp src/common.cpp)

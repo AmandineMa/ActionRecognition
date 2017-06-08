@@ -19,17 +19,27 @@ void SensorFeatureVector::normalize(NormalizationType normalization_type){
   vector3D_.normalize(normalization_type);
 }
 
-void SensorFeatureVector::write_to_file(std::ofstream &os){  
+void SensorFeatureVector::write_to_file(std::ofstream &os, FeatureFileFormat file_format){  
   std::vector<float> values_vector(SENSOR_FEATURE_VECTOR_SIZE);
   values_vector[VectorElements::X]=vector3D_.get_x();
   values_vector[VectorElements::Y]=vector3D_.get_y();
   values_vector[VectorElements::Z]=vector3D_.get_z();
 
-  // Swap endianess to be compatible with default HTK configuration
-  // tools::swap_endian(values_vector.begin(),values_vector.end());
-
-  // Write the vector values in  the file given in parameter
-  os.write((char *)&values_vector[0], values_vector.size()*sizeof(float));
+  switch(file_format){
+    case FeatureFileFormat::dat:{
+      // Write the vector values in  the file given in parameter
+      os.write((char *)&values_vector[0], values_vector.size()*sizeof(float));
+      break;
+    } case FeatureFileFormat::lab:{
+        os << "<SensorFeatureVector>";
+        std::ostream_iterator<float> output_iterator(os, " ");
+        std::copy(values_vector.begin(), values_vector.end(), output_iterator); 
+        os << "</SensorFeatureVector>";
+        break;
+      }
+    default:
+      break;
+  }
 }
 
 void SensorFeatureVector::print_vector(void){

@@ -4,15 +4,17 @@ setup:
     enable_recognition: true
     enable_training: true
 
+    generate_grammar_file: false
+
     path_root: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
         
     path_data: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_modified/
     path_segmentation: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/segmentation/
-    path_data_to_reco: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco_modified/
+    path_data_to_reco: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco_1/
 
-
+#no embedded_unit_flat_init with other init
 training_options: 
-    isolated_unit_init: false
+    isolated_unit_init: true
     isolated_unit_flat_init: true
     embedded_unit_flat_init: false
     isolated_unit_training: true
@@ -20,19 +22,7 @@ training_options:
     state_num_def: 1
     iterations_nb: 45
     emission_type: 0
-    normalization: 0
-
-feature_vector:
-    - true #map_hand
-    - true #hand_black
-    - true #hand_red
-    - true #hand_blue
-    - true #hand_area1
-    - true #hand_area2
-    - true #hand_area3
-    - true #hand_small
-    - true #map_head
-    - true #head_black
-    - true #head_red
-    - true #head_blue
+    topology_type: 2
+    normalization: 3
+    threshold: true
 

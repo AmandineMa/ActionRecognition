@@ -12,6 +12,40 @@ namespace bf = boost::filesystem;
 std::string filling(std::string label_name, int &c){
 
   std::string x;
+  if(label_name.compare("pointing")==0){
+    if(c == 0){
+      x = "pointing";
+      c = 0;
+    }
+  }
+
+  if(label_name.compare("pick_place")==0){
+    if(c == 0){
+      x = "pick";c++;
+    }else{ 
+      x = "place";
+      c = 0;
+    }
+  }
+
+  if(label_name.compare("pick_place_h")==0){
+    if(c == 0){
+      x = "pick";c++;
+    }else{ 
+      x = "place";
+      c = 0;
+    }
+  }
+
+  if(label_name.compare("pick_place_w")==0){
+    if(c == 0){
+      x = "pick";c++;
+    }else{ 
+      x = "place";
+      c = 0;
+    }
+  }
+
   if(label_name.compare("scenario1")==0){
     if(c == 0){
       x = "sil";c++;
@@ -109,11 +143,10 @@ int main(int argc, char** argv){
         while(std::getline(f, line)){
           ++i;
         }
-
+        i=i-2;
         std::ifstream pre_seg_file(pre_seg_dir+tools::get_file_name(file_path)+".xml");
         std::string file_name = tools::get_file_name(file_path);
         std::string label_name = file_name.substr(0, file_name.find_last_of("_"));
-         
         std::string pre_seg_line;
         boost::smatch match;
         boost::regex reg_exp("\\d+");
@@ -130,38 +163,44 @@ int main(int argc, char** argv){
         if((label_name.compare("scenario1")==0 && count_line != 4) 
            || (label_name.compare("scenario1bis")==0 && count_line != 5)
            || (label_name.compare("scenario2")==0 && count_line != 4) 
-           || (label_name.compare("scenario4")==0 && count_line != 4))
+           || (label_name.compare("scenario4")==0 && count_line != 4)
+           || (label_name.compare("pick_place_h")==0 && count_line != 2)
+           || (label_name.compare("pick_place_w")==0 && count_line != 2)
+           || (label_name.compare("pick_place")==0 && count_line != 1))
           std::cout << "error in file " << file_name << std::endl;
 
 
         file << "<MotionLabeling>\n";
-        while(!num_queue.empty()){
-          if(c > 1)
-            file << match_prev-1 << "\"/>\n" ;
+        if(label_name.compare("pointing")!=0){
+          while((num_queue.size()!=1 && count_line == 2) || (!num_queue.empty() && count_line==1)){
             
-          file << "<MotionLabel name=\"";
+            file << "<MotionLabel name=\"";
              
+            file << filling(label_name, c);
+            if(c == 1){
+              file <<"\" startPoint=\""<< 1;
+              file <<"\" endPoint=\"" << num_queue.front()-1 << "\"/>\n";
+            }
+            else{ 
+              file  <<"\" startPoint=\"" << match_prev;
+              file <<"\" endPoint=\"";
+            }
+            match_prev = num_queue.front();
+            num_queue.pop();
+          }
+          //file << match_prev-1 << "\"/>\n" ;
+          file << "<MotionLabel name=\"";
           file << filling(label_name, c);
+          file  <<"\" startPoint=\"" << match_prev; 
+          file <<"\" endPoint=\"";
+          file << i << "\"/>\n</MotionLabeling>";
+          file.close();
+        }else{ 
+          file << "<MotionLabel name=\"pointing";
+          file <<"\" startPoint=\""<< 1;
+          file <<"\" endPoint=\"" << i <<"\"/>\n</MotionLabeling>";
 
-          if(c == 1){
-            file <<"\" startPoint=\""<< 1;
-            file <<"\" endPoint=\"" << num_queue.front()-1 << "\"/>\n";
-          }
-          else{
-            file  <<"\" startPoint=\"" << match_prev;
-            file <<"\" endPoint=\"";
-          }
-          match_prev = num_queue.front();
-          num_queue.pop();
         }
-        file << match_prev-1 << "\"/>\n" ;
-        file << "<MotionLabel name=\"";
-        file << filling(label_name, c);
-        file  <<"\" startPoint=\"" << match_prev; 
-        file <<"\" endPoint=\"";
-        file << i << "\"/>\n</MotionLabeling>";
-        file.close();
-          
         count_file++;
       }
 

@@ -11,7 +11,7 @@
 #include <string>
 
 #include "action_recognition/common.hpp"
-
+#include "action_recognition/Labels.hpp"
 /**
  * \brief Gaussian (base) class that represents a Gaussian distribution
  */
@@ -41,6 +41,7 @@ private:
   int nb_states_; /** HMM states number */
   std::vector<float> component_weights_; /** Vector of the component weights */
   EmissionType emission_type_; /** Emission distribution type */
+  TopologyType topology_type_;
   std::vector<float> start_proba_; /** Vector of the start probabilities */
   std::vector<float> end_proba_; /** Vector of the end probabilities */
   std::vector<Gaussian*> observations_; /** Vector of Gaussians */
@@ -57,7 +58,7 @@ public:
    * \param Emission distribution type
    * \param Number of mixtures, default value = 1
    */
-  HMM(std::string name, int nb_states, int dim, EmissionType emission_type, int nb_mixtures = 1);
+  HMM(std::string name, int nb_states, int dim, EmissionType emission_type, TopologyType topology_type, int nb_mixtures = 1);
   /**
    * \brief Destructor for an HMM. Delete the Gaussian pointers.
    */
@@ -71,7 +72,6 @@ public:
    * \brief Get the HMM from HTK HMM file format
    */
   void get_from_HMM_file(std::string file_path);
-
 };
 
 #endif

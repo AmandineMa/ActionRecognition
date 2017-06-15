@@ -6,25 +6,52 @@
 #include <memory>
 #include <iostream>
 
+
 #include "action_recognition/HMM.hpp"
 #include "action_recognition/common.hpp"
+#include "action_recognition/Labels.hpp"
 
-
-HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, int nb_mixtures):
-  name_(name),nb_states_(nb_states), emission_type_(emission_type), start_proba_(nb_states,0),end_proba_(nb_states,0),
+HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, TopologyType topology_type, int nb_mixtures):
+  name_(name),nb_states_(nb_states), emission_type_(emission_type), topology_type_(topology_type), start_proba_(nb_states,0),end_proba_(nb_states,0),
   transmat_(nb_states, std::vector<float>(nb_states,0)){
-
-  start_proba_[0] = 1;
   
-  end_proba_[nb_states-1] = 0.3;
+  start_proba_[0] = 1;
 
-  std::vector<std::vector<float> >::iterator it = transmat_.begin();
-  int i;
-  for(i = 0; i < (nb_states - 1) ; i++){
-    transmat_[i][i] = 0.6;
-    transmat_[i][i+1] = 0.4;
+  switch(topology_type){
+    case TopologyType::L_to_R:{
+      end_proba_[nb_states-1] = 0.3;
+
+      for(int i = 0; i < (nb_states - 1) ; i++){
+        transmat_[i][i] = 0.6;
+        transmat_[i][i+1] = 0.4;
+      }
+      transmat_[nb_states-1][nb_states-1] = 0.7;
+      break;
+    }
+    case TopologyType::Bakis:{
+      end_proba_[nb_states-2] = 0.3;
+      end_proba_[nb_states-1] = 0.3;
+
+      for(int i = 0; i < (nb_states - 2) ; i++){
+        transmat_[i][i] = 0.4;
+        transmat_[i][i+1] = 0.3;
+        transmat_[i][i+2] = 0.3;
+      }
+      transmat_[nb_states-2][nb_states-2] = 0.4;
+      transmat_[nb_states-2][nb_states-1] = 0.3;
+      transmat_[nb_states-1][nb_states-1] = 0.7;
+      break;
+    }
+    case TopologyType::Ergodic:{
+      float prob = 1.0/(nb_states+1);
+      for(int i = 0; i < nb_states; i++){
+        end_proba_[i]=prob;
+        for(int j = 0; j < nb_states; j++)
+        transmat_[i][j] = prob;
+      }
+      break;
+    }
   }
-  transmat_[nb_states-1][nb_states-1] = 0.7;
 
   switch(emission_type_){
     case EmissionTypes::Gaussian:{

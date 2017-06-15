@@ -14,7 +14,8 @@ const unsigned HTK_MFCC_E_D_Z = 326 + 2048;
 
 struct HTKHeader {
     unsigned nSamples;              // number of samples
-    unsigned Period = 100000;                // period [100ns]
+  //TODO:have to match with period of ROS node
+    unsigned Period = 330000;                // period [100ns]
     unsigned short BytesPerSample;
     unsigned short FeatureType = HTK_USER;     // if you use a user-defined type, set to HTK_USER.
 

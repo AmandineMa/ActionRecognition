@@ -6,6 +6,7 @@
 #include <string>
 #include <stdio.h>
 #include <cstdlib>
+#include <boost/regex.hpp>
 
 #include "action_recognition/DataHandler.hpp"
 #include "action_recognition/TrainHMM.hpp"
@@ -15,7 +16,7 @@
 namespace bf = boost::filesystem;
 
 void generate_MMF_from_HMM_files(Setup setup, Labels labels);
-
+void build_threshold_model(Setup setup);
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
@@ -38,7 +39,9 @@ int main(int argc, char** argv){
   int state_num_def;
   int iterations_nb;
   int emission_type;
+  int topology_type;
   int normalization_type;
+  bool threshold;
 
   std::map<std::string, bool> map_features;
 
@@ -57,6 +60,8 @@ int main(int argc, char** argv){
   node.getParam("training_options/state_num_def", state_num_def);
   node.getParam("training_options/iterations_nb", iterations_nb);
   node.getParam("training_options/emission_type", emission_type);
+  node.getParam("training_options/topology_type", topology_type);
+  node.getParam("training_options/threshold", threshold);
 
   //node.getParam("feature_vector", map_features);
 
@@ -71,6 +76,7 @@ int main(int argc, char** argv){
   setenv("HCONFIG",const_cast<char*>(HTK_conf_file_name.c_str()),true);
 
   DataHandler datah(setup);
+
   if(enable_training){
     bf::path path(setup.output_hmm);
     for (bf::directory_iterator end_dir_it, it(path); it!=end_dir_it; ++it)
@@ -94,32 +100,50 @@ int main(int argc, char** argv){
         if(embedded_unit_flat_init)
           TrainHMM::embedded_unit_flat_init(true, setup, it.first->first, 
                                             state_num_def, dim,
-                                            static_cast<EmissionType>(emission_type));
+                                            static_cast<EmissionType>(emission_type), 
+                                            static_cast<TopologyType>(topology_type));
 
         if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init){
           int median_samp_nb = datah.feature_matrices_to_file(setup, it.first->second);
-          TrainHMM::train_HMM(it.first->second[0].get_label(), true, isolated_unit_init, isolated_unit_flat_init, isolated_unit_training, static_cast<EmissionType>(emission_type), it.first->second[0].get_feature_vector_size(), median_samp_nb, static_cast<StatesNumDef>(state_num_def), iterations_nb, setup);
+          TrainHMM::train_HMM(it.first->second[0].get_label(), true, isolated_unit_init, isolated_unit_flat_init, isolated_unit_training, static_cast<EmissionType>(emission_type), static_cast<TopologyType>(topology_type), it.first->second[0].get_feature_vector_size(), median_samp_nb, static_cast<StatesNumDef>(state_num_def), iterations_nb, setup);
         }
       }
     }
     
     datah.get_labels().write_to_file(LabelFileFormats::txt);
     generate_MMF_from_HMM_files(setup, datah.get_labels());
+    
 
     if(embedded_unit_training){
       datah.seg_files_to_MLF(setup);
       TrainHMM::train_HMMs(true, setup);
      }
     
+    if(threshold){
+      Labels new_labels = datah.get_labels();
+      new_labels.add_label("threshold");
+      build_threshold_model(setup);
+      generate_MMF_from_HMM_files(setup, new_labels);
+      bool gen_gram_file=false;
+      new_labels.write_to_file(LabelFileFormats::txt);
+      node.getParam("setup/generate_grammar_file", gen_gram_file);
+      if(gen_gram_file)
+        new_labels.write_to_file(LabelFileFormats::grammar);
+      new_labels.write_to_file(LabelFileFormats::dict);
 
-    bool gen_gram_file=false;
-    node.getParam("setup/generate_grammar_file", gen_gram_file);
-    if(gen_gram_file)
-      datah.get_labels().write_to_file(LabelFileFormats::grammar);
-    datah.get_labels().write_to_file(LabelFileFormats::dict);
+      ROS_INFO("%s",new_labels.compile_grammar().c_str());
+      ROS_INFO("%s", new_labels.test_grammar().c_str());
+    }else{
 
-    ROS_INFO("%s", datah.get_labels().compile_grammar().c_str());
-    ROS_INFO("%s", datah.get_labels().test_grammar().c_str());
+      bool gen_gram_file=false;
+      node.getParam("setup/generate_grammar_file", gen_gram_file);
+      if(gen_gram_file)
+        datah.get_labels().write_to_file(LabelFileFormats::grammar);
+      datah.get_labels().write_to_file(LabelFileFormats::dict);
+
+      ROS_INFO("%s", datah.get_labels().compile_grammar().c_str());
+      ROS_INFO("%s", datah.get_labels().test_grammar().c_str());
+    }
     
   }
 
@@ -146,6 +170,7 @@ int main(int argc, char** argv){
       }
     }
     file_list.close();
+
     std::string command = "HVite -A -T 1 -C "+HTK_conf_file_name +
       " -H "+setup.hmmsdef_path
       +" -i "+setup.output_path+"reco.mlf"
@@ -202,3 +227,110 @@ void generate_MMF_from_HMM_files(Setup setup, Labels labels){
 }
 
 
+void build_threshold_model(Setup setup){
+
+  std::ifstream mmf_file(setup.hmmsdef_path);
+  std::ofstream threshold_file(setup.output_hmm+"threshold");
+  std::string line;
+  int nb_states=0;
+  boost::smatch match;
+  boost::regex reg_exp("\\d+");
+  while(std::getline(mmf_file, line)){
+    if(line.find("<NUMSTATES>") != std::string::npos ){
+      if(boost::regex_search(line, match, reg_exp))
+        nb_states = nb_states+std::stoi(match[0])-2;
+    }
+  }
+  mmf_file.clear();
+  mmf_file.seekg(0, mmf_file.beg);
+  std::vector<std::vector<float> > trans_mat;
+  int count_line = 0; 
+  int count_state = 2;
+  bool get_trans_mat = false;
+  int index_filling = 0;
+  int count_transmat_row = 0;
+  int count_transmat_line = 0;
+  bool first_line_transmat = true;
+  int num_state_unit_model = 0;
+  bool skip = true;
+  std::vector<float> end_proba_;
+  while(std::getline(mmf_file, line)){
+    if((line.find("<VECSIZE>") == std::string::npos 
+        && line.find("~o") == std::string::npos 
+        && line.find("<STREAMINFO>") == std::string::npos 
+        && line.find("~h") == std::string::npos
+        && line.find("<BEGINHMM>") == std::string::npos
+        && line.find("<ENDHMM>") == std::string::npos
+        && count_line >= 6 ) 
+       || count_line < 6){
+      if(line.find("<STATE>") != std::string::npos){
+        threshold_file << "<STATE> "<< count_state << std::endl;
+        count_state++;
+      }else if(line.find("~h") != std::string::npos)
+        threshold_file << "~h \"threshold\"" << std::endl;
+      else if(line.find("<NUMSTATES>") != std::string::npos){
+        if(count_line < 6)
+          threshold_file << "<NUMSTATES> "<< std::to_string(nb_states+2) << std::endl;
+        boost::regex_search(line, match, reg_exp);
+        num_state_unit_model += std::stoi(match[0])-2;  
+        index_filling = count_transmat_row;
+        get_trans_mat = false;
+        skip = false;
+      }else if(line.find("<TRANSP>") != std::string::npos){
+        get_trans_mat = true;
+        first_line_transmat = true;
+      }else if(get_trans_mat){
+        float n;
+        if(!first_line_transmat && !skip){
+          trans_mat.emplace_back(std::vector<float>(nb_states,0));
+          std::stringstream string_stream(line);
+          count_transmat_row = 0;
+          while(string_stream >> n){
+            int transmat_index = count_transmat_row-1+index_filling;
+            if(count_transmat_row != 0 && transmat_index < num_state_unit_model)
+                trans_mat.back().at(transmat_index)=n;
+            count_transmat_row++;
+          }
+          count_transmat_row = count_transmat_row - 2 + index_filling;
+
+          float new_a = (1.0-trans_mat.back().at(count_transmat_line))/float(nb_states);
+          end_proba_.push_back(new_a);
+          for(int i = 0; i < nb_states; i++){
+            if(i != count_transmat_line)
+              trans_mat.back().at(i)=new_a;
+          }
+          count_transmat_line++;
+          if(count_transmat_line == num_state_unit_model)
+            skip = true;
+        }
+        first_line_transmat = false; 
+      }else
+        threshold_file << line << std::endl;
+
+    }
+
+    count_line++;
+  } 
+  threshold_file.setf(std::ios::fixed);
+  threshold_file.precision(6);
+  threshold_file << "   <TransP> " << nb_states+2 << "\n";
+  std::vector<float> start_proba_(nb_states,1.0/nb_states);
+  std::ostream_iterator<float> it_file(threshold_file, " ");
+  threshold_file << float(0) << " "; std::copy(start_proba_.begin(), start_proba_.end(), it_file); threshold_file << float(0) << "\n";
+  std::vector<float>::iterator it_vector = it_vector = end_proba_.begin();
+  std::vector<std::vector<float> >::iterator it_tr_ = trans_mat.begin();
+  for(; it_tr_ != trans_mat.end() ; it_tr_++){
+    threshold_file << float(0) << " "; std::copy(it_tr_->begin(), it_tr_->end(), it_file); threshold_file << *it_vector <<"\n";
+    it_vector++;
+  }
+  std::vector<float> zeros(trans_mat.size()+2,0);
+  std::copy(zeros.begin(), zeros.end(), it_file);
+  threshold_file << "\n";
+
+  threshold_file << "<ENDHMM>";
+  threshold_file.close();
+  threshold_file.close();
+  //remove((setup.).c_str());
+  // rename((dir_path+"temp").c_str(), (dir_path+"threshold").c_str());
+
+}

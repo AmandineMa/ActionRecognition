@@ -52,14 +52,17 @@ void FeatureVector::write_to_file(std::ofstream &os, FeatureFileFormat file_form
       std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
       for(; it != sensor_feature_vectors_.end() ; it++)
         (*it)->write_to_file(os, file_format);
-      // Write the vector values in  the file given in parameter
       os.write((char *)&flag_vector_[0], flag_vector_.size()*sizeof(float));
       break;
     }
     case FeatureFileFormat::lab:{
       std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
       for(; it != sensor_feature_vectors_.end() ; it++)
-        (*it)->write_to_file(os, file_format);
+        (*it)->write_to_file(os, file_format); 
+      os << "<Flags>";
+      std::ostream_iterator<float> output_iterator(os, " ");
+      std::copy(flag_vector_.begin(), flag_vector_.end(), output_iterator); 
+      os << "</Flags>";
       break;
     }
     default:

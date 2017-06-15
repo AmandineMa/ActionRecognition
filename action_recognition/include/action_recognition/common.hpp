@@ -58,6 +58,17 @@ enum EmissionType
 }
 typedef EmissionTypes::EmissionType EmissionType;
 
+namespace TopologyTypes
+{
+enum TopologyType
+  {
+    Ergodic = 0,
+    L_to_R = 1,
+    Bakis = 2
+  };
+}
+typedef TopologyTypes::TopologyType TopologyType;
+
 namespace StatesNumDefs
 {
 /**

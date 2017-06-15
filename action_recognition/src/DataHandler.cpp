@@ -38,7 +38,6 @@ void DataHandler::raw_data_from_file_to_feature_matrices(Setup setup){
     for(bf::directory_iterator file_it(data_path); file_it != end_it; file_it++){
       bf::path file_path = file_it->path();
       if(bf::is_regular_file(file_path) && !tools::is_hidden(file_path)){ 
-    
         // Get the segmentation file corresponding to the data file
         /*
           queue of pairs
@@ -82,7 +81,7 @@ void DataHandler::raw_data_from_file_to_feature_matrices(Setup setup){
             // Get the line of the first vector of the action
             begin = seg_element.second.first;
             // Get the line of the last vector of the action
-            end = seg_element.second.second;      
+            end = seg_element.second.second;            
           }      
 
           // Add a new feature vector
@@ -110,9 +109,10 @@ void DataHandler::raw_data_from_file_to_feature_matrices(Setup setup){
               //}
               //map_features_it++;
           }while(node = node->next_sibling());   
-        
+   
           // If the FeatureMatrix is filled
           if(count > end - begin){  
+           
             // Add the FeatureMatrix to the map, to the corresponding label
             label_features_map_[seg_element.first].push_back(std::move(fm)); //C++11
 
@@ -311,7 +311,6 @@ std::queue<std::pair<std::string,std::pair<int, int> > > DataHandler::parse_seg_
                             (motion_label_node->first_attribute("name")->value(), 
                              std::pair<int,int>(atoi(motion_label_node->first_attribute("startPoint")->value()), 
                                                 atoi(motion_label_node->first_attribute("endPoint")->value())))); 
-
   return segmentation_queue;
 }
 

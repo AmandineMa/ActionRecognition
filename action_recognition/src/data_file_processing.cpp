@@ -1,3 +1,4 @@
+
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <boost/filesystem.hpp>
@@ -19,7 +20,7 @@ int main(int argc, char** argv){
 
   std::string data_path;
   std::string data_path2;
-  std::vector<int> vector_features_size;
+  std::vector<int> vector_features_size; 
 
   node.getParam("data_file_processing/data_path", data_path);
   node.getParam("data_file_processing/data_path2", data_path2);
@@ -60,21 +61,29 @@ int main(int argc, char** argv){
             int count = 0; 
             float n;
             std::stringstream string_stream(node->value());
-            //if((std::string(node->name())).compare("SensFeatExt") == 0)
-            if(*vector_it == SensorFeatureVectorType::SensorFeatureVector){
-              f2<<"<SensFeat>";
-              while(string_stream >> n 
-                    && count < SensorFeatureVectorType::SensorFeatureVector){
-                f2 << n << " ";
-                count++;
+            if((std::string(node->name())).compare("Flags") == 0){
+              if(*vector_it != 0){
+                f2 << "Flags";
+                while(string_stream >> n){
+                  f2 << n << " ";
+                }
+              }                
+            }else{
+              if(*vector_it == SensorFeatureVectorType::SensorFeatureVector){
+                f2<<"<SensFeat>";
+                while(string_stream >> n 
+                      && count < SensorFeatureVectorType::SensorFeatureVector){
+                  f2 << n << " ";
+                  count++;
+                }
+                f2<<"</SensFeat>";
+              }else if(*vector_it == SensorFeatureVectorType::SensorFeatureVectorExtended){
+                f2<<"<SensFeatExt>";
+                while(string_stream >> n){
+                  f2 << n << " ";
+                }
+                f2<<"</SensFeatExt>";
               }
-              f2<<"</SensFeat>";
-            }else if(*vector_it == SensorFeatureVectorType::SensorFeatureVectorExtended){
-              f2<<"<SensFeatExt>";
-              while(string_stream >> n){
-                f2 << n << " ";
-              }
-              f2<<"</SensFeatExt>";
             }
             vector_it++;
           }while (node = node->next_sibling());

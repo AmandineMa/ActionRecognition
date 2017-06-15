@@ -14,6 +14,7 @@
 
 #include "action_recognition/common.hpp"
 #include "toaster_msgs/HumanListStamped.h"
+#include "toaster_msgs/FactList.h"
 #include "action_recognition/FeatureMatrix.hpp"
 
 namespace bf = boost::filesystem;
@@ -31,16 +32,21 @@ struct Frame{
     target_frame(targ_frame), source_frame(src_frame), type(t){}
 };
 
+
+
 /* -------- Global variables ---------- */
 std::vector<Frame> tf_frames_array;   
 std::vector<std::vector<Frame> > transforms_array;
 std::vector<int> tf_nb_per_limb;
+std::vector<bool> object_visible;
+std::map<std::string, int> objects_map;
 ros::NodeHandle* node_;
 geometry_msgs::Pose hand_pose_,head_pose_ ;
 /* -------- Function declarations -------- */
 void initialize_tf2_frames(void);
 int getch();
 void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg);
+void is_visible_callback(const toaster_msgs::FactList::ConstPtr& msg);
 
 /* ------- main ------- */
 int main(int argc, char** argv){
@@ -61,12 +67,14 @@ int main(int argc, char** argv){
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
   ros::Subscriber human_list_sub_ = node.subscribe("/pdg/humanList", 1, humanListCallback);
+  ros::Subscriber is_visible_sub = node.subscribe("/move3d_facts/factList", 1, is_visible_callback);
   geometry_msgs::TransformStamped transformStamped; 
   std::string data_file_name;  
   std::string seg_file_name;
   bool transform_limb_map;
   node.getParam("recorder/data_file_name", data_file_name);  
   node.getParam("tf_frames/transform_limb_map", transform_limb_map);
+
 
   int count_file = 0;
   bf::directory_iterator end_it;
@@ -155,6 +163,16 @@ int main(int argc, char** argv){
           vector.push_back(result_transform.getOrigin().x());
           vector.push_back(result_transform.getOrigin().y());
           vector.push_back(result_transform.getOrigin().z());
+
+          if(limb_pose == &head_pose_){
+            bool isVisible = object_visible[objects_map[it->source_frame]];
+            fm.add_flag(isVisible);
+            if(isVisible)
+              fm.add_flag(std::sqrt(std::inner_product(vector.begin(), vector.end(), vector.begin(), 0.0)));
+            else
+              fm.add_flag(0);
+          }
+
           if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
             vector.push_back(result_transform.getRotation().x());
             vector.push_back(result_transform.getRotation().y());
@@ -162,7 +180,7 @@ int main(int argc, char** argv){
             vector.push_back(result_transform.getRotation().w());
           }
 
-          fm.add_sensor_feature_vector(vector); 
+          fm.add_sensor_feature_vector(vector);         
         }
       }
       count++;
@@ -206,6 +224,7 @@ void initialize_tf2_frames(void){
   std::string source_frame;
   int type; 
   int count = 0;
+  int count_head = 0;
   for(std::vector<int>::iterator it = tf_nb_per_limb.begin(); it != tf_nb_per_limb.end(); ++it){
     transforms_array.emplace_back();
     for(int c = 0; c < *it; c++){
@@ -214,8 +233,13 @@ void initialize_tf2_frames(void){
       node_->getParam(path+n+"/sourceFrame", source_frame);
       node_->getParam(path+n+"/type", type);
       transforms_array.back().emplace_back(target_frame, source_frame, static_cast<SensorFeatureVectorType>(type));
+      if(target_frame == "sonof/HERAKLES_HUMAN1/head"){
+        objects_map[source_frame]=count_head;
+        count_head++;
+      }
     }
   }
+  object_visible.assign(objects_map.size(), false);
 }
 
 
@@ -232,6 +256,24 @@ void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg){
           if(msg->humanList[i].meAgent.skeletonNames[j]=="rightHand")
             hand_pose_=msg->humanList[i].meAgent.skeletonJoint[j].meEntity.pose; 
         }
+    }
+  }
+}
+
+void is_visible_callback(const toaster_msgs::FactList::ConstPtr& msg){
+  std::fill(object_visible.begin(), object_visible.end(), false);
+
+  if(!msg->factList.empty()){
+    for (unsigned int i = 0; i < msg->factList.size(); ++i){
+      if(msg->factList[i].property == "isVisibleBy"){
+        if(msg->factList[i].targetId =="HERAKLES_HUMAN1"){
+          for(std::map<std::string, int>::iterator objects_map_it = objects_map.begin(); 
+              objects_map_it != objects_map.end(); objects_map_it++){
+            if(msg->factList[i].subjectId == objects_map_it->first)
+              object_visible[objects_map_it->second]=true;
+          }
+        }
+      }
     }
   }
 }

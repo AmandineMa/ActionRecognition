@@ -2,19 +2,20 @@
 #do not forget to add "/" at the end of the path name for a directory
 
 data_file_processing:
-    data_path: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data/
-    data_path2: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_modified/
+    data_path: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco_2/
+    data_path2: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco_modified/
 
 feature_vector_size:
     - 7 #map_hand
-    - 3 #hand_black
-    - 3 #hand_red
-    - 3 #hand_blue
-    - 3 #hand_area1
-    - 3 #hand_area2
-    - 3 #hand_area3
-    - 3 #hand_small
-    - 3 #map_head
-    - 0 #head_black
-    - 0 #head_red
-    - 0 #head_blue
+    - 7 #hand_black
+    - 7 #hand_red
+    - 7 #hand_blue
+    - 7 #hand_area1
+    - 7 #hand_area2
+    - 7 #hand_area3
+    - 7 #hand_small
+    - 7 #map_head
+    - 7 #head_black
+    - 7 #head_red
+    - 7 #head_blue
+    - 0 #flags

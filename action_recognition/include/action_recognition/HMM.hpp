@@ -28,7 +28,7 @@ protected:
 class GMM : public Gaussian{ 
   friend class HMM;
 protected:
-  std::vector<float> priors_; /** Matrix of priors */
+  std::vector<float> mixture_weight_; /** Matrix of priors */
   int nb_mixtures_; /** Number of mixtures */
 };
 
@@ -39,7 +39,6 @@ class HMM{
  
 private:
   int nb_states_; /** HMM states number */
-  std::vector<float> component_weights_; /** Vector of the component weights */
   EmissionType emission_type_; /** Emission distribution type */
   TopologyType topology_type_;
   std::vector<float> start_proba_; /** Vector of the start probabilities */

@@ -63,13 +63,13 @@ HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, T
       break;
     }
     case EmissionTypes::GMM:{
-      std::vector<float> priors(nb_mixtures, 1.0/nb_mixtures);
+      std::vector<float> mixture_weight(nb_mixtures, 1.0/nb_mixtures);
       for(int i = 0; i < nb_states; i++){
         observations_.emplace_back(new GMM());
         static_cast<GMM*>(observations_.back())->nb_mixtures_ = nb_mixtures;
-        static_cast<GMM*>(observations_.back())->priors_ = priors;
-        std::vector<std::vector<float> > temp0(nb_states, std::vector<float>(dim,0));
-        std::vector<std::vector<float> > temp1(nb_states, std::vector<float>(dim,1));
+        static_cast<GMM*>(observations_.back())->mixture_weight_ = mixture_weight;
+        std::vector<std::vector<float> > temp0(nb_mixtures, std::vector<float>(dim,0));
+        std::vector<std::vector<float> > temp1(nb_mixtures, std::vector<float>(dim,1));
         observations_.back()->means_ = temp0;
         observations_.back()->covars_ = temp1;
       }
@@ -115,7 +115,7 @@ void HMM::write_to_file(std::string file_path){
         ofile << "     <NumMixes> " << nb_mixtures << "\n";
         int j;
         for(j = 0; j < nb_mixtures; j++){
-          ofile << "        <MIXTURE> " << j+1 << " " << static_cast<GMM*>(observations_[0])->priors_[j];
+          ofile << "        <MIXTURE> " << j+1 << " " << static_cast<GMM*>(observations_[i])->mixture_weight_[j];
           ofile << "\n";
           ofile << "          <MEAN> " << ndim << "\n";
           std::copy(observations_[i]->means_[j].begin(), observations_[i]->means_[j].end(), it_file);

@@ -28,6 +28,7 @@ int main(int argc, char** argv){
   std::string path_root;
   std::string path_segmentation;
   std::string path_data;
+  bool print_output;
 
   bool enable_recognition; 
   bool enable_training;   
@@ -39,6 +40,7 @@ int main(int argc, char** argv){
   int state_num_def;
   int iterations_nb;
   int emission_type;
+  int mixtures_nb;
   int topology_type;
   int normalization_type;
   bool threshold;
@@ -48,6 +50,7 @@ int main(int argc, char** argv){
   node.getParam("setup/path_root", path_root);
   node.getParam("setup/path_data", path_data);
   node.getParam("setup/path_segmentation", path_segmentation);
+  node.getParam("setup/print_output", print_output);
 
   node.getParam("setup/enable_recognition", enable_recognition);
   node.getParam("setup/enable_training", enable_training);  
@@ -60,10 +63,9 @@ int main(int argc, char** argv){
   node.getParam("training_options/state_num_def", state_num_def);
   node.getParam("training_options/iterations_nb", iterations_nb);
   node.getParam("training_options/emission_type", emission_type);
+  node.getParam("training_options/mixtures_nb", mixtures_nb);
   node.getParam("training_options/topology_type", topology_type);
   node.getParam("training_options/threshold", threshold);
-
-  //node.getParam("feature_vector", map_features);
 
   Setup setup(path_root,path_data, path_segmentation);
   setup.hmmsdef_path = setup.output_path+"hmmsdef";
@@ -98,14 +100,22 @@ int main(int argc, char** argv){
       for(; it.first != it.second ; it.first++){ 
 
         if(embedded_unit_flat_init)
-          TrainHMM::embedded_unit_flat_init(true, setup, it.first->first, 
+          TrainHMM::embedded_unit_flat_init(print_output, setup, it.first->first, 
                                             state_num_def, dim,
                                             static_cast<EmissionType>(emission_type), 
-                                            static_cast<TopologyType>(topology_type));
+                                            static_cast<TopologyType>(topology_type), 
+                                            mixtures_nb);
 
         if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init){
           int median_samp_nb = datah.feature_matrices_to_file(setup, it.first->second);
-          TrainHMM::train_HMM(it.first->second[0].get_label(), true, isolated_unit_init, isolated_unit_flat_init, isolated_unit_training, static_cast<EmissionType>(emission_type), static_cast<TopologyType>(topology_type), it.first->second[0].get_feature_vector_size(), median_samp_nb, static_cast<StatesNumDef>(state_num_def), iterations_nb, setup);
+
+          TrainHMM::train_HMM(it.first->second[0].get_label(), print_output, 
+                              isolated_unit_init, isolated_unit_flat_init, 
+                              isolated_unit_training, static_cast<EmissionType>(emission_type), 
+                              static_cast<TopologyType>(topology_type), 
+                              it.first->second[0].get_feature_vector_size(), 
+                              median_samp_nb, static_cast<StatesNumDef>(state_num_def), 
+                              iterations_nb, setup, mixtures_nb);
         }
       }
     }
@@ -116,7 +126,7 @@ int main(int argc, char** argv){
 
     if(embedded_unit_training){
       datah.seg_files_to_MLF(setup);
-      TrainHMM::train_HMMs(true, setup);
+      TrainHMM::train_HMMs(print_output, setup);
      }
     
     if(threshold){

@@ -4,6 +4,8 @@ setup:
     enable_recognition: true
     enable_training: true
 
+    print_output: true
+
     generate_grammar_file: false
 
     path_root: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
@@ -17,12 +19,13 @@ training_options:
     isolated_unit_init: true
     isolated_unit_flat_init: true
     embedded_unit_flat_init: false
-    isolated_unit_training: true
-    embedded_unit_training: false
+    isolated_unit_training: false
+    embedded_unit_training: true
     state_num_def: 1
     iterations_nb: 45
-    emission_type: 0
+    emission_type: 1
+    mixtures_nb: 3
     topology_type: 2
-    normalization: 3
+    normalization: 1
     threshold: true
 

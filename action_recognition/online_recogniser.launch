@@ -1,0 +1,6 @@
+<launch>
+        <rosparam command="load" file="$(find action_recognition)/params/file_setup.yaml" />
+	<rosparam command="load" file="$(find action_recognition)/params/tf_frames.yaml" />
+	<rosparam command="load" file="$(find action_recognition)/params/recogniser.yaml" />
+	<node name="online_recogniser" pkg="action_recognition" type="online_recogniser" output="screen"/>  <!-- Launch action_recognition -->
+</launch>

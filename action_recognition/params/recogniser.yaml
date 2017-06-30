@@ -1,0 +1,5 @@
+---
+
+recogniser:
+    tmp_dir: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/online_test/
+    noramlization: 0

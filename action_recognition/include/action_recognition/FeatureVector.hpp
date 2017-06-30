@@ -29,7 +29,9 @@ public:
   /** 
    * \brief Constructor for an emtpy feature vector
    */
+
   FeatureVector();
+
   /** 
    * \brief Constructor for a feature vector
    * \param std::vector of flags

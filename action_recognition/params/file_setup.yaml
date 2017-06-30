@@ -1,0 +1,8 @@
+---
+
+file_setup:
+    path_root: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/
+        
+    path_data: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_modified/
+    path_segmentation: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/segmentation/
+    path_data_to_reco: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco_1/

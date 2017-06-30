@@ -148,6 +148,8 @@ add_executable(data_recorder src/data_recorder.cpp src/common.cpp src/FeatureMat
 add_executable(generator src/generate_seg_file.cpp src/common.cpp)
 add_executable(patch src/correct_bug.cpp src/common.cpp)
 add_executable(data_file_processing src/data_file_processing.cpp src/common.cpp)
+add_executable(test_thread src/test.cpp)
+add_executable(online_recogniser src/online_recogniser.cpp src/Vector3D.cpp src/SensorFeatureVector.cpp src/SensorFeatureVectorExtended.cpp src/FeatureVector.cpp src/FeatureMatrixD.cpp src/common.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -183,6 +185,18 @@ target_link_libraries(data_file_processing
    ${catkin_LIBRARIES}
    ${Boost_FILESYSTEM_LIBRARY}
 )
+
+target_link_libraries(test_thread
+   ${catkin_LIBRARIES}
+   ${Boost_FILESYSTEM_LIBRARY}
+)
+
+target_link_libraries(online_recogniser
+   ${catkin_LIBRARIES}
+   ${Boost_FILESYSTEM_LIBRARY}
+)
+
+
 #############
 ## Install ##
 #############

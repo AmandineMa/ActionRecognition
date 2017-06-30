@@ -20,7 +20,7 @@ int FeatureMatrix::get_feature_vector_size(void) const{
   if(feature_vector_array_.empty())
     return 0;
   else
-    return feature_vector_array_[0].get_size();
+    return feature_vector_array_.front().get_size();
 }
 
 int FeatureMatrix::get_samples_number(void) const{return feature_vector_array_.size();}

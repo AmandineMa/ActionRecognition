@@ -47,9 +47,9 @@ int main(int argc, char** argv){
 
   std::map<std::string, bool> map_features;
 
-  node.getParam("setup/path_root", path_root);
-  node.getParam("setup/path_data", path_data);
-  node.getParam("setup/path_segmentation", path_segmentation);
+  node.getParam("file_setup/path_root", path_root);
+  node.getParam("file_setup/path_data", path_data);
+  node.getParam("file_setup/path_segmentation", path_segmentation);
   node.getParam("setup/print_output", print_output);
 
   node.getParam("setup/enable_recognition", enable_recognition);
@@ -159,7 +159,7 @@ int main(int argc, char** argv){
 
   if(enable_recognition){    
     std::string path_dir;
-    node.getParam("setup/path_data_to_reco", path_dir);
+    node.getParam("file_setup/path_data_to_reco", path_dir);
     bf::directory_iterator end_it;    
     std::string dir_data = path_dir+"dat/";
     bf::create_directory(dir_data);
@@ -201,11 +201,6 @@ int main(int argc, char** argv){
 
   return 0;
 };
-
-void get_params(void){
-
-
-}
 
 
 void generate_MMF_from_HMM_files(Setup setup, Labels labels){

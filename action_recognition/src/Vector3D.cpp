@@ -55,9 +55,11 @@ void Vector3D::normalize(NormalizationType normalization_type){
     case NormalizationType::score:{
       float sum = std::accumulate(vector3D_.begin(), vector3D_.end(), 0.0);
       float mean = sum/vector3D_.size();
-      float sq_sum = std::inner_product(vector3D_.begin(), vector3D_.end(), 
-                                        vector3D_.begin(), 0.0);
-      float stdev = std::sqrt(sq_sum / vector3D_.size() - mean * mean);
+
+      std::vector<float> diff(vector3D_.size());
+      std::transform(vector3D_.begin(), vector3D_.end(), diff.begin(), [mean](float x) { return x - mean; });
+      float sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+      float stdev = std::sqrt(sq_sum / vector3D_.size());
       for (std::vector<float>::iterator it = vector3D_.begin() ; it != vector3D_.end() ; it++)
         *it =( (*it)-mean )/stdev;
       break;

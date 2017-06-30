@@ -1,14 +1,15 @@
-#ifndef FEATUREMATRIX_HPP
-#define	FEATUREMATRIX_HPP
+#ifndef FEATUREMATRIXD_HPP
+#define	FEATUREMATRIXD_HPP
 
 /**
- * \file FeatureMatrix.hpp
- * \brief FeatureMatrix class
+ * \file FeatureMatrixD.hpp
+ * \brief FeatureMatrixD class
  * \author Amandine M.
  */
 
 #include <vector>
 #include <string>
+#include <mutex>
 
 #include "action_recognition/FeatureVector.hpp"
 
@@ -19,27 +20,17 @@
  *   ...
  *   FeatureVector_T ]
  */
-class FeatureMatrix{
+class FeatureMatrixD{
 private:
-  std::string label_; /** Label (name) of the action associated to the matrix */
-  std::vector<FeatureVector> feature_vector_array_; /** Serie of feature vectors */
+ 
+  std::deque<FeatureVector> feature_vector_array_; /** Serie of feature vectors */
+  mutable std::mutex mutex_;
     
 public:
   /** 
    * \brief Constructor for an emtpy feature matrix
    */
-  FeatureMatrix();
-  /** 
-   * \brief Constructor for a feature matrix
-   * \param Name of the associated action
-   */
-  FeatureMatrix(std::string label); 
-  /** 
-   * \brief Constructor for a feature matrix
-   * \param Name of the associated action
-   * \param Serie of feature vectors
-   */
-  //FeatureMatrix(std::string label, std::deque<FeatureVector> feature_vector_array);
+  FeatureMatrixD();
  
   /** 
    * \brief Add a new empty feature vector 
@@ -67,7 +58,10 @@ public:
    */
   void set_flags(std::vector<float> flags);
 
-  void set_label(std::string label);
+
+  void pop_feature_vector(void);
+
+  void pop_feature_vectors(int n);
 
   std::string get_label(void) const;
   /** 
@@ -85,7 +79,7 @@ public:
    * \brief Write the matrix values to the file given in parameter
    * \param Reference to an opened std::ofstream file
    */
-  void write_to_file(std::ofstream &os, FeatureFileFormat file_format) const;
+  void write_to_file(std::ofstream &os) const;
   /** 
    * \brief Normalize the values of all the #FeatureVector with the method given in parameter
    * \param #NormalizationType

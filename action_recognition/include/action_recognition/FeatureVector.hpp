@@ -36,7 +36,7 @@ public:
    * \brief Constructor for a feature vector
    * \param std::vector of flags
    */
-  FeatureVector(std::vector<float> flag_vector);
+  FeatureVector(const std::vector<float> &flag_vector);
 
   /** 
    * \brief Build a pointer on a new sensor feature vector object 
@@ -44,7 +44,7 @@ public:
    * and add it to the vector of unique_ptr
    * \param std::vector of values corresponding to a sensor feature vector
    */
-  void add_sensor_feature_vector(std::vector<float> values_vector);
+  void add_sensor_feature_vector(const std::vector<float> &values_vector);
   /** 
    * \brief Add a flag value to the vector of flags
    * \param Flag value
@@ -54,7 +54,7 @@ public:
    * \brief Set the vector of flags
    * \param Flags vector
    */
-  void set_flags(std::vector<float> flags);
+  void set_flags(const std::vector<float> &flags);
   /** 
    * \brief Return the size of the feature vector (number of values)
    * \retval Number of values

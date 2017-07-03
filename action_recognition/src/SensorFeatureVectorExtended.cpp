@@ -5,12 +5,12 @@
 #include "action_recognition/SensorFeatureVector.hpp"
 #include "action_recognition/common.hpp"
 
-SensorFeatureVectorExtended::SensorFeatureVectorExtended(Vector3D vector3D, tf2::Quaternion quaternion):SensorFeatureVector(vector3D), quaternion_(quaternion){}
+SensorFeatureVectorExtended::SensorFeatureVectorExtended(const Vector3D &vector3D, const tf2::Quaternion &quaternion):SensorFeatureVector(vector3D), quaternion_(quaternion){}
 
-SensorFeatureVectorExtended::SensorFeatureVectorExtended(float x, float y, float z, tf2::Quaternion quaternion):
+SensorFeatureVectorExtended::SensorFeatureVectorExtended(float x, float y, float z, const tf2::Quaternion &quaternion):
   SensorFeatureVector(x,y,z), quaternion_(quaternion){}
 
-SensorFeatureVectorExtended::SensorFeatureVectorExtended(std::vector<float> values_vector){
+SensorFeatureVectorExtended::SensorFeatureVectorExtended(const std::vector<float> &values_vector){
   if(values_vector.size() != SENSOR_FEATURE_VECTOR_EXTENDED_SIZE)
     std::cerr << "The vector size for a Sensorfeaturevectorextended initialization should be " << SENSOR_FEATURE_VECTOR_EXTENDED_SIZE << std::endl;
   else{

@@ -32,7 +32,7 @@ public:
    * \param #Vector3D containing the values
    * \param quaternion
    */
-  SensorFeatureVectorExtended(Vector3D vector3D, tf2::Quaternion quaternion);   
+  SensorFeatureVectorExtended(const Vector3D &vector3D, const tf2::Quaternion &quaternion);   
   /** 
    * \brief Constructor for an extended sensor feature vector
    * \param x value of the 3D vector
@@ -40,7 +40,7 @@ public:
    * \param z value of the 3D vector
    * \param quaternion
    */
-  SensorFeatureVectorExtended(float x, float y, float z, tf2::Quaternion quaternion); 
+  SensorFeatureVectorExtended(float x, float y, float z, const tf2::Quaternion &quaternion); 
   /** 
    * \brief Constructor for an extended sensor feature vector
    * \param x value of the 3D vector
@@ -56,7 +56,7 @@ public:
    * \brief Constructor for an extended sensor feature vector
    * \param std::vector containing the values
    */
-  SensorFeatureVectorExtended(std::vector<float> values_vector_);
+  SensorFeatureVectorExtended(const std::vector<float> &values_vector_);
 
   tf2::Quaternion get_quaternion(void);
 

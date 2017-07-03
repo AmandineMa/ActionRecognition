@@ -10,11 +10,11 @@
 
 FeatureVector::FeatureVector():feature_vector_size_(0){}
 
-FeatureVector::FeatureVector(std::vector<float> flag_vector):
+FeatureVector::FeatureVector(const std::vector<float> &flag_vector):
   flag_vector_(flag_vector), feature_vector_size_(flag_vector.size()){}
 
 
-void FeatureVector::add_sensor_feature_vector(std::vector<float> values_vector){
+void FeatureVector::add_sensor_feature_vector(const std::vector<float> &values_vector){
   feature_vector_size_ += values_vector.size();
   switch(values_vector.size()){
     case SENSOR_FEATURE_VECTOR_SIZE:
@@ -35,7 +35,7 @@ void FeatureVector::add_flag(float flag){
   feature_vector_size_ += 1;
 }
 
-void FeatureVector::set_flags(std::vector<float> flags){
+void FeatureVector::set_flags(const std::vector<float> &flags){
   feature_vector_size_ = feature_vector_size_ - flag_vector_.size() + flags.size();
   flag_vector_ = flags;
 }

@@ -57,11 +57,11 @@ void FeatureMatrix::new_feature_vector(void){
   feature_vector_array_.emplace_back(); //C++11
 }
 
-void FeatureMatrix::new_feature_vector(std::vector<float> flag_vector){
+void FeatureMatrix::new_feature_vector(const std::vector<float> &flag_vector){
   feature_vector_array_.emplace_back(flag_vector); //C++11
 }
 
-void FeatureMatrix::add_sensor_feature_vector(std::vector<float> values_vector){
+void FeatureMatrix::add_sensor_feature_vector(const std::vector<float> &values_vector){
   feature_vector_array_.back().add_sensor_feature_vector(values_vector);
 }
 
@@ -69,7 +69,7 @@ void FeatureMatrix::add_flag(float flag){
   feature_vector_array_.back().add_flag(flag);
 }
 
-void FeatureMatrix::set_flags(std::vector<float> flags){
+void FeatureMatrix::set_flags(const std::vector<float> &flags){
   feature_vector_array_.back().set_flags(flags);
 }
 

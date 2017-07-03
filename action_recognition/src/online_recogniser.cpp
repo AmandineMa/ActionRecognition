@@ -44,49 +44,36 @@ ros::NodeHandle* node_;
 geometry_msgs::Pose hand_pose_,head_pose_ ; 
 FeatureMatrixD fm;
 bool is_ready(false);
-bool is_ready_to_reco(){return is_ready;};
 std::mutex mutex;
 std::condition_variable cv;
 
 const float RATE = 30.0;
 const int SAMPLE_NUMBER_TH = 5*RATE;
 const int N_SAMPLE_REMOVE = 1*RATE;
-std::atomic<bool> popped(true);
 
 /* -------- Function declarations -------- */
 void initialize_tf2_frames(void);
-int getch();
 void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg);
+
+Setup setup_init(void);
+void set_env(Setup setup);
 
 void recogniser(void){
   int normalization_type;
-
-  std::string path_root;
-  std::string path_segmentation;
-  std::string path_data;
-
   std::string tmp_dir;
   node_->getParam("recogniser/normalization", normalization_type); 
   node_->getParam("recogniser/tmp_dir", tmp_dir); 
-  node_->getParam("file_setup/path_root", path_root);
-  node_->getParam("file_setup/path_data", path_data);
-  node_->getParam("file_setup/path_segmentation", path_segmentation);
-  Setup setup(path_root,path_data, path_segmentation);
-  setup.hmmsdef_path = setup.output_path+"hmmsdef";
+ 
+  Setup setup(setup_init());
 
-
-  std::string HTK_conf_file_name = path_root+"HTK_conf_file";
-  std::ofstream HTK_conf_file(HTK_conf_file_name);
-  HTK_conf_file << "NATURALREADORDER = TRUE" << "\n" << "NATURALWRITEORDER = TRUE" << "\n"
-                << "FORCEOUT = TRUE" << "\n";
-  HTK_conf_file.close();
-  setenv("HCONFIG",const_cast<char*>(HTK_conf_file_name.c_str()),true);
+  set_env(setup);
 
 
   while(ros::ok()){
+ 
     std::unique_lock<std::mutex> lock(mutex);
-    cv.wait(lock, is_ready_to_reco);
-    is_ready = false;
+    cv.wait(lock, []{return is_ready;});
+
     fm.normalize(static_cast<NormalizationType>(normalization_type));
    
     std::string tmp_file_name = tmp_dir+"tmp_data.dat";
@@ -94,11 +81,10 @@ void recogniser(void){
     fm.write_to_file(tmp_file);
     
     fm.pop_feature_vectors(N_SAMPLE_REMOVE);
-    
-    popped = true;
-    //ROS_INFO("%d", fm.get_samples_number());
-    std::string command = "HVite -A -T 1 -C "+HTK_conf_file_name +
-      " -H "+setup.hmmsdef_path
+    is_ready = false;
+    lock.unlock();
+
+    std::string command = "HVite -A -T 1 -H "+setup.hmmsdef_path
       +" -w "+setup.grammar_net_path
       +" "+setup.dict_path
       +" "+setup.labels_list_path
@@ -109,7 +95,7 @@ void recogniser(void){
     boost::regex_search(output, match, reg_exp);
     std::istringstream iss(match[0]);
     std::string action;
-    while(iss >> action){}
+    while(iss >> action){} //Get last action recognised by HVite
     ROS_INFO("%s", action.c_str());
 
 
@@ -146,8 +132,12 @@ int main(int argc, char** argv){
   uint64_t time_prev;
   uint64_t time_now; bool first = true;
   std::vector<uint64_t> time_diff_vector;
+
+
   while (node.ok()){
+
     ros::spinOnce();
+
     try{ 
       time_now = ros::Time::now().toNSec();
       if(!first){
@@ -234,14 +224,17 @@ int main(int argc, char** argv){
 
           fm.add_sensor_feature_vector(vector);         
         }
+      }
 
-        if(fm.get_samples_number() > SAMPLE_NUMBER_TH && popped){
-          std::unique_lock<std::mutex> lock(mutex);
+      std::unique_lock<std::mutex> lock(mutex,std::defer_lock);
+      if(lock.try_lock()){
+        if(fm.get_samples_number() > SAMPLE_NUMBER_TH){
+          
           is_ready = true;
           cv.notify_one();
-          popped = false;
         }
       }
+
     }
     catch (tf2::TransformException &ex) {
       ROS_WARN("%s",ex.what());
@@ -282,6 +275,26 @@ void initialize_tf2_frames(void){
   }
 }
 
+Setup setup_init(void){
+  std::string path_root;
+  std::string path_segmentation;
+  std::string path_data;
+  node_->getParam("file_setup/path_root", path_root);
+  node_->getParam("file_setup/path_data", path_data);
+  node_->getParam("file_setup/path_segmentation", path_segmentation);
+  Setup setup(path_root,path_data, path_segmentation);
+  setup.hmmsdef_path = setup.output_path+"hmmsdef";
+  return setup;
+}
+
+void set_env(Setup setup){
+  std::string HTK_conf_file_name = setup.root_path+"HTK_conf_file";
+  std::ofstream HTK_conf_file(HTK_conf_file_name);
+  HTK_conf_file << "NATURALREADORDER = TRUE" << "\n" << "NATURALWRITEORDER = TRUE" << "\n"
+                << "FORCEOUT = TRUE" << "\n";
+  HTK_conf_file.close();
+  setenv("HCONFIG",const_cast<char*>(HTK_conf_file_name.c_str()),true);
+}
 
 void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg){
   if (!msg->humanList.empty())

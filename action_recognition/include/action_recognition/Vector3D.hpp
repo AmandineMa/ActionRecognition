@@ -37,7 +37,7 @@ public:
    * \brief Constructor for a 3D vector
    * \param std::vector containing the values
    */
-  Vector3D(std::vector<float> vector3D);
+  Vector3D(const std::vector<float> &vector3D);
 
   /**
    * \brief Set new values for the vector

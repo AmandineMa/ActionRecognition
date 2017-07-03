@@ -42,7 +42,7 @@ void FeatureMatrixD::new_feature_vector(void){
   feature_vector_array_.emplace_back(); //C++11
 }
 
-void FeatureMatrixD::new_feature_vector(std::vector<float> flag_vector){
+void FeatureMatrixD::new_feature_vector(const std::vector<float> &flag_vector){
   std::lock_guard<std::mutex> lock(mutex_);
   feature_vector_array_.emplace_back(flag_vector); //C++11
 }
@@ -59,7 +59,7 @@ void FeatureMatrixD::pop_feature_vectors(int n){
     feature_vector_array_.pop_front();
 }
 
-void FeatureMatrixD::add_sensor_feature_vector(std::vector<float> values_vector){
+void FeatureMatrixD::add_sensor_feature_vector(const std::vector<float> &values_vector){
   std::lock_guard<std::mutex> lock(mutex_);
   feature_vector_array_.back().add_sensor_feature_vector(values_vector);
 }
@@ -69,7 +69,7 @@ void FeatureMatrixD::add_flag(float flag){
   feature_vector_array_.back().add_flag(flag);
 }
 
-void FeatureMatrixD::set_flags(std::vector<float> flags){
+void FeatureMatrixD::set_flags(const std::vector<float> &flags){
   std::lock_guard<std::mutex> lock(mutex_);
   feature_vector_array_.back().set_flags(flags);
 }

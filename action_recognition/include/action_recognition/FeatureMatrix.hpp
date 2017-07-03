@@ -49,12 +49,12 @@ public:
    * \brief Add a new feature vector with flags
    * \param Vector of flags
    */
-  void new_feature_vector(std::vector<float> flag_vector);
+  void new_feature_vector(const std::vector<float> &flag_vector);
   /** 
    * \brief Add a sensor feature vector to the last added feature vector
    * \param Vector of values of the new sensor feature vector
    */
-  void add_sensor_feature_vector(std::vector<float> values_vector);
+  void add_sensor_feature_vector(const std::vector<float> &values_vector);
 
   /** 
    * \brief Add a flag to the last added feature vector
@@ -65,7 +65,7 @@ public:
    * \brief Set a vector of flags for the last added feature vector
    * \param Vector of flags
    */
-  void set_flags(std::vector<float> flags);
+  void set_flags(const std::vector<float> &flags);
 
   void set_label(std::string label);
 

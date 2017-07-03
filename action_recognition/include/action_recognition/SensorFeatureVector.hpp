@@ -32,12 +32,12 @@ public:
    * \brief Constructor for a sensor feature vector
    * \param #Vector3D containing the values
    */
-  SensorFeatureVector(Vector3D vector3D);
+  SensorFeatureVector(const Vector3D &vector3D);
   /** 
    * \brief Constructor for a sensor feature vector
    * \param std::vector containing the values
    */
-  SensorFeatureVector(std::vector<float> values_vector_);
+  SensorFeatureVector(const std::vector<float> &values_vector_);
   /** 
    * \brief Constructor for a sensor feature vector
    * \param x value

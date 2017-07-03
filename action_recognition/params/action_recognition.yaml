@@ -2,7 +2,7 @@
 
 setup:
     enable_recognition: true
-    enable_training: false
+    enable_training: true
 
     print_output: true
 

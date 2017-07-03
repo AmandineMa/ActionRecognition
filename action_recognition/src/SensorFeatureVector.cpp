@@ -7,9 +7,9 @@
 
 SensorFeatureVector::SensorFeatureVector(){}
 
-SensorFeatureVector::SensorFeatureVector(Vector3D vector3D):vector3D_(vector3D){}
+SensorFeatureVector::SensorFeatureVector(const Vector3D &vector3D):vector3D_(vector3D){}
 
-SensorFeatureVector::SensorFeatureVector(std::vector<float> values_vector):vector3D_(values_vector){}
+SensorFeatureVector::SensorFeatureVector(const std::vector<float> &values_vector):vector3D_(values_vector){}
 
 SensorFeatureVector::SensorFeatureVector(float x, float y, float z):vector3D_(x,y,z){} 
 

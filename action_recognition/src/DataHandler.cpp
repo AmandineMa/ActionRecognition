@@ -17,12 +17,10 @@ namespace bf = boost::filesystem;
 
 //TODO:split class into 2 classes : base class DataHandler, child class SegDataHandler with map in child class
 
-DataHandler::DataHandler(Setup setup/*, std::map<std::string, bool> map_features*/):labels_
-                                                             (setup.labels_list_path,
-                                                              setup.grammar_net_path, 
-                                                              setup.dict_path,
-                                                              setup.grammar_path)
-                                                              /*map_features_(map_features)*/{}
+DataHandler::DataHandler(Setup setup):labels_(setup.labels_list_path,
+                                              setup.grammar_net_path, 
+                                              setup.dict_path,
+                                              setup.grammar_path){}
 
 void DataHandler::raw_data_from_file_to_feature_matrices(Setup setup){
 

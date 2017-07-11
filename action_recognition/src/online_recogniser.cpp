@@ -97,7 +97,7 @@ void recogniser(void){
     std::string action;
     while(iss >> action){} //Get last action recognised by HVite
     ROS_INFO("%s", action.c_str());
-
+    //ROS_INFO("%s", output.c_str());
 
   }
 }
@@ -169,29 +169,29 @@ int main(int argc, char** argv){
         if(transform_limb_map){
 
           std::vector<float> vector;
-          // vector.push_back(limb_pose->position.x);
-          // vector.push_back(limb_pose->position.y);
-          // vector.push_back(limb_pose->position.z);
-          // vector.push_back(limb_pose->orientation.x);
-          // vector.push_back(limb_pose->orientation.y);
-          // vector.push_back(limb_pose->orientation.z);
-          // vector.push_back(limb_pose->orientation.w);
+          vector.push_back(limb_pose->position.x);
+          vector.push_back(limb_pose->position.y);
+          vector.push_back(limb_pose->position.z);
+          vector.push_back(limb_pose->orientation.x);
+          vector.push_back(limb_pose->orientation.y);
+          vector.push_back(limb_pose->orientation.z);
+          vector.push_back(limb_pose->orientation.w);
 
-          vector.push_back(32);
-          vector.push_back(32);
-          vector.push_back(32);
-          vector.push_back(32);
-          vector.push_back(32);
-          vector.push_back(32);
-          vector.push_back(32);
+          // vector.push_back(32);
+          // vector.push_back(32);
+          // vector.push_back(32);
+          // vector.push_back(32);
+          // vector.push_back(32);
+          // vector.push_back(32);
+          // vector.push_back(32);
           fm.add_sensor_feature_vector(vector); 
 
         }
         for(it = it_tf_array->begin(); it != it_tf_array->end(); it++){
 
-          // transformStamped = tfBuffer.lookupTransform("map", 
-          //                                             it->source_frame, 
-          //                                             ros::Time(0));
+          transformStamped = tfBuffer.lookupTransform("map", 
+                                                      it->source_frame, 
+                                                      ros::Time(0));
           tf2::Transform element_transform;
           tf2::Transform result_transform;
           tf2::Transform limb_transform;
@@ -201,25 +201,25 @@ int main(int argc, char** argv){
           result_transform = element_transform.inverseTimes(limb_transform);
 
           std::vector<float> vector;
-          // vector.push_back(result_transform.getOrigin().x());
-          // vector.push_back(result_transform.getOrigin().y());
-          // vector.push_back(result_transform.getOrigin().z());
+          vector.push_back(result_transform.getOrigin().x());
+          vector.push_back(result_transform.getOrigin().y());
+          vector.push_back(result_transform.getOrigin().z());
 
-          vector.push_back(32);
-          vector.push_back(32);
-          vector.push_back(32);
+          // vector.push_back(32);
+          // vector.push_back(32);
+          // vector.push_back(32);
  
 
           if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
-            // vector.push_back(result_transform.getRotation().x());
-            // vector.push_back(result_transform.getRotation().y());
-            // vector.push_back(result_transform.getRotation().z());
-            // vector.push_back(result_transform.getRotation().w());
+            vector.push_back(result_transform.getRotation().x());
+            vector.push_back(result_transform.getRotation().y());
+            vector.push_back(result_transform.getRotation().z());
+            vector.push_back(result_transform.getRotation().w());
 
-            vector.push_back(32);
-            vector.push_back(32);
-            vector.push_back(32);
-            vector.push_back(32);
+            // vector.push_back(32);
+            // vector.push_back(32);
+            // vector.push_back(32);
+            // vector.push_back(32);
           }
 
           fm.add_sensor_feature_vector(vector);         

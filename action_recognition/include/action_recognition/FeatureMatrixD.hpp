@@ -3,7 +3,7 @@
 
 /**
  * \file FeatureMatrixD.hpp
- * \brief FeatureMatrixD class
+ * \brief FeatureMatrixD class to be used for real-time recognition
  * \author Amandine M.
  */
 
@@ -14,7 +14,10 @@
 #include "action_recognition/FeatureVector.hpp"
 
 /** 
- * \brief A class that represents feature vectors from time 0 to T
+ * \brief A class that represents feature vectors from time 0 to T, 
+ * to be used for real-time recognition
+ *
+ * Thead safe
  * [ FeatureVector_t0 
  *   FeatureVector_t1
  *   ...
@@ -25,7 +28,14 @@ private:
  
   std::deque<FeatureVector> feature_vector_array_; /** Serie of feature vectors */
   mutable std::mutex mutex_;
-    
+
+  /** 
+   * \brief Return the size of feature vector (matrix columns number)
+   * 
+   * Not thread safe
+   *\retval Size
+   */
+  int get_feature_vector_size(void) const;
 public:
   /** 
    * \brief Constructor for an emtpy feature matrix
@@ -58,21 +68,22 @@ public:
    */
   void set_flags(const std::vector<float> &flags);
 
-
+  /** 
+   * \brief Remove the first feature vector of the queue
+   */
   void pop_feature_vector(void);
 
+  /** 
+   * \brief Remove the n first feature vectors of the queue
+   */
   void pop_feature_vectors(int n);
 
-  std::string get_label(void) const;
-  /** 
-   * \brief Return the size of feature vector (matrix columns number)
-   *\retval Size
-   */
-  int get_feature_vector_size(void) const;
   /** 
    * \brief Return the samples number of the matrix  
-   * (matrix lines number - number of feature vectors)
-   *\retval Samples number
+   *
+   * Not thread safe, to be used with a mutex
+   * (matrix lines number <=> number of feature vectors)
+   * \retval Samples number
    */
   int get_samples_number(void) const;
   /** 

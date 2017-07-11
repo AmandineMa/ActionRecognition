@@ -42,6 +42,7 @@ void FeatureVector::set_flags(const std::vector<float> &flags){
 
 void FeatureVector::normalize(NormalizationType normalization_type){
   std::vector<std::unique_ptr<SensorFeatureVector> >::iterator it = sensor_feature_vectors_.begin();
+  //Normalize each SensorFeatureVectors
   for( ; it != sensor_feature_vectors_.end() ; it++)
     (*it)->normalize(normalization_type);
 }
@@ -50,15 +51,19 @@ void FeatureVector::write_to_file(std::ofstream &os, FeatureFileFormat file_form
   switch(file_format){
     case FeatureFileFormat::dat:{
       std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
+      //Write each SensorFeatureVectors to the file
       for(; it != sensor_feature_vectors_.end() ; it++)
         (*it)->write_to_file(os, file_format);
+      //Write the flags to the file
       os.write((char *)&flag_vector_[0], flag_vector_.size()*sizeof(float));
       break;
     }
     case FeatureFileFormat::lab:{
-      std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin();
+      std::vector<std::unique_ptr<SensorFeatureVector> >::const_iterator it = sensor_feature_vectors_.begin(); 
+      //Write each SensorFeatureVectors to the file
       for(; it != sensor_feature_vectors_.end() ; it++)
         (*it)->write_to_file(os, file_format); 
+      //Write the flags to the file
       os << "<Flags>";
       std::ostream_iterator<float> output_iterator(os, " ");
       std::copy(flag_vector_.begin(), flag_vector_.end(), output_iterator); 

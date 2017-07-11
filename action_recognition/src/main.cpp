@@ -15,8 +15,9 @@
 
 namespace bf = boost::filesystem;
 
-void generate_MMF_from_HMM_files(Setup setup, Labels labels);
-void build_threshold_model(Setup setup);
+void generate_MMF_from_HMM_files(Setup setup, Labels labels, std::string file_path="");
+void build_threshold_model(Setup setup, Labels labels);
+void merge_MMF_and_HMM_file(Setup setup, std::string label);
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
@@ -85,30 +86,39 @@ int main(int argc, char** argv){
       bf::remove(it->path());
 
     std::string data_list_path;
+    std::map<std::string, int> median_samp_nb_map;
     if(embedded_unit_flat_init || embedded_unit_training){
-      datah.raw_data_from_files_to_data_files
-        (setup, static_cast<NormalizationType>(normalization_type));
+      // Add data_list_path to setup
+      // TODO: check if median_samp_nb is empty
+      median_samp_nb_map = datah.raw_data_from_files_to_data_files
+        (setup, static_cast<NormalizationType>(normalization_type), true);
     }
 
     if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init || embedded_unit_flat_init){
-      datah.raw_data_from_file_to_feature_matrices(setup);
+      datah.raw_data_from_files_to_feature_matrices(setup);
       datah.normalize(static_cast<NormalizationType>(normalization_type));
 
       std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
                 std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
       int dim = it.first->second[0].get_feature_vector_size();
-      for(; it.first != it.second ; it.first++){ 
+      for(; it.first != it.second ; it.first++){
 
-        if(embedded_unit_flat_init)
+        int median;
+        if(!median_samp_nb_map.empty())
+          median = median_samp_nb_map[it.first->first];
+        else
+          median = 60;
+
+        if(embedded_unit_flat_init){
           TrainHMM::embedded_unit_flat_init(print_output, setup, it.first->first, 
-                                            state_num_def, dim,
+                                            static_cast<StatesNumDef>(state_num_def), dim, 
+                                            median,
                                             static_cast<EmissionType>(emission_type), 
                                             static_cast<TopologyType>(topology_type), 
                                             mixtures_nb);
-
-        if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init){
-          int median_samp_nb = datah.feature_matrices_to_file(setup, it.first->second);
-
+        }else if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init){
+          int median_samp_nb = datah.feature_matrices_to_data_files(setup, it.first->second);
+         
           TrainHMM::train_HMM(it.first->second[0].get_label(), print_output, 
                               isolated_unit_init, isolated_unit_flat_init, 
                               isolated_unit_training, static_cast<EmissionType>(emission_type), 
@@ -132,8 +142,9 @@ int main(int argc, char** argv){
     if(threshold){
       Labels new_labels = datah.get_labels();
       new_labels.add_label("threshold");
-      build_threshold_model(setup);
-      generate_MMF_from_HMM_files(setup, new_labels);
+      build_threshold_model(setup, datah.get_labels());
+      //generate_MMF_from_HMM_files(setup, new_labels);
+      merge_MMF_and_HMM_file(setup, "threshold");
       bool gen_gram_file=false;
       new_labels.write_to_file(LabelFileFormats::txt);
       node.getParam("setup/generate_grammar_file", gen_gram_file);
@@ -141,8 +152,8 @@ int main(int argc, char** argv){
         new_labels.write_to_file(LabelFileFormats::grammar);
       new_labels.write_to_file(LabelFileFormats::dict);
 
-      ROS_INFO("%s",new_labels.compile_grammar().c_str());
-      ROS_INFO("%s", new_labels.test_grammar().c_str());
+      // ROS_INFO("%s",new_labels.compile_grammar().c_str());
+      //ROS_INFO("%s", new_labels.test_grammar().c_str());
     }else{
 
       bool gen_gram_file=false;
@@ -203,16 +214,22 @@ int main(int argc, char** argv){
 };
 
 
-void generate_MMF_from_HMM_files(Setup setup, Labels labels){
+void generate_MMF_from_HMM_files(Setup setup, Labels labels, std::string file_path){
   std::pair<std::set<std::string>::iterator, std::set<std::string>::iterator> it = labels.get_iterator();
-  std::ofstream MMF_file(setup.hmmsdef_path);
+ 
+  if(file_path.empty())
+    file_path = setup.hmmsdef_path;
+
+  std::ofstream MMF_file(file_path);
+
+
   for(; it.first != it.second ; it.first++){
     std::ifstream hmm((setup.output_hmm+(*it.first)).c_str());
     MMF_file << hmm.rdbuf();
   }
   MMF_file.close();
 
-  std::ifstream MMF_file_2(setup.hmmsdef_path);
+  std::ifstream MMF_file_2(file_path);
   std::ofstream temp(setup.output_hmm+"temp");
   std::string line;
   int count = 0;
@@ -227,14 +244,44 @@ void generate_MMF_from_HMM_files(Setup setup, Labels labels){
   }
   MMF_file_2.close();
   temp.close();
-  remove((setup.hmmsdef_path).c_str());
+  remove((file_path).c_str());
+  rename((setup.output_hmm+"temp").c_str(), (file_path).c_str());
+}
+
+void merge_MMF_and_HMM_file(Setup setup, std::string label){
+
+  std::ofstream MMF_file_final(setup.output_hmm+"MMF_temp");
+
+  std::ifstream MMF_file(setup.hmmsdef_path);
+  MMF_file_final << MMF_file.rdbuf();
+  std::ifstream hmm(setup.output_hmm+label.c_str());  
+  MMF_file_final << hmm.rdbuf();
+  MMF_file_final.close();
+
+  std::ifstream MMF_file_2(setup.output_hmm+"MMF_temp");
+  std::ofstream temp(setup.output_hmm+"temp");
+  std::string line;
+  int count = 0;
+  while(std::getline(MMF_file_2, line)){
+    if( ( (line.find("<VECSIZE>") == std::string::npos && line.find("~o") == std::string::npos 
+            &&  line.find("<STREAMINFO>") == std::string::npos) && count >= 3) ||
+        ( (line.find("<VECSIZE>") != std::string::npos || line.find("~o") != std::string::npos
+           || line.find("<STREAMINFO>") != std::string::npos) && count < 3) ){
+      temp << line << std::endl;
+    }
+    count++;
+  }
+  MMF_file_2.close();
+  temp.close();
+  remove((setup.output_hmm+"MMF_temp").c_str());
   rename((setup.output_hmm+"temp").c_str(), (setup.hmmsdef_path).c_str());
 }
 
 
-void build_threshold_model(Setup setup){
-
-  std::ifstream mmf_file(setup.hmmsdef_path);
+void build_threshold_model(Setup setup, Labels labels){
+  std::string MMF_file_path = setup.output_hmm+"hmmsdef_init";
+  generate_MMF_from_HMM_files(setup, labels, MMF_file_path);
+  std::ifstream mmf_file(MMF_file_path);
   std::ofstream threshold_file(setup.output_hmm+"threshold");
   std::string line;
   int nb_states=0;
@@ -292,17 +339,20 @@ void build_threshold_model(Setup setup){
           count_transmat_row = 0;
           while(string_stream >> n){
             int transmat_index = count_transmat_row-1+index_filling;
-            if(count_transmat_row != 0 && transmat_index < num_state_unit_model)
+            if(count_transmat_row != 0 && transmat_index < num_state_unit_model){
                 trans_mat.back().at(transmat_index)=n;
+            }
             count_transmat_row++;
           }
           count_transmat_row = count_transmat_row - 2 + index_filling;
-
+          float new_a2 = (1.0-trans_mat.back().at(count_transmat_line));
           float new_a = (1.0-trans_mat.back().at(count_transmat_line))/float(nb_states);
           end_proba_.push_back(new_a);
           for(int i = 0; i < nb_states; i++){
-            if(i != count_transmat_line)
+            if(i != count_transmat_line){
+              //trans_mat.back().at(i)=0;
               trans_mat.back().at(i)=new_a;
+            }
           }
           count_transmat_line++;
           if(count_transmat_line == num_state_unit_model)

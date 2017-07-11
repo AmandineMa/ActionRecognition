@@ -21,8 +21,7 @@ class FeatureVector{
 
 private:
   std::vector<std::unique_ptr<SensorFeatureVector>> sensor_feature_vectors_; /** Vector of unique_ptr (to use polymorphism) on #SensorFeatureVector */
-  std::vector<float> flag_vector_; /** Vector of flags (values like 1, 0, -1). 
-                                       Float for compatibility with HTK */
+  std::vector<float> flag_vector_; /** Vector of flags (values like 1, 0, -1 or normal floats)*/
   int feature_vector_size_; /** Total number of data values in the feature vector */
 
 public:

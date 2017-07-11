@@ -14,24 +14,18 @@
 FeatureMatrixD::FeatureMatrixD():feature_vector_array_(0){}
 
 
-int FeatureMatrixD::get_feature_vector_size(void) const{
-  //std::lock_guard<std::mutex> lock(mutex_);
-  if(feature_vector_array_.empty())
-    return 0;
-  else
-    return feature_vector_array_.front().get_size();
-}
 
 int FeatureMatrixD::get_samples_number(void) const{
-  //std::lock_guard<std::mutex> lock(mutex_); 
   return feature_vector_array_.size();
 }
 
 void FeatureMatrixD::write_to_file(std::ofstream &os) const{
   std::lock_guard<std::mutex> lock(mutex_);
+  //Write HTK Header so that the file is comprehensible by HTK Toolkit
   tools::write_HTK_header_to_file(os, get_feature_vector_size(), 
                                   get_samples_number());
   std::deque<FeatureVector>::const_iterator it = feature_vector_array_.begin();
+  //Write each FeatureVector to the file
   for(; it != feature_vector_array_.end() ; it++)
     it->write_to_file(os, FeatureFileFormat::dat); 
   os.close(); 
@@ -86,4 +80,13 @@ void FeatureMatrixD::print(void){
  std::deque<FeatureVector>::iterator it = feature_vector_array_.begin();
   for( ; it != feature_vector_array_.end() ; it++)
     it->print_vector();
+}
+
+/***** Private function ******/
+
+int FeatureMatrixD::get_feature_vector_size(void) const{
+  if(feature_vector_array_.empty())
+    return 0;
+  else
+    return feature_vector_array_.front().get_size();
 }

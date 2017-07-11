@@ -22,9 +22,9 @@ DataHandler::DataHandler(Setup setup):labels_(setup.labels_list_path,
                                               setup.dict_path,
                                               setup.grammar_path){}
 
-void DataHandler::raw_data_from_file_to_feature_matrices(Setup setup){
+void DataHandler::raw_data_from_files_to_feature_matrices(Setup setup){
 
-  // To iterate the contents of a directoryg
+  // To iterate the contents of a directory
   bf::directory_iterator end_it;
   
   std::string data_path = setup.data_path;
@@ -145,9 +145,8 @@ FeatureMatrix DataHandler::raw_data_from_file_to_feature_matrix(std::string raw_
     count++;
     // Iterate the sensor feature vectors and the flags in the data file
     rapidxml::xml_node<> * node = feature_vector_node->first_node();
-    //std::map<std::string, bool>::iterator map_features_it = map_features_.begin();
+
     do{
-      //if(map_features_it->second){
         std::vector<float> vector;
         std::stringstream string_stream(node->value());
         float n;
@@ -161,40 +160,85 @@ FeatureMatrix DataHandler::raw_data_from_file_to_feature_matrix(std::string raw_
           fm.set_flags(vector);
         else
           fm.add_sensor_feature_vector(vector);
-        //}
-        // map_features_it++;
     }while(node = node->next_sibling());   
 
   }while (feature_vector_node = feature_vector_node->next_sibling());
   return fm;
 }
 
-void DataHandler::raw_data_from_files_to_data_files(Setup &setup, NormalizationType normalization_type){
+std::map<std::string, int> DataHandler::raw_data_from_files_to_data_files(Setup &setup, NormalizationType normalization_type, bool seg_to_get_samp_nb){
   setup.data_list_path = setup.htk_tmp_files_path+"data_list.scp";
+
+  // Create a txt file where the path of each HTK file will be written
   std::ofstream file_list(setup.data_list_path);
+
   bf::directory_iterator end_it;
   std::string output_data_path = setup.htk_tmp_files_path+"dat/";
   boost::filesystem::create_directory(output_data_path);
+
+  std::map<std::string, std::vector<int> > segmentation_map;
+
+  // Iterate on files of the directory
   for(bf::directory_iterator file_it(setup.data_path); file_it != end_it; file_it++){  
 
     bf::path file_path = file_it->path();
     if(bf::is_regular_file(file_path) && !tools::is_hidden(file_path)){ 
     
+      // If there are segmentation files existing
+      // To compute median sample numbers for each action
+      if(seg_to_get_samp_nb){
+
+        // Get the segmentation file corresponding to the data file
+        /*
+          queue of pairs
+          pairs of {"action", {start_point, end_point} }
+          Example :
+          take_object {0, 324}
+          put_object {325, 600}
+        */
+        std::queue<std::pair<std::string,std::pair<int, int> > > seg_queue 
+          = parse_seg_file(setup.seg_files_path+tools::get_file_name(file_path)+".xml");
+
+        while(!seg_queue.empty()){
+          std::pair<std::string,std::pair<int, int> > seg_element = seg_queue.front(); 
+          seg_queue.pop();
+          // For each action examples, add the number of samples 
+          // in the vector of the map {label, vector<sample_nb>}
+          segmentation_map[seg_element.first].push_back
+            (seg_element.second.second - seg_element.second.first);
+        }
+      }
+
+      // Write the file in a FeatureMatrix
       FeatureMatrix fm = raw_data_from_file_to_feature_matrix(file_path.c_str());
+      // Normalize the FeatureMatrix
       fm.normalize(static_cast<NormalizationType>(normalization_type));
       // Open the new data file
       std::string file_name = output_data_path+tools::get_file_name(file_path)+".dat";
       std::ofstream data_file(file_name);
-      // write_HTK_header_to_file(data_file, fm.get_feature_vector_size(), fm.get_samples_number());
+      // Write the FeatureMatrix to a HTK file
       fm.write_to_file(data_file, FeatureFileFormat::dat);
-      //data_file.close();
+      // Add the file to the list of paths
       file_list << file_name << "\n";         
     }
   }
+
   file_list.close();
+
+  // Compute the median sample number for each action
+  std::map<std::string, int> median_samp_nb_map;
+  // If the segmentation_map is empty because the boolean was false, then there is no iteration
+  // and median_samp_nb_map remain empty at the end of the for loop
+  for(std::map<std::string, std::vector<int> >::iterator it = segmentation_map.begin(); 
+      it != segmentation_map.end(); it++){
+    median_samp_nb_map[it->first]=tools::median(it->second);
+  }
+
+
+  return median_samp_nb_map;
 }
 
-int DataHandler::feature_matrices_to_file(Setup setup, const std::vector<FeatureMatrix> &feature_matrix_array){
+int DataHandler::feature_matrices_to_data_files(Setup setup, const std::vector<FeatureMatrix> &feature_matrix_array){
 std::string label = feature_matrix_array[0].get_label();
   // Vector that contains the number of samples of each matrix
   std::vector<int> sample_numbers;
@@ -219,11 +263,8 @@ std::string label = feature_matrix_array[0].get_label();
     // Open the new data file
     std::ofstream data_file(data_file_name.c_str());
 
-    //write_HTK_header_to_file(data_file, it->get_feature_vector_size(), it->get_samples_number());
     // Write the feature matrix to the data file
     it->write_to_file(data_file, FeatureFileFormat::dat); 
-    // Close the data file
-    //data_file.close();
 
     // Write the path of the data file to the scp file
     data_files_list << data_file_name.c_str() << "\n";

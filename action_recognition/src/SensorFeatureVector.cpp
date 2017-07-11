@@ -27,12 +27,14 @@ void SensorFeatureVector::write_to_file(std::ofstream &os, FeatureFileFormat fil
 
   switch(file_format){
     case FeatureFileFormat::dat:{
-      // Write the vector values in  the file given in parameter
+      // Write the vector values in  the file given in parameter - Binary format
       os.write((char *)&values_vector[0], values_vector.size()*sizeof(float));
       break;
     } case FeatureFileFormat::lab:{
         os << "<SensorFeatureVector>";
         std::ostream_iterator<float> output_iterator(os, " ");
+        // Copy the value from the vector to the file, one by one
+        // separated by the delimiter passed in the std::ostream_iterator
         std::copy(values_vector.begin(), values_vector.end(), output_iterator); 
         os << "</SensorFeatureVector>";
         break;

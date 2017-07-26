@@ -1,3 +1,9 @@
+/**
+ * \file main.cpp
+ * \brief This ROS node aims to train and test HMMs
+
+ * \author Amandine M.
+ */
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <tf2_ros/transform_listener.h>
@@ -23,8 +29,6 @@ int main(int argc, char** argv){
   ros::init(argc, argv, "action_reco");
 
   ros::NodeHandle node;
-  
-  ros::Rate rate(10.0); 
 
   std::string path_root;
   std::string path_segmentation;
@@ -88,27 +92,34 @@ int main(int argc, char** argv){
     std::string data_list_path;
     std::map<std::string, int> median_samp_nb_map;
     if(embedded_unit_flat_init || embedded_unit_training){
-      // Add data_list_path to setup
+      // Convert the text data files to HTK data files
+      // Get the median number of samples for each data files
+      // The called function adds data_list_path to setup
       // TODO: check if median_samp_nb is empty
       median_samp_nb_map = datah.raw_data_from_files_to_data_files
         (setup, static_cast<NormalizationType>(normalization_type), true);
     }
 
     if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init || embedded_unit_flat_init){
+      // Convert text data files to feature matrices, segmented action by action
       datah.raw_data_from_files_to_feature_matrices(setup);
       datah.normalize(static_cast<NormalizationType>(normalization_type));
 
       std::pair<std::map<std::string, std::vector<FeatureMatrix> >::iterator,
                 std::map<std::string, std::vector<FeatureMatrix> >::iterator > it = datah.get_map_iterator();
       int dim = it.first->second[0].get_feature_vector_size();
+      // Iterate through the different feature matrices types
       for(; it.first != it.second ; it.first++){
 
         int median;
-        if(!median_samp_nb_map.empty())
+        if(!median_samp_nb_map.empty()){
           median = median_samp_nb_map[it.first->first];
-        else
+        }else{
           median = 60;
-
+        }
+        // The embedded unit flat initialization cannot be done with other initializations
+        // Because it creates a new HMM prototype, so it would erase the other iniatializations
+        // and vice-versa
         if(embedded_unit_flat_init){
           TrainHMM::embedded_unit_flat_init(print_output, setup, it.first->first, 
                                             static_cast<StatesNumDef>(state_num_def), dim, 
@@ -117,6 +128,7 @@ int main(int argc, char** argv){
                                             static_cast<TopologyType>(topology_type), 
                                             mixtures_nb);
         }else if(isolated_unit_init || isolated_unit_training || isolated_unit_flat_init){
+          // Convert feature matrices from same action to data files
           int median_samp_nb = datah.feature_matrices_to_data_files(setup, it.first->second);
          
           TrainHMM::train_HMM(it.first->second[0].get_label(), print_output, 
@@ -139,6 +151,7 @@ int main(int argc, char** argv){
       TrainHMM::train_HMMs(print_output, setup);
      }
     
+    // Build threshold model
     if(threshold){
       Labels new_labels = datah.get_labels();
       new_labels.add_label("threshold");

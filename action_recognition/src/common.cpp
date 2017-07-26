@@ -52,7 +52,6 @@ std::string tools::get_last_dir_name(bf::path path){
   std::string path_str = path.c_str();
   std::string dir_and_file = path_str.substr(path_str.find_last_of("/", path_str.find_last_of("/")-1)+1);
   return dir_and_file.substr(0, dir_and_file.find_last_of("/"));
-
 }
 
 bool tools::is_hidden(bf::path p)

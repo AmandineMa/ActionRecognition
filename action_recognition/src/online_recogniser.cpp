@@ -1,3 +1,15 @@
+/**
+ * \file online_recogniser.cpp
+ * \brief This ROS node aims to do online human action recognition from trained HMMs.<br>
+ * It is multithreaded, with one thread doing recognition with HTK, the other one getting
+ * the tf data and writing them in a feature matrix. <br>
+ * It works with sliding window. Recognition of a window of x seconds
+ * with data stored in a feature matrix.  Then it removes a few samples for the feature matrix
+ * and keep the rest of the data as "memory". Then new samples are added to the feature matrix.
+ * Then it recognizes it, then it removes the first samples and so on.
+ * \author Amandine M.
+ */
+
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <tf2_ros/transform_listener.h>
@@ -37,15 +49,14 @@ struct Frame{
 
 
 /* -------- Global variables ---------- */
-std::vector<Frame> tf_frames_array;   
-std::vector<std::vector<Frame> > transforms_array;
-std::vector<int> tf_nb_per_limb;
+std::vector<std::vector<Frame> > transforms_array_;
+std::vector<int> tf_nb_per_limb_;
 ros::NodeHandle* node_;
 geometry_msgs::Pose hand_pose_,head_pose_ ; 
-FeatureMatrixD fm;
+FeatureMatrixD fm_;
 bool is_ready(false);
-std::mutex mutex;
-std::condition_variable cv;
+std::mutex mutex_;
+std::condition_variable cv_;
 
 const float RATE = 30.0;
 const int SAMPLE_NUMBER_TH = 5*RATE;
@@ -58,6 +69,7 @@ void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg);
 Setup setup_init(void);
 void set_env(Setup setup);
 
+// Thread doing the recognition
 void recogniser(void){
   int normalization_type;
   std::string tmp_dir;
@@ -71,19 +83,23 @@ void recogniser(void){
 
   while(ros::ok()){
  
-    std::unique_lock<std::mutex> lock(mutex);
-    cv.wait(lock, []{return is_ready;});
+    // Wait for the feature matrix to be ready to be recognized
+    std::unique_lock<std::mutex> lock(mutex_);
+    cv_.wait(lock, []{return is_ready;});
 
-    fm.normalize(static_cast<NormalizationType>(normalization_type));
+    fm_.normalize(static_cast<NormalizationType>(normalization_type));
    
     std::string tmp_file_name = tmp_dir+"tmp_data.dat";
     std::ofstream tmp_file(tmp_file_name);
-    fm.write_to_file(tmp_file);
+    fm_.write_to_file(tmp_file);
     
-    fm.pop_feature_vectors(N_SAMPLE_REMOVE);
+    // Remove the n first feature vectors from the matrix
+    fm_.pop_feature_vectors(N_SAMPLE_REMOVE);
     is_ready = false;
+    // Free the lock
     lock.unlock();
 
+    // Recognition with HTK. The recognised action is written in ROS_INFO
     std::string command = "HVite -A -T 1 -H "+setup.hmmsdef_path
       +" -w "+setup.grammar_net_path
       +" "+setup.dict_path
@@ -95,7 +111,8 @@ void recogniser(void){
     boost::regex_search(output, match, reg_exp);
     std::istringstream iss(match[0]);
     std::string action;
-    while(iss >> action){} //Get last action recognised by HVite
+    // Get the last action recognised by HVite
+    while(iss >> action){}     
     ROS_INFO("%s", action.c_str());
     //ROS_INFO("%s", output.c_str());
 
@@ -118,27 +135,27 @@ int main(int argc, char** argv){
   tf2_ros::TransformListener tfListener(tfBuffer);
   ros::Subscriber human_list_sub_ = node.subscribe("/pdg/humanList", 1, humanListCallback);
   //ros::Subscriber is_visible_sub = node.subscribe("/move3d_facts/factList", 1, is_visible_callback);
-  geometry_msgs::TransformStamped transformStamped; 
+ 
   bool transform_limb_map;
   node.getParam("tf_frames/transform_limb_map", transform_limb_map);
   
-
   initialize_tf2_frames(); 
  
   // Listen to tf2 broadcaster and write the frames in file
   std::vector<Frame>::iterator it;
 
+  // Init the recogniser thread
   std::thread recogniser_thread(recogniser);
   uint64_t time_prev;
   uint64_t time_now; bool first = true;
   std::vector<uint64_t> time_diff_vector;
 
-
   while (node.ok()){
 
     ros::spinOnce();
 
-    try{ 
+    try{  
+      // New time diff between 2 loops is added to the vector
       time_now = ros::Time::now().toNSec();
       if(!first){
         time_diff_vector.push_back(time_now - time_prev);
@@ -147,15 +164,16 @@ int main(int argc, char** argv){
       first = false;
       time_prev = time_now;
 
-     
+      // 1 feature vector for 1 loop, added to the feature matrix
+      fm_.new_feature_vector();
 
-     fm.new_feature_vector();
-
-      for(std::vector<std::vector<Frame> >::iterator it_tf_array = transforms_array.begin(); 
-          it_tf_array != transforms_array.end(); it_tf_array++){
+      // Iteration through the array of transforms, 1 iteration for 1 limb
+      for(std::vector<std::vector<Frame> >::iterator it_tf_array = transforms_array_.begin(); 
+          it_tf_array != transforms_array_.end(); it_tf_array++){
         
-        geometry_msgs::Pose* limb_pose;
-        switch(it_tf_array - transforms_array.begin()){ //iterator on index n
+        geometry_msgs::Pose* limb_pose; 
+        // To get the index on which the iterator is
+        switch(it_tf_array - transforms_array_.begin()){ //iterator on index n
           case 0:
             limb_pose = &hand_pose_;
             break;
@@ -166,6 +184,7 @@ int main(int argc, char** argv){
             break;
         }
 
+        // If the transform map->limb is needed
         if(transform_limb_map){
 
           std::vector<float> vector;
@@ -184,22 +203,27 @@ int main(int argc, char** argv){
           // vector.push_back(32);
           // vector.push_back(32);
           // vector.push_back(32);
-          fm.add_sensor_feature_vector(vector); 
+          fm_.add_sensor_feature_vector(vector); 
 
-        }
+        }  
+        // To iterate through the different transformations to compute between limb and objects
         for(it = it_tf_array->begin(); it != it_tf_array->end(); it++){
-
+          // Transform map->object 
+          geometry_msgs::TransformStamped transformStamped; 
           transformStamped = tfBuffer.lookupTransform("map", 
                                                       it->source_frame, 
                                                       ros::Time(0));
           tf2::Transform element_transform;
           tf2::Transform result_transform;
           tf2::Transform limb_transform;
+          // geometry_msgs to tf2::Transform for the transformStamped
           tf2::fromMsg(transformStamped.transform, element_transform);
+          // geometry_msgs to tf2::Transform for the limb_pose
           tf2::fromMsg(*limb_pose, limb_transform);
-
+          // Compute the transform limb->object
           result_transform = element_transform.inverseTimes(limb_transform);
 
+          // Add the transform to a vector (which will be added as sensor feature vector)
           std::vector<float> vector;
           vector.push_back(result_transform.getOrigin().x());
           vector.push_back(result_transform.getOrigin().y());
@@ -209,7 +233,7 @@ int main(int argc, char** argv){
           // vector.push_back(32);
           // vector.push_back(32);
  
-
+          // Add the quaternion of the transform to the vector if needed
           if(it->type == SensorFeatureVectorType::SensorFeatureVectorExtended){
             vector.push_back(result_transform.getRotation().x());
             vector.push_back(result_transform.getRotation().y());
@@ -222,16 +246,19 @@ int main(int argc, char** argv){
             // vector.push_back(32);
           }
 
-          fm.add_sensor_feature_vector(vector);         
+          fm_.add_sensor_feature_vector(vector);         
         }
       }
 
-      std::unique_lock<std::mutex> lock(mutex,std::defer_lock);
+      // lock is initialized but without locking the mutex
+      std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
+      // Try to get the lock for the mutex, if it cannot do it
+      // it means than the mutex is already locked by the other thread
+      // If so, it just re-loop to get a new sample
       if(lock.try_lock()){
-        if(fm.get_samples_number() > SAMPLE_NUMBER_TH){
-          
+        if(fm_.get_samples_number() > SAMPLE_NUMBER_TH){
           is_ready = true;
-          cv.notify_one();
+          cv_.notify_one();
         }
       }
 
@@ -252,7 +279,7 @@ void initialize_tf2_frames(void){
   int i = 0;
   std::string n = std::to_string(i); //C++11
   while(node_->getParam("tf_frames/transforms_nb/limb"+n, transforms_nb)){
-    tf_nb_per_limb.push_back(transforms_nb);
+    tf_nb_per_limb_.push_back(transforms_nb);
     i++; 
     n = std::to_string(i);
   }
@@ -263,14 +290,14 @@ void initialize_tf2_frames(void){
   int type; 
   int count = 0;
   int count_head = 0;
-  for(std::vector<int>::iterator it = tf_nb_per_limb.begin(); it != tf_nb_per_limb.end(); ++it){
-    transforms_array.emplace_back();
+  for(std::vector<int>::iterator it = tf_nb_per_limb_.begin(); it != tf_nb_per_limb_.end(); ++it){
+    transforms_array_.emplace_back();
     for(int c = 0; c < *it; c++){
       std::string n = std::to_string(count++); //C++11
       node_->getParam(path+n+"/targetFrame", target_frame);
       node_->getParam(path+n+"/sourceFrame", source_frame);
       node_->getParam(path+n+"/type", type);
-      transforms_array.back().emplace_back(target_frame, source_frame, static_cast<SensorFeatureVectorType>(type));
+      transforms_array_.back().emplace_back(target_frame, source_frame, static_cast<SensorFeatureVectorType>(type));
     }
   }
 }

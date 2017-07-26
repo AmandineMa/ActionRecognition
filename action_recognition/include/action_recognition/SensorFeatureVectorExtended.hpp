@@ -24,6 +24,7 @@
 class SensorFeatureVectorExtended : public SensorFeatureVector {
 
 private:
+   /** \brief Quaternion **/
   tf2::Quaternion quaternion_;
 
 public:

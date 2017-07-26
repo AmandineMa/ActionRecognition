@@ -19,7 +19,8 @@
 class Vector3D{
 
 private:
-  std::vector<float> vector3D_; /** Values vector */
+  /** \brief Values vector */
+  std::vector<float> vector3D_;
 
 public:
   /** 

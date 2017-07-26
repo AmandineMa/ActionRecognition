@@ -28,11 +28,11 @@ int FeatureMatrix::get_samples_number(void) const{return feature_vector_array_.s
 void FeatureMatrix::write_to_file(std::ofstream &os, FeatureFileFormat file_format) const{
   switch(file_format){
     case FeatureFileFormat::dat:{
-      //Write HTK Header so that the file is comprehensible by HTK Toolkit
+      // Write HTK Header so that the file is comprehensible by HTK Toolkit
       tools::write_HTK_header_to_file(os, get_feature_vector_size(), 
                                get_samples_number());
       std::vector<FeatureVector>::const_iterator it = feature_vector_array_.begin();
-      //Write each FeatureVector to the file
+      // Write each FeatureVector to the file
       for(; it != feature_vector_array_.end() ; it++)
         it->write_to_file(os, file_format); 
       os.close();
@@ -41,7 +41,7 @@ void FeatureMatrix::write_to_file(std::ofstream &os, FeatureFileFormat file_form
     case FeatureFileFormat::lab:{
       os << "<Data>\n";
       std::vector<FeatureVector>::const_iterator it = feature_vector_array_.begin();
-      //Write each FeatureVector to the file
+      // Write each FeatureVector to the file
       for(; it != feature_vector_array_.end() ; it++){
         os << "<FeatVect>";
         it->write_to_file(os, file_format); 

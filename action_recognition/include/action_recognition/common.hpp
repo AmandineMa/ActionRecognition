@@ -18,29 +18,47 @@
 #define HTK_SAMPLE_SIZE 4
 
 namespace SensorFeatureVectorTypes{
+/**
+ * \addtogroup SensorFeatureVectorTypes
+ * \brief A #SensorFeatureVector can be simple (3 elements - coordinates)
+ * or extended (6 elements - coordinates + quaternion)
+ * @{
+ */
 enum SensorFeatureVectorType
   {
-  SensorFeatureVector = 3,
-  SensorFeatureVectorExtended = 7
+    /**  SensorFeatureVector of size 3 (x, y, z coordinates) */
+    SensorFeatureVector = 3,
+   /**  SensorFeatureVector of size 7 (x, y, z coordinates + quaternion) */
+    SensorFeatureVectorExtended = 7
   };
+/** @} */
 }
 typedef SensorFeatureVectorTypes::SensorFeatureVectorType SensorFeatureVectorType;
 
 namespace VectorElements{
 /**
  * \addtogroup VectorElements
- * Indexes of the elements in #SensorFeatureVector and #SensorFeatureVectorExtended
+ * \brief Indexes of the elements in #SensorFeatureVector and #SensorFeatureVectorExtended
+ * @{
  */
 enum VectorElement
   {
+    /** Index of x element of the coordinates */
     X = 0,
+    /** Index of y element of the coordinates */
     Y = 1,
+    /** Index of z element of the coordinates */
     Z = 2,
+    /** Index of x element of the quaternion */
     X_Q = 3,
+    /** Index of y element of the quaternion */
     Y_Q = 4,
+    /** Index of z element of the quaternion */
     Z_Q = 5,
+    /** Index of w element of the quaternion */
     W = 6
   };
+/** @} */
 }
 typedef VectorElements::VectorElement VectorElement;
 
@@ -48,24 +66,45 @@ namespace EmissionTypes
 {
 /**
  * \addtogroup EmissionTypes
- * To model the distribution with Gaussian Mixture model (GMM) or single Gaussian (Gaussian)
+ * \brief To model the distribution with Gaussian Mixture model (GMM) or single Gaussian (Gaussian)
+ * @{
  */
 enum EmissionType
   {
+    /** Gaussian type */
     Gaussian = 0,
+    /** Gaussian Mixture Model type */
     GMM = 1
   };
+/** @} */
 }
 typedef EmissionTypes::EmissionType EmissionType;
 
 namespace TopologyTypes
 {
+/**
+ * \addtogroup TopologyTypes
+ * \brief To define the topology of an HMM
+ * @{
+ */
 enum TopologyType
   {
+    /** Ergodic topolgy every state are linked to each others */
     Ergodic = 0,
+    /**
+     * Left-to-right topolgy, each state has a transition to himself 
+     * and to his direct neighbour to the right  
+     */
     L_to_R = 1,
+    /** 
+     * Bakis topology, each state has a transition to himself,
+     * to the two next states at its right 
+     * (the word Bakis can also be used for the simple left-to-right topolgy,
+     * here it makes the distinction between the two topologies) 
+     */
     Bakis = 2
   };
+/** @} */
 }
 typedef TopologyTypes::TopologyType TopologyType;
 
@@ -73,17 +112,19 @@ namespace StatesNumDefs
 {
 /**
  * \addtogroup StatesNumDefs
- * To define the way to compute the states number of a HMM
+ * \brief To define the way to compute the states number of a HMM
+ * @{ 
  */
 enum StatesNumDef
   {
     /** ceil(sqrt(median(sample_numbers))) **/
-    median = 0,
+    median = 0, 
     /** ceil(median(sample_numbers)/10) **/
     linear_scaling = 1,
     /** Number of states defined by user **/
     fix_number = 2
   };
+/** @} */
 }
 typedef StatesNumDefs::StatesNumDef StatesNumDef;
 
@@ -91,7 +132,8 @@ namespace FeatureFileFormats
 {
 /**
  * \addtogroup FeatureFileFormats
- * To define the output format of a#FeatureMatrix
+ * \brief To define the output format of a#FeatureMatrix
+ * @{
  */
 enum FeatureFileFormat
   {
@@ -100,6 +142,7 @@ enum FeatureFileFormat
     /** Output data to txt file **/
     lab
   };
+/** @} */
 }
 typedef FeatureFileFormats::FeatureFileFormat FeatureFileFormat;
 
@@ -107,7 +150,8 @@ namespace LabelFileFormats
 {
 /**
  * \addtogroup LabelFileFormats
- * To define the output format of a #Labels object
+ * \brief To define the output format of a #Labels object
+ * @{
  */
 enum LabelFileFormat
   {
@@ -118,6 +162,7 @@ enum LabelFileFormat
     /** Output a grammar (txt file) **/
     grammar
   };
+/** @} */
 }
 typedef LabelFileFormats::LabelFileFormat LabelFileFormat;
 
@@ -125,7 +170,8 @@ namespace NormalizationTypes
 {
 /**
  * \addtogroup NormalizationTypes
- * To define the normalization method to be used
+ * \brief To define the normalization method to be used
+ * @{
  */
 enum NormalizationType
   {
@@ -140,11 +186,12 @@ enum NormalizationType
     /** Feature scaling **/
     scaling = 4
   };
+/** @} */
 }
 typedef NormalizationTypes::NormalizationType NormalizationType;
 
 /** 
- * Namespace gathering different useful functions
+ * \brief Namespace gathering different useful functions
  */
 namespace tools
 {
@@ -210,10 +257,11 @@ void swap_endian(InputIterator first, InputIterator last){
 std::string execute_command(std::string command);
 
 /** 
- * \brief Get a file name from an absolute path
+ * \brief Get a file name from an absolute path, without the extension
  * \param Path
  */
 std::string get_file_name(boost::filesystem::path path);
+
 /** 
  * \brief Get the last directory from an absolute path 
  * Example : /home/user/LAST_DIRECTORY_NAME/example.txt
@@ -226,11 +274,13 @@ std::string get_last_dir_name(boost::filesystem::path path);
  * \retval True if is hidden, False if not
  */
 bool is_hidden(boost::filesystem::path p);
+
 /**
  * \brief Return the median value of the elements of the std::vector
  * \param Median value of the elements of the std::vector
  */
 float median(std::vector<int> samples_number);
+
 
 void write_HTK_header_to_file(std::ofstream& data_file, int bytes_per_sample, int samp_nb);
 }

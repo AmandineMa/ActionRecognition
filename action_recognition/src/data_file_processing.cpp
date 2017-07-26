@@ -1,3 +1,14 @@
+/**
+ * \file data_file_processing.cpp
+ * \brief This ROS node aims to custom the feature vectors contained in files of recorded data.
+ *
+ * Thanks to the ROS params, it is possible to choose for the flags vector and for each SensorFeatureVector the desired size.
+ * If the original SensorFeatureVector is of size 7, it can be down to 3 or 0.
+ * If the original SensorFeatureVector is of size 3, it can be down to 0.
+ * For now, the flags vector can only be customized by disappearing, so from a size N, it can be down to 0.
+ * The modified data are written in a new file.
+ * \author Amandine M.
+ */
 
 #include <ros/ros.h>
 #include <ros/console.h>
@@ -53,22 +64,38 @@ int main(int argc, char** argv){
         f2 << "<Data>" << std::endl;
         rapidxml::xml_node<> * feature_vector_node = root_node->first_node("FeatVect");   
        
+        // Iteration of each FeatureVector of the data file
         do{
           f2 << "<FeatVect>" << std::endl; 
           rapidxml::xml_node<> * node = feature_vector_node->first_node();  
+          // Iterator for the vector containing the size of each sub-vector
           std::vector<int>::iterator vector_it =  vector_features_size.begin(); 
+          // Iteration on each element (SensorFeatureVectors, Flags) of the data file
           do{
             int count = 0; 
             float n;
             std::stringstream string_stream(node->value());
+
+            // Check if the element is a vector of flags
             if((std::string(node->name())).compare("Flags") == 0){
+              // If the expected size of the vector of flags is different of 0,
+              // the whole vector is re-written in the new file.
+              // Otherwise, none of the elements of the vector is re-written
               if(*vector_it != 0){
-                f2 << "Flags";
+                f2 << "<Flags>";
                 while(string_stream >> n){
                   f2 << n << " ";
                 }
+                f2 << "</Flags>";
               }                
-            }else{
+            }
+            // If else, the element is a SensorFeatureVector
+            else{
+              // If the new size of the new size of the SensorFeatureVector is 0,
+              // nothing is written in the new file.
+
+              // If the new size of the element is a simple SensorFeatureVector,
+              // only the 3 first elements of the vector will be written in the new file
               if(*vector_it == SensorFeatureVectorType::SensorFeatureVector){
                 f2<<"<SensFeat>";
                 while(string_stream >> n 
@@ -77,6 +104,11 @@ int main(int argc, char** argv){
                   count++;
                 }
                 f2<<"</SensFeat>";
+
+                // If the new size of the element is a SensorFeatureVectorExtended,
+                // all the elements of the vector will be written in the new file
+                // TODO : check the initial size of the SensorFeatureVector, 
+                //        if it is 3, it cannot work
               }else if(*vector_it == SensorFeatureVectorType::SensorFeatureVectorExtended){
                 f2<<"<SensFeatExt>";
                 while(string_stream >> n){

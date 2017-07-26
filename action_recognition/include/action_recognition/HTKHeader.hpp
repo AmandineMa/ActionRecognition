@@ -13,25 +13,17 @@ const unsigned HTK_MFCC_E_D = 326;
 const unsigned HTK_MFCC_E_D_Z = 326 + 2048;
 
 struct HTKHeader {
-    unsigned nSamples;              // number of samples
-  //TODO:have to match with period of ROS node
-    unsigned Period = 330000;                // period [100ns]
-    unsigned short BytesPerSample;
-    unsigned short FeatureType = HTK_USER;     // if you use a user-defined type, set to HTK_USER.
+  /** \brief Number of samples */
+  unsigned nSamples;            
+  // TODO: have to match with period of ROS node
+  /** \brief Period of data acquisition */
+  unsigned Period = 330000;               
+  /** \brief Number of bytes per sample */
+  unsigned short BytesPerSample;
+  /** \brief HTK feature type */
+  unsigned short FeatureType = HTK_USER;
 
 public:
-    // void read(istream& in)
-    // {
-    //  	in.read((char*)&nSamples, sizeof(nSamples));
-    //     in.read((char*)&Period, sizeof(Period));
-    //     in.read((char*)&BytesPerSample, sizeof(BytesPerSample));
-    //     in.read((char*)&FeatureType, sizeof(FeatureType));
-        
-    //     nSamples = tools::swap_endian(nSamples);
-    //     Period = tools::swap_endian(Period);
-    //     BytesPerSample = tools::swap_endian(BytesPerSample);
-    //     FeatureType = tools::swap_endian(FeatureType);   
-    // }
 
     void write_to_file(ostream& out) const
     {

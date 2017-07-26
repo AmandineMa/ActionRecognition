@@ -12,37 +12,61 @@
 #include "action_recognition/Labels.hpp"
 
 HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, TopologyType topology_type, int nb_mixtures):
-  name_(name),nb_states_(nb_states), emission_type_(emission_type), topology_type_(topology_type), start_proba_(nb_states,0),end_proba_(nb_states,0),
+  name_(name), nb_states_(nb_states), 
+  emission_type_(emission_type), topology_type_(topology_type), 
+  start_proba_(nb_states,0),end_proba_(nb_states,0),
   transmat_(nb_states, std::vector<float>(nb_states,0)){
   
+  // The HMM will always starts on the first state
   start_proba_[0] = 1;
 
   switch(topology_type){
     case TopologyType::L_to_R:{
-      end_proba_[nb_states-1] = 0.3;
-
+     
+      // Definition of the transition matrix 
       for(int i = 0; i < (nb_states - 1) ; i++){
+        // The probability for each state to self-transited is 0.6
         transmat_[i][i] = 0.6;
+        // The probability for each state to go to the next one is 0.4
         transmat_[i][i+1] = 0.4;
       }
+      // Set the probability of the last emitting state to loop  on himself
       transmat_[nb_states-1][nb_states-1] = 0.7;
+      // Set the probability of the last emitting state 
+      // to go to the end non-emitting state (leave the HMM)
+      end_proba_[nb_states-1] = 0.3;
       break;
     }
     case TopologyType::Bakis:{
-      end_proba_[nb_states-2] = 0.3;
-      end_proba_[nb_states-1] = 0.3;
-
+      
       for(int i = 0; i < (nb_states - 2) ; i++){
+        // The probability for each state to self-transited is 0.4
         transmat_[i][i] = 0.4;
+        // The probability for each state to go to the next one is 0.3
         transmat_[i][i+1] = 0.3;
+        // The probability for each state to go to 2 states further is 0.3
         transmat_[i][i+2] = 0.3;
       }
+
+      // Set the probability of the penultimate state to loop  on himself
       transmat_[nb_states-2][nb_states-2] = 0.4;
+      // Set the probability of the penultimate emitting state 
+      // to go to the last state
       transmat_[nb_states-2][nb_states-1] = 0.3;
+      // Set the probability of the penultimate emitting state 
+      // to go to the end non-emitting state (leave the HMM)
+      end_proba_[nb_states-2] = 0.3;
+
+      // Set the probability of the last state to loop  on himself
       transmat_[nb_states-1][nb_states-1] = 0.7;
+      // Set the probability of the last emitting state 
+      // to go to the end non-emitting state (leave the HMM)
+      end_proba_[nb_states-1] = 0.3;
+
       break;
     }
     case TopologyType::Ergodic:{
+      // All the probabilities of the transition matrix are equally distributed
       float prob = 1.0/(nb_states+1);
       for(int i = 0; i < nb_states; i++){
         end_proba_[i]=prob;
@@ -55,15 +79,82 @@ HMM::HMM(std::string name, int nb_states, int dim, EmissionType emission_type, T
 
   switch(emission_type_){
     case EmissionTypes::Gaussian:{
+      // There is one Gaussian object for the HMM
+      /*    Means :
+            State 1 [ 0 0 0 0 0 ...]
+            State 2 [ 0 0 0 0 0 ...]
+            State 3 [ 0 0 0 0 0 ...]
+            ...
+            State N [ 0 0 0 0 0 ...]
+
+            Covars :
+            State 1 [ 1 1 1 1 1 ...]
+            State 2 [ 1 1 1 1 1 ...]
+            State 3 [ 1 1 1 1 1 ...]
+            ...
+            State N [ 1 1 1 1 1 ...]
+      */
       observations_.emplace_back(new Gaussian());
-      std::vector<std::vector<float> > temp0(nb_states, std::vector<float>(dim,0));
-      std::vector<std::vector<float> > temp1(nb_states, std::vector<float>(dim,1));
+      // All the means, for each state, are initialized to 0
+      std::vector<std::vector<float> > temp0(nb_states, std::vector<float>(dim,0));  
       observations_.back()->means_ = temp0;
+      // All the variances, for each state, are initialized to 1
+      std::vector<std::vector<float> > temp1(nb_states, std::vector<float>(dim,1));
       observations_.back()->covars_ = temp1;
       break;
     }
     case EmissionTypes::GMM:{
       std::vector<float> mixture_weight(nb_mixtures, 1.0/nb_mixtures);
+      // For each state, there are a certain number of mixtures
+      // There is a Gaussian object (GMM) for each state
+      /*    
+            State 1 - GMM 1
+            Means :
+            Mixture 1 [ 0 0 0 0 0 ...]
+            Mixture 2 [ 0 0 0 0 0 ...]
+            Mixture 3 [ 0 0 0 0 0 ...]
+            ...
+            Mixture M [ 0 0 0 0 0 ...]
+
+            Covars :
+            Mixture 1 [ 1 1 1 1 1 ...]
+            Mixture 2 [ 1 1 1 1 1 ...]
+            Mixture 3 [ 1 1 1 1 1 ...]
+            ...
+            Mixture M [ 1 1 1 1 1 ...] 
+            
+            State 2 - GMM 2
+            Means :
+            Mixture 1 [ 0 0 0 0 0 ...]
+            Mixture 2 [ 0 0 0 0 0 ...]
+            Mixture 3 [ 0 0 0 0 0 ...]
+            ...
+            Mixture M [ 0 0 0 0 0 ...]
+
+            Covars :
+            Mixture 1 [ 1 1 1 1 1 ...]
+            Mixture 2 [ 1 1 1 1 1 ...]
+            Mixture 3 [ 1 1 1 1 1 ...]
+            ...
+            Mixture M [ 1 1 1 1 1 ...]
+
+            ...
+
+            State N - GMM N
+            Means :
+            Mixture 1 [ 0 0 0 0 0 ...]
+            Mixture 2 [ 0 0 0 0 0 ...]
+            Mixture 3 [ 0 0 0 0 0 ...]
+            ...
+            Mixture M [ 0 0 0 0 0 ...]
+
+            Covars :
+            Mixture 1 [ 1 1 1 1 1 ...]
+            Mixture 2 [ 1 1 1 1 1 ...]
+            Mixture 3 [ 1 1 1 1 1 ...]
+            ...
+            Mixture M [ 1 1 1 1 1 ...]
+      */
       for(int i = 0; i < nb_states; i++){
         observations_.emplace_back(new GMM());
         static_cast<GMM*>(observations_.back())->nb_mixtures_ = nb_mixtures;

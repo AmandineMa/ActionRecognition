@@ -9,6 +9,7 @@
 #include "action_recognition/common.hpp"
 #include "action_recognition/FeatureMatrix.hpp"
 
+// Anonymous namespace for private functions of the TrainHMM namespace 
 namespace{
   int compute_state_number(int num_states_def, int median_samp_nb){
     // Definition of the number of states for the HMM

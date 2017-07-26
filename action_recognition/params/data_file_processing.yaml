@@ -2,7 +2,9 @@
 #do not forget to add "/" at the end of the path name for a directory
 
 data_file_processing:
+    # folder path of the original data
     data_path: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco_2/
+    # folder path where the new data files will be written
     data_path2: /home/amayima/catkin_ws/src/ActionRecognition/test_data_handler/data_reco_modified/
 
 feature_vector_size:

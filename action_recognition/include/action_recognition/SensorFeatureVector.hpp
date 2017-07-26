@@ -21,6 +21,7 @@
 class SensorFeatureVector{
 
 protected:
+  /** \brief #Vector3D **/
   Vector3D vector3D_;
 
 public: 

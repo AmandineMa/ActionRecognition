@@ -12,14 +12,17 @@
 
 #include "action_recognition/common.hpp"
 #include "action_recognition/Labels.hpp"
+
 /**
  * \brief Gaussian (base) class that represents a Gaussian distribution
  */
 class Gaussian{
  friend class HMM;
 protected:
-  std::vector<std::vector<float> > means_; /** Matrix of means */
-  std::vector<std::vector<float> > covars_; /** Matrix of covariances */
+  /** \brief Matrix of means */
+  std::vector<std::vector<float> > means_; 
+  /** \brief Matrix of covariances */
+  std::vector<std::vector<float> > covars_; 
 };
 
 /**
@@ -28,8 +31,10 @@ protected:
 class GMM : public Gaussian{ 
   friend class HMM;
 protected:
-  std::vector<float> mixture_weight_; /** Matrix of priors */
-  int nb_mixtures_; /** Number of mixtures */
+  /** \brief Matrix of priors */
+  std::vector<float> mixture_weight_; 
+  /** \brief Number of mixtures */
+  int nb_mixtures_; 
 };
 
 /**
@@ -38,19 +43,37 @@ protected:
 class HMM{
  
 private:
-  int nb_states_; /** HMM states number */
-  EmissionType emission_type_; /** Emission distribution type */
+  /** \brief HMM states number */
+  int nb_states_; 
+  /** \brief Emission distribution type */
+  EmissionType emission_type_; 
+  /** \brief Topology type (Bakis, ergodic) */
   TopologyType topology_type_;
-  std::vector<float> start_proba_; /** Vector of the start probabilities */
-  std::vector<float> end_proba_; /** Vector of the end probabilities */
-  std::vector<Gaussian*> observations_; /** Vector of Gaussians */
-  std::vector<std::vector<float> > transmat_; /** Transition matrix */
+  /** 
+   * \brief Vector of the start probabilities of the transition matrix 
+   * (Probabilities of the start non-emitting state) 
+   */
+  std::vector<float> start_proba_; 
+  /** 
+   * \brief Vector of the end probabilities of the transition matrix
+   * (Probabilities of the end non-emitting state) 
+   */
+  std::vector<float> end_proba_; 
+  /** \brief Vector of Gaussians */
+  std::vector<Gaussian*> observations_; 
+  /** \brief Transition matrix */
+  std::vector<std::vector<float> > transmat_; 
 
-public: 
+public:
+  /** \brief Name (label) of the HMM */
   std::string name_;
 
   /**
-   * \brief Constructor for an HMM
+   * \brief Constructor for a prototype HMM
+   *
+   * It builds a prototype of an HMM by defining initial probabilities 
+   * according to the topology type. 
+   * All values of the transition matrix set to 0 will remain 0 after every algorithm execution.
    * \param Name
    * \param States number
    * \param Dimension
@@ -58,6 +81,7 @@ public:
    * \param Number of mixtures, default value = 1
    */
   HMM(std::string name, int nb_states, int dim, EmissionType emission_type, TopologyType topology_type, int nb_mixtures = 1);
+
   /**
    * \brief Destructor for an HMM. Delete the Gaussian pointers.
    */

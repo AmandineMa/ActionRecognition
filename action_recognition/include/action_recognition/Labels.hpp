@@ -12,22 +12,29 @@
 
 #include "action_recognition/common.hpp"
 /**
- * \brief Labels class which contains a set of all the labels (non-duplicated elements)
+ * \brief Labels class which contains a set of all the labels (non-duplicated elements) present in the data
  */
 class Labels{
 
 private:
-  std::set<std::string> labels_; /** set of all the labels (non-duplicated elements) */
-  std::string labels_list_path_; /** Path of the labels list file */
-  std::string grammar_net_path_; /** Path of the grammar net file */
-  std::string dict_path_;        /** Path of the dictionnary file */
-  std::string grammar_path_;     /** Path of the grammar file */
+  /** \brief Set of all the labels (non-duplicated elements) */
+  std::set<std::string> labels_; 
+  /** \brief Path of the labels list file */
+  std::string labels_list_path_;
+  /** \brief Path of the grammar net file */
+  std::string grammar_net_path_; 
+  /** \brief Path of the dictionnary file */
+  std::string dict_path_;  
+  /** \brief Path of the grammar file */    
+  std::string grammar_path_;   
 
 public:
+
   /** 
    * \brief Constructor for an emtpy Labels object
    */
   Labels();
+
   /** 
    * \brief Constructor for a Labels object
    * \param Path of the labels list file
@@ -66,12 +73,14 @@ public:
    * \param #LabelFileFormats::LabelFileFormat (dict, grammar, text)
    */
   void write_to_file(LabelFileFormats::LabelFileFormat file_format);
+
   /** 
-   * \brief Compile a grammar to output a grammar net file
+   * \brief Compile a grammar to output a grammar net file, with the HParse tool
    */
   std::string compile_grammar(void);
+
   /** 
-   * \brief Test the grammar net file from the grammar compilation output
+   * \brief Test the grammar net file from the grammar compilation output, with the HSGen tool
    */
   std::string test_grammar(void);
 
